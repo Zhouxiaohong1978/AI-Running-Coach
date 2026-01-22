@@ -24,27 +24,34 @@ struct SignInWithAppleButton: View {
     }
 
     private func handleSignInWithAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        print("🍎 [Apple Sign In] 开始请求...")
         let nonce = randomNonceString()
         currentNonce = nonce
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(nonce)
+        print("🍎 [Apple Sign In] Nonce已生成: \(nonce.prefix(10))...")
     }
 
     private func handleSignInWithAppleCompletion(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
+            print("🍎 [Apple Sign In] 授权成功")
             guard let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
                   let nonce = currentNonce,
                   let appleIDToken = appleIDCredential.identityToken,
                   let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+                print("❌ [Apple Sign In] 无法获取Apple ID凭证")
                 errorMessage = "无法获取Apple ID凭证"
                 return
             }
 
+            print("🍎 [Apple Sign In] 开始调用Supabase认证...")
             Task {
                 do {
                     try await authManager.signInWithApple(idToken: idTokenString, nonce: nonce)
+                    print("✅ [Apple Sign In] 登录成功")
                 } catch {
+                    print("❌ [Apple Sign In] 登录失败: \(error.localizedDescription)")
                     errorMessage = error.localizedDescription
                 }
             }
@@ -52,9 +59,11 @@ struct SignInWithAppleButton: View {
         case .failure(let error):
             if let authError = error as? ASAuthorizationError,
                authError.code == .canceled {
+                print("🍎 [Apple Sign In] 用户取消")
                 // 用户取消了登录，不显示错误
                 return
             }
+            print("❌ [Apple Sign In] 授权失败: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
         }
     }
@@ -140,6 +149,7 @@ struct SignInWithAppleButtonRepresentable: UIViewRepresentable {
         }
 
         @objc func handleAuthorizationAppleIDButtonPress() {
+            print("🍎 [Apple Sign In] 按钮被点击")
             let appleIDProvider = ASAuthorizationAppleIDProvider()
             let request = appleIDProvider.createRequest()
             onRequest(request)
@@ -147,6 +157,7 @@ struct SignInWithAppleButtonRepresentable: UIViewRepresentable {
             let authorizationController = ASAuthorizationController(authorizationRequests: [request])
             authorizationController.delegate = self
             authorizationController.presentationContextProvider = self
+            print("🍎 [Apple Sign In] 开始执行授权请求...")
             authorizationController.performRequests()
         }
 
@@ -159,13 +170,28 @@ struct SignInWithAppleButtonRepresentable: UIViewRepresentable {
         }
 
         func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-            guard let window = UIApplication.shared.connectedScenes
+            print("🍎 [Apple Sign In] 获取presentation anchor...")
+
+            // 使用更可靠的方式获取window
+            let window = UIApplication.shared.connectedScenes
                 .compactMap({ $0 as? UIWindowScene })
                 .flatMap({ $0.windows })
-                .first(where: { $0.isKeyWindow }) else {
-                fatalError("No key window found")
+                .first { $0.isKeyWindow } ??
+                UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first
+
+            guard let validWindow = window else {
+                print("❌ [Apple Sign In] 无法找到有效的window")
+                // 返回第一个场景的第一个window作为fallback
+                return UIApplication.shared.connectedScenes
+                    .compactMap({ $0 as? UIWindowScene })
+                    .first?.windows.first ?? UIWindow()
             }
-            return window
+
+            print("✅ [Apple Sign In] Window找到")
+            return validWindow
         }
     }
 }
