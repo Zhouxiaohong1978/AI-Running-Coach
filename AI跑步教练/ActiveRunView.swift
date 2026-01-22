@@ -17,14 +17,12 @@ struct ActiveRunView: View {
     var body: some View {
         ZStack {
             // Map Background with route polyline
-            Map(coordinateRegion: $locationManager.region,
-                showsUserLocation: true,
-                annotationItems: []) { _ in
-                MapMarker(coordinate: CLLocationCoordinate2D())
-            }
-            .overlay {
-                MapPolylineOverlay(coordinates: locationManager.routeCoordinates)
-            }
+            RunMapView(
+                userLocation: $locationManager.userLocation,
+                region: $locationManager.region,
+                routeCoordinates: locationManager.routeCoordinates,
+                pathUpdateVersion: locationManager.pathUpdateVersion
+            )
             .ignoresSafeArea()
 
             VStack {
@@ -150,19 +148,6 @@ struct ActiveRunView: View {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-}
-
-struct MapPolylineOverlay: View {
-    let coordinates: [CLLocationCoordinate2D]
-
-    var body: some View {
-        GeometryReader { _ in
-            if coordinates.count >= 2 {
-                MapPolyline(coordinates: coordinates)
-                    .stroke(Color(red: 0.5, green: 0.8, blue: 0.1), lineWidth: 4)
-            }
-        }
     }
 }
 

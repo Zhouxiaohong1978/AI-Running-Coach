@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import MapKit
+import Combine
 
 class LocationManager: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
@@ -18,6 +19,7 @@ class LocationManager: NSObject, ObservableObject {
         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     )
     @Published var routeCoordinates: [CLLocationCoordinate2D] = []
+    @Published var pathUpdateVersion: Int = 0 // 用于触发地图轨迹更新
     @Published var distance: Double = 0 // 米
     @Published var currentPace: Double = 0 // 分钟/公里
     @Published var duration: TimeInterval = 0
@@ -115,6 +117,7 @@ extension LocationManager: CLLocationManagerDelegate {
         // 如果正在跟踪，添加到路线
         if isTracking {
             routeCoordinates.append(location.coordinate)
+            pathUpdateVersion += 1 // 递增版本号触发地图更新
 
             // 计算距离
             if let lastLoc = lastLocation {
