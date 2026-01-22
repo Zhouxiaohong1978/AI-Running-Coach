@@ -11,6 +11,51 @@ struct HomeView: View {
     @State private var selectedTab = 0
 
     var body: some View {
+        ZStack {
+            // Tab Content
+            switch selectedTab {
+            case 0:
+                homeContent
+            case 1:
+                planContent
+            case 2:
+                HistoryView()
+            case 3:
+                SettingsView()
+            default:
+                homeContent
+            }
+
+            // Bottom Tab Bar
+            VStack {
+                Spacer()
+                HStack(spacing: 0) {
+                    TabBarItem(icon: "house.fill", label: "开始", isSelected: selectedTab == 0) {
+                        selectedTab = 0
+                    }
+
+                    TabBarItem(icon: "calendar", label: "计划", isSelected: selectedTab == 1) {
+                        selectedTab = 1
+                    }
+
+                    TabBarItem(icon: "clock", label: "历史", isSelected: selectedTab == 2) {
+                        selectedTab = 2
+                    }
+
+                    TabBarItem(icon: "person", label: "我的", isSelected: selectedTab == 3) {
+                        selectedTab = 3
+                    }
+                }
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .shadow(color: Color.black.opacity(0.05), radius: 8, y: -2)
+            }
+        }
+    }
+
+    // MARK: - Home Content
+
+    private var homeContent: some View {
         NavigationView {
             ZStack {
                 Color(UIColor.systemGroupedBackground)
@@ -127,28 +172,6 @@ struct HomeView: View {
                             .padding(.bottom, 20)
                         }
                     }
-
-                    // Bottom Tab Bar
-                    HStack(spacing: 0) {
-                        TabBarItem(icon: "house.fill", label: "开始", isSelected: selectedTab == 0) {
-                            selectedTab = 0
-                        }
-
-                        TabBarItem(icon: "calendar", label: "计划", isSelected: selectedTab == 1) {
-                            selectedTab = 1
-                        }
-
-                        TabBarItem(icon: "clock", label: "历史", isSelected: selectedTab == 2) {
-                            selectedTab = 2
-                        }
-
-                        TabBarItem(icon: "person", label: "我的", isSelected: selectedTab == 3) {
-                            selectedTab = 3
-                        }
-                    }
-                    .padding(.vertical, 8)
-                    .background(Color.white)
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, y: -2)
                 }
 
                 // Help Button
@@ -173,6 +196,21 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+        }
+    }
+
+    // MARK: - Plan Content (Placeholder)
+
+    private var planContent: some View {
+        NavigationView {
+            VStack {
+                Text("训练计划")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                Text("即将推出")
+                    .foregroundColor(.secondary)
+            }
+            .navigationTitle("计划")
         }
     }
 }

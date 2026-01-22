@@ -48,7 +48,7 @@ struct DetailedStatsView: View {
 
                     // Stats Cards Row
                     HStack(spacing: 12) {
-                        DetailStatCard(
+                        DetailedStatCard(
                             icon: "bolt.fill",
                             iconColor: Color.blue.opacity(0.6),
                             label: "AVG PACE",
@@ -56,7 +56,7 @@ struct DetailedStatsView: View {
                             unit: "/km"
                         )
 
-                        DetailStatCard(
+                        DetailedStatCard(
                             icon: "flame.fill",
                             iconColor: Color.orange.opacity(0.6),
                             label: "CALORIES",
@@ -117,7 +117,7 @@ struct DetailedStatsView: View {
     }
 }
 
-struct DetailStatCard: View {
+struct DetailedStatCard: View {
     let icon: String
     let iconColor: Color
     let label: String

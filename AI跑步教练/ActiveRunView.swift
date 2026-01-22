@@ -11,8 +11,11 @@ import MapKit
 struct ActiveRunView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var locationManager = LocationManager()
+    @StateObject private var dataManager = RunDataManager.shared
     @State private var isPaused = false
     @State private var showSummary = false
+    @State private var isEnding = false
+    @State private var savedRecord: RunRecord?
 
     var body: some View {
         ZStack {
@@ -87,42 +90,55 @@ struct ActiveRunView: View {
                 Spacer()
                     .frame(height: 40)
 
-                // Control Buttons
-                HStack(spacing: 40) {
-                    // Pause Button
-                    Button(action: {
-                        isPaused.toggle()
-                        if isPaused {
-                            locationManager.pauseTracking()
-                        } else {
-                            locationManager.resumeTracking()
-                        }
-                    }) {
-                        Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                            .font(.system(size: 24))
+                // Control Buttons or Loading
+                if isEnding {
+                    // 结束加载动画
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        Text("正在保存跑步数据...")
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
-                            .frame(width: 60, height: 60)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
                     }
-
-                    // Stop Button
-                    Button(action: {
-                        locationManager.stopTracking()
-                        showSummary = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 80, height: 80)
-
-                            Text("结束")
-                                .font(.system(size: 12, weight: .bold))
+                    .frame(height: 80)
+                    .padding(.bottom, 40)
+                } else {
+                    HStack(spacing: 40) {
+                        // Pause Button
+                        Button(action: {
+                            isPaused.toggle()
+                            if isPaused {
+                                locationManager.pauseTracking()
+                            } else {
+                                locationManager.resumeTracking()
+                            }
+                        }) {
+                            Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                                .font(.system(size: 24))
                                 .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Circle())
+                        }
+
+                        // Stop Button
+                        Button(action: {
+                            endRun()
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 80, height: 80)
+
+                                Text("结束")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
                         }
                     }
+                    .padding(.bottom, 40)
                 }
-                .padding(.bottom, 40)
             }
         }
         .navigationBarHidden(true)
@@ -133,7 +149,40 @@ struct ActiveRunView: View {
             locationManager.stopTracking()
         }
         .fullScreenCover(isPresented: $showSummary) {
-            RunSummaryView()
+            if let record = savedRecord {
+                RunSummaryView(runRecord: record)
+            } else {
+                RunSummaryView()
+            }
+        }
+    }
+
+    // MARK: - Actions
+
+    private func endRun() {
+        isEnding = true
+        locationManager.stopTracking()
+
+        // 创建跑步记录
+        let record = RunRecord(
+            distance: locationManager.distance,
+            duration: locationManager.duration,
+            pace: locationManager.currentPace,
+            calories: locationManager.calories,
+            startTime: Date().addingTimeInterval(-locationManager.duration),
+            endTime: Date(),
+            routeCoordinates: locationManager.routeCoordinates.map { Coordinate(from: $0) }
+        )
+
+        savedRecord = record
+
+        // 保存到数据库
+        Task {
+            await dataManager.addRunRecord(record)
+
+            // 延迟 2 秒后显示结束页面
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            showSummary = true
         }
     }
 

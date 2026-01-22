@@ -10,11 +10,26 @@ import MapKit
 
 struct RunSummaryView: View {
     @Environment(\.dismiss) var dismiss
+    var runRecord: RunRecord?
+
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
         span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
     )
     @State private var showDetailedStats = false
+
+    init(runRecord: RunRecord? = nil) {
+        self.runRecord = runRecord
+
+        // 如果有轨迹数据，设置地图中心
+        if let record = runRecord,
+           let firstCoord = record.routeCoordinates.first {
+            _region = State(initialValue: MKCoordinateRegion(
+                center: firstCoord.toCLLocationCoordinate2D(),
+                span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+            ))
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -75,14 +90,14 @@ struct RunSummaryView: View {
                                 StatCard(
                                     icon: "location.fill",
                                     label: "DISTANCE",
-                                    value: "0.26",
+                                    value: String(format: "%.2f", (runRecord?.distance ?? 0) / 1000.0),
                                     unit: "km"
                                 )
 
                                 StatCard(
                                     icon: "clock.fill",
                                     label: "TIME",
-                                    value: "1:25",
+                                    value: formatDuration(runRecord?.duration ?? 0),
                                     unit: ""
                                 )
                             }
@@ -91,14 +106,14 @@ struct RunSummaryView: View {
                                 StatCard(
                                     icon: "bolt.fill",
                                     label: "平均配速",
-                                    value: "5'33\"",
-                                    unit: "/km"
+                                    value: formatPace(runRecord?.pace ?? 0),
+                                    unit: ""
                                 )
 
                                 StatCard(
                                     icon: "flame.fill",
                                     label: "CALORIES",
-                                    value: "15",
+                                    value: String(format: "%.0f", runRecord?.calories ?? 0),
                                     unit: "kcal"
                                 )
                             }
@@ -180,6 +195,27 @@ struct RunSummaryView: View {
             .fullScreenCover(isPresented: $showDetailedStats) {
                 DetailedStatsView()
             }
+        }
+    }
+
+    // MARK: - Formatting
+
+    private func formatPace(_ pace: Double) -> String {
+        guard pace > 0, pace.isFinite else { return "0'00\"" }
+        let minutes = Int(pace)
+        let seconds = Int((pace - Double(minutes)) * 60)
+        return "\(minutes)'\(String(format: "%02d", seconds))\" /km"
+    }
+
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let hours = Int(duration) / 3600
+        let minutes = (Int(duration) % 3600) / 60
+        let seconds = Int(duration) % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, seconds)
         }
     }
 }
