@@ -89,10 +89,18 @@ struct ForgotPasswordView: View {
 
     private var emailInputView: some View {
         VStack(spacing: 24) {
+            Image(systemName: "envelope.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.white)
+                .padding(.top, 20)
+
             Text("输入注册邮箱")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.white)
-                .padding(.top, 20)
+
+            Text("我们将发送6位验证码到您的邮箱")
+                .font(.system(size: 14))
+                .foregroundColor(.white.opacity(0.8))
 
             // 邮箱输入框
             HStack(spacing: 12) {
@@ -117,10 +125,16 @@ struct ForgotPasswordView: View {
 
             // 错误提示
             if let error = errorMessage {
-                Text(error)
-                    .font(.system(size: 14))
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                    Text(error)
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
+                .padding(12)
+                .background(Color.red.opacity(0.8))
+                .cornerRadius(8)
             }
 
             // 发送验证码按钮
@@ -146,10 +160,14 @@ struct ForgotPasswordView: View {
 
     private var verificationCodeView: some View {
         VStack(spacing: 24) {
+            Image(systemName: "number.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.white)
+                .padding(.top, 20)
+
             Text("输入验证码")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.white)
-                .padding(.top, 20)
 
             Text("验证码已发送至 \(email)")
                 .font(.system(size: 14))
@@ -168,6 +186,15 @@ struct ForgotPasswordView: View {
                     }
                     .keyboardType(.numberPad)
                     .foregroundColor(.white)
+                    .onChange(of: verificationCode) { newValue in
+                        // 限制只能输入6位数字
+                        let filtered = newValue.filter { $0.isNumber }
+                        if filtered.count > 6 {
+                            verificationCode = String(filtered.prefix(6))
+                        } else {
+                            verificationCode = filtered
+                        }
+                    }
             }
             .padding()
             .background(Color.white.opacity(0.2))
@@ -175,10 +202,16 @@ struct ForgotPasswordView: View {
 
             // 错误提示
             if let error = errorMessage {
-                Text(error)
-                    .font(.system(size: 14))
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                    Text(error)
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
+                .padding(12)
+                .background(Color.red.opacity(0.8))
+                .cornerRadius(8)
             }
 
             // 验证按钮
@@ -212,10 +245,14 @@ struct ForgotPasswordView: View {
 
     private var newPasswordView: some View {
         VStack(spacing: 24) {
+            Image(systemName: "lock.circle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.white)
+                .padding(.top, 20)
+
             Text("设置新密码")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundColor(.white)
-                .padding(.top, 20)
 
             // 新密码输入框
             HStack(spacing: 12) {
@@ -226,14 +263,14 @@ struct ForgotPasswordView: View {
                 if showPassword {
                     TextField("", text: $newPassword)
                         .placeholder(when: newPassword.isEmpty) {
-                            Text("请输入新密码")
+                            Text("请输入新密码（至少6位）")
                                 .foregroundColor(.white.opacity(0.5))
                         }
                         .foregroundColor(.white)
                 } else {
                     SecureField("", text: $newPassword)
                         .placeholder(when: newPassword.isEmpty) {
-                            Text("请输入新密码")
+                            Text("请输入新密码（至少6位）")
                                 .foregroundColor(.white.opacity(0.5))
                         }
                         .foregroundColor(.white)
@@ -276,10 +313,16 @@ struct ForgotPasswordView: View {
 
             // 错误提示
             if let error = errorMessage {
-                Text(error)
-                    .font(.system(size: 14))
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.yellow)
+                    Text(error)
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
+                .padding(12)
+                .background(Color.red.opacity(0.8))
+                .cornerRadius(8)
             }
 
             // 确认按钮
@@ -306,7 +349,7 @@ struct ForgotPasswordView: View {
     private var successView: some View {
         VStack(spacing: 24) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
+                .font(.system(size: 80))
                 .foregroundColor(.white)
                 .padding(.top, 40)
 
@@ -349,6 +392,11 @@ struct ForgotPasswordView: View {
             return
         }
 
+        guard email.contains("@") && email.contains(".") else {
+            errorMessage = "请输入有效的邮箱地址"
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -364,15 +412,22 @@ struct ForgotPasswordView: View {
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = "发送失败: \(error.localizedDescription)"
+                    let errorDesc = error.localizedDescription.lowercased()
+                    if errorDesc.contains("network") || errorDesc.contains("connection") {
+                        errorMessage = "网络连接不稳定，请检查网络后重试"
+                    } else if errorDesc.contains("rate") || errorDesc.contains("limit") {
+                        errorMessage = "发送过于频繁，请稍后再试"
+                    } else {
+                        errorMessage = "发送失败: \(error.localizedDescription)"
+                    }
                 }
             }
         }
     }
 
     private func verifyCode() {
-        guard verificationCode.count >= 6 else {
-            errorMessage = "请输入完整的验证码"
+        guard verificationCode.count == 6 else {
+            errorMessage = "请输入完整的6位验证码"
             return
         }
 
