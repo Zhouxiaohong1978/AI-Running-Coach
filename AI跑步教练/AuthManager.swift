@@ -55,17 +55,32 @@ class AuthManager: ObservableObject {
             password: password
         )
 
-        print("📝 [AuthManager] 注册响应: user=\(response.user.id.uuidString), session=\(response.session != nil)")
+        print("📝 [AuthManager] 注册响应: user=\(response.user.id.uuidString), session=\(response.session != nil), identities=\(response.user.identities?.count ?? 0)")
 
-        // 检查是否有 session（有些配置需要邮箱验证）
+        // 检查邮箱是否已被注册
+        // Supabase 对于已存在的邮箱会返回 user 但 identities 为空
+        if response.user.identities?.isEmpty ?? true {
+            print("⚠️ [AuthManager] 邮箱已被注册: \(email)")
+            throw NSError(
+                domain: "AuthManager",
+                code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "该邮箱已被注册，请直接登录"]
+            )
+        }
+
+        // 正常注册成功
         if let session = response.session {
             currentUser = session.user
             isAuthenticated = true
             print("✅ [AuthManager] 注册成功，已自动登录")
         } else {
-            currentUser = response.user
-            isAuthenticated = true
-            print("⚠️ [AuthManager] 注册成功，但可能需要邮箱验证")
+            // 需要邮箱验证的情况（如果 Supabase 配置了邮箱验证）
+            print("⚠️ [AuthManager] 注册成功，请查收验证邮件")
+            throw NSError(
+                domain: "AuthManager",
+                code: -4,
+                userInfo: [NSLocalizedDescriptionKey: "注册成功，请查收验证邮件后登录"]
+            )
         }
     }
 
@@ -119,8 +134,39 @@ class AuthManager: ObservableObject {
     /// 发送OTP验证码到邮箱（用于找回密码）
     func sendOTP(email: String) async throws {
         print("📧 [AuthManager] 发送OTP验证码到: \(email)")
-        try await supabase.auth.signInWithOTP(email: email)
-        print("✅ [AuthManager] OTP验证码已发送")
+
+        // 最多重试3次
+        for attempt in 1...3 {
+            do {
+                print("📧 [AuthManager] 尝试发送OTP (第\(attempt)次)...")
+                try await supabase.auth.signInWithOTP(email: email)
+                print("✅ [AuthManager] OTP验证码已发送")
+                return
+            } catch {
+                print("⚠️ [AuthManager] 发送失败 (第\(attempt)次): \(error.localizedDescription)")
+
+                // 如果不是网络错误，直接抛出
+                let errorMessage = error.localizedDescription.lowercased()
+                if !errorMessage.contains("network") &&
+                   !errorMessage.contains("connection") &&
+                   !errorMessage.contains("timed out") &&
+                   !errorMessage.contains("timeout") {
+                    throw error
+                }
+
+                // 网络错误时等待后重试
+                if attempt < 3 {
+                    try await Task.sleep(nanoseconds: UInt64(attempt) * 1_000_000_000) // 1秒, 2秒
+                }
+            }
+        }
+
+        // 所有重试都失败，抛出更友好的错误
+        throw NSError(
+            domain: "AuthManager",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: "网络连接不稳定，请检查网络后重试"]
+        )
     }
 
     /// 验证OTP验证码
