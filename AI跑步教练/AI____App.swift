@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct AI跑步教练App: App {
+    @StateObject private var authManager = AuthManager.shared
+
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            if authManager.isAuthenticated {
+                HomeView()
+            } else {
+                LoginView()
+            }
         }
     }
 }

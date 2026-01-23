@@ -9,11 +9,15 @@ import SwiftUI
 
 struct LoginView: View {
     @StateObject private var authManager = AuthManager.shared
+    @Environment(\.dismiss) private var dismiss
     @State private var email = ""
     @State private var password = ""
-    @State private var isSignUpMode = false
+    @State private var selectedTab = 0  // 0: 登录, 1: 注册
+    @State private var showPassword = false
     @State private var errorMessage: String?
     @State private var showError = false
+    @State private var showForgotPassword = false
+    @State private var forgotPasswordEmail = ""
 
     var body: some View {
         NavigationView {
@@ -39,39 +43,84 @@ struct LoginView: View {
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.white)
 
-                        Text(isSignUpMode ? "创建新账号" : "欢迎回来")
+                        Text(selectedTab == 0 ? "欢迎回来" : "创建新账号")
                             .font(.system(size: 16))
                             .foregroundColor(.white.opacity(0.9))
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 20)
+
+                    // 登录/注册 Tab 切换
+                    HStack(spacing: 0) {
+                        TabButton(title: "登录", isSelected: selectedTab == 0) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedTab = 0
+                                showError = false
+                            }
+                        }
+                        TabButton(title: "注册", isSelected: selectedTab == 1) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedTab = 1
+                                showError = false
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 32)
 
                     // 输入表单
                     VStack(spacing: 16) {
                         // 邮箱输入
-                        TextField("", text: $email)
-                            .placeholder(when: email.isEmpty) {
-                                Text("邮箱地址")
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
-                            .textContentType(.emailAddress)
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(12)
+                        HStack(spacing: 12) {
+                            Image(systemName: "envelope")
+                                .foregroundColor(.white.opacity(0.6))
+                                .frame(width: 20)
+
+                            TextField("", text: $email)
+                                .placeholder(when: email.isEmpty) {
+                                    Text("邮箱")
+                                        .foregroundColor(.white.opacity(0.6))
+                                }
+                                .textContentType(.emailAddress)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .keyboardType(.emailAddress)
+                                .foregroundColor(.white)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(12)
 
                         // 密码输入
-                        SecureField("", text: $password)
-                            .placeholder(when: password.isEmpty) {
-                                Text("密码")
+                        HStack(spacing: 12) {
+                            Image(systemName: "lock")
+                                .foregroundColor(.white.opacity(0.6))
+                                .frame(width: 20)
+
+                            if showPassword {
+                                TextField("", text: $password)
+                                    .placeholder(when: password.isEmpty) {
+                                        Text("密码")
+                                            .foregroundColor(.white.opacity(0.6))
+                                    }
+                                    .textContentType(selectedTab == 1 ? .newPassword : .password)
+                                    .foregroundColor(.white)
+                            } else {
+                                SecureField("", text: $password)
+                                    .placeholder(when: password.isEmpty) {
+                                        Text("密码")
+                                            .foregroundColor(.white.opacity(0.6))
+                                    }
+                                    .textContentType(selectedTab == 1 ? .newPassword : .password)
+                                    .foregroundColor(.white)
+                            }
+
+                            Button(action: { showPassword.toggle() }) {
+                                Image(systemName: showPassword ? "eye" : "eye.slash")
                                     .foregroundColor(.white.opacity(0.6))
                             }
-                            .textContentType(isSignUpMode ? .newPassword : .password)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(12)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(12)
 
                         // 错误提示
                         if showError, let error = errorMessage {
@@ -87,9 +136,9 @@ struct LoginView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                Text(isSignUpMode ? "注册" : "登录")
+                                Text(selectedTab == 0 ? "登录" : "注册")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                                    .foregroundColor(Color(red: 0.3, green: 0.6, blue: 0.1))
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -98,14 +147,16 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .disabled(authManager.isLoading || email.isEmpty || password.isEmpty)
 
-                        // 切换登录/注册模式
-                        Button(action: {
-                            isSignUpMode.toggle()
-                            showError = false
-                        }) {
-                            Text(isSignUpMode ? "已有账号？立即登录" : "没有账号？立即注册")
-                                .font(.system(size: 14))
-                                .foregroundColor(.white)
+                        // 忘记密码（仅登录模式显示）
+                        if selectedTab == 0 {
+                            Button(action: {
+                                forgotPasswordEmail = email
+                                showForgotPassword = true
+                            }) {
+                                Text("忘记密码？")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.white)
+                            }
                         }
 
                         // 分隔线
@@ -113,9 +164,10 @@ struct LoginView: View {
                             Rectangle()
                                 .fill(Color.white.opacity(0.3))
                                 .frame(height: 1)
-                            Text("或")
+                            Text("或者使用以下方式登录")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.8))
+                                .fixedSize()
                             Rectangle()
                                 .fill(Color.white.opacity(0.3))
                                 .frame(height: 1)
@@ -132,6 +184,11 @@ struct LoginView: View {
             }
             .navigationBarHidden(true)
         }
+        .sheet(isPresented: $showForgotPassword) {
+            ForgotPasswordView(initialEmail: $forgotPasswordEmail)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+        }
     }
 
     // MARK: - Actions
@@ -142,16 +199,47 @@ struct LoginView: View {
 
         Task {
             do {
-                if isSignUpMode {
+                if selectedTab == 1 {
+                    print("📝 [注册] 开始注册...")
                     try await authManager.signUp(email: email, password: password)
+                    print("✅ [注册] 注册成功")
                 } else {
+                    print("🔑 [登录] 开始登录...")
                     try await authManager.signIn(email: email, password: password)
+                    print("✅ [登录] 登录成功")
                 }
+
+                // 登录/注册成功后关闭页面
+                dismiss()
             } catch {
+                print("❌ [认证] 失败: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
                 showError = true
             }
         }
+    }
+}
+
+// MARK: - Tab Button
+
+struct TabButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? .white : .white.opacity(0.6))
+
+                Rectangle()
+                    .fill(isSelected ? Color.white : Color.clear)
+                    .frame(height: 2)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

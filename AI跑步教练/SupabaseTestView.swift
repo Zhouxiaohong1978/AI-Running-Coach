@@ -11,7 +11,12 @@ import Supabase
 // 在 View 外部初始化 Supabase 客户端
 let supabase = SupabaseClient(
     supabaseURL: URL(string: "https://aisgbqzksfzdlbjdcwpn.supabase.co")!,
-    supabaseKey: "sb_publishable_Mr8yLtY7MDtlWReRFidL3w_Jn_Kswgl"
+    supabaseKey: "sb_publishable_Mr8yLtY7MDtlWReRFidL3w_Jn_Kswgl",
+    options: SupabaseClientOptions(
+        auth: SupabaseClientOptions.AuthOptions(
+            emitLocalSessionAsInitialSession: true
+        )
+    )
 )
 
 struct SupabaseTestView: View {

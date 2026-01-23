@@ -138,6 +138,12 @@ struct SettingsView: View {
             .sheet(isPresented: $showLoginSheet) {
                 LoginView()
             }
+            .onChange(of: authManager.isAuthenticated) { isAuthenticated in
+                // 登录成功后自动关闭登录页面
+                if isAuthenticated {
+                    showLoginSheet = false
+                }
+            }
             .alert("确认退出", isPresented: $showLogoutAlert) {
                 Button("取消", role: .cancel) {}
                 Button("退出", role: .destructive) {
