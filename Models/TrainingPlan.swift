@@ -1,0 +1,193 @@
+//
+//  TrainingPlan.swift
+//  AI跑步教练
+//
+//  训练计划数据模型
+//
+
+import Foundation
+
+// MARK: - Training Plan
+
+/// 训练计划
+struct TrainingPlan: Codable, Identifiable {
+    let id: UUID
+    let userId: UUID
+    let goal: String
+    let planJson: TrainingPlanData
+    let durationWeeks: Int
+    let difficulty: String
+    var isActive: Bool
+    var progress: TrainingProgress
+    let createdAt: Date
+    var updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case goal
+        case planJson = "plan_json"
+        case durationWeeks = "duration_weeks"
+        case difficulty
+        case isActive = "is_active"
+        case progress
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
+// MARK: - Training Progress
+
+/// 训练进度
+struct TrainingProgress: Codable {
+    var completedWeeks: Int
+    var completedTasks: [String: Bool]  // taskId -> completed
+    var lastCompletedDate: Date?
+
+    init() {
+        self.completedWeeks = 0
+        self.completedTasks = [:]
+        self.lastCompletedDate = nil
+    }
+
+    init(completedWeeks: Int, completedTasks: [String: Bool], lastCompletedDate: Date?) {
+        self.completedWeeks = completedWeeks
+        self.completedTasks = completedTasks
+        self.lastCompletedDate = lastCompletedDate
+    }
+}
+
+// MARK: - Training Goal
+
+/// 训练目标类型
+enum TrainingGoal: String, CaseIterable, Identifiable {
+    case fiveK = "5km入门"
+    case tenK = "10km进阶"
+    case halfMarathon = "半程马拉松"
+    case fullMarathon = "全程马拉松"
+    case weightLoss = "减肥燃脂"
+    case endurance = "耐力提升"
+
+    var id: String { rawValue }
+
+    var displayName: String { rawValue }
+
+    var description: String {
+        switch self {
+        case .fiveK:
+            return "适合跑步新手，8周完成首个5公里"
+        case .tenK:
+            return "适合有基础的跑者，10周突破10公里"
+        case .halfMarathon:
+            return "挑战21.1公里，12周系统训练"
+        case .fullMarathon:
+            return "完成42.195公里梦想，16周专业训练"
+        case .weightLoss:
+            return "科学燃脂，8周养成跑步习惯"
+        case .endurance:
+            return "提升心肺功能，增强跑步耐力"
+        }
+    }
+
+    var recommendedWeeks: Int {
+        switch self {
+        case .fiveK: return 8
+        case .tenK: return 10
+        case .halfMarathon: return 12
+        case .fullMarathon: return 16
+        case .weightLoss: return 8
+        case .endurance: return 8
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .fiveK: return "figure.run"
+        case .tenK: return "figure.run.circle"
+        case .halfMarathon: return "trophy"
+        case .fullMarathon: return "trophy.fill"
+        case .weightLoss: return "flame"
+        case .endurance: return "heart.fill"
+        }
+    }
+}
+
+// MARK: - Task Type
+
+/// 训练任务类型
+enum TaskType: String, Codable {
+    case easyRun = "easy_run"       // 轻松跑
+    case tempoRun = "tempo_run"     // 节奏跑
+    case interval = "interval"       // 间歇跑
+    case longRun = "long_run"       // 长距离跑
+    case rest = "rest"              // 休息日
+    case crossTraining = "cross_training"  // 交叉训练
+
+    var displayName: String {
+        switch self {
+        case .easyRun: return "轻松跑"
+        case .tempoRun: return "节奏跑"
+        case .interval: return "间歇跑"
+        case .longRun: return "长距离跑"
+        case .rest: return "休息"
+        case .crossTraining: return "交叉训练"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .easyRun: return "figure.walk"
+        case .tempoRun: return "figure.run"
+        case .interval: return "bolt.fill"
+        case .longRun: return "figure.run.circle.fill"
+        case .rest: return "bed.double.fill"
+        case .crossTraining: return "figure.mixed.cardio"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .easyRun: return "green"
+        case .tempoRun: return "orange"
+        case .interval: return "red"
+        case .longRun: return "blue"
+        case .rest: return "gray"
+        case .crossTraining: return "purple"
+        }
+    }
+}
+
+// MARK: - Difficulty
+
+/// 难度等级
+enum Difficulty: String, Codable, CaseIterable {
+    case beginner = "beginner"
+    case intermediate = "intermediate"
+    case advanced = "advanced"
+
+    var displayName: String {
+        switch self {
+        case .beginner: return "入门"
+        case .intermediate: return "进阶"
+        case .advanced: return "高级"
+        }
+    }
+}
+
+// MARK: - Day of Week Extension
+
+extension Int {
+    /// 星期几的中文名称
+    var dayOfWeekName: String {
+        switch self {
+        case 1: return "周一"
+        case 2: return "周二"
+        case 3: return "周三"
+        case 4: return "周四"
+        case 5: return "周五"
+        case 6: return "周六"
+        case 7: return "周日"
+        default: return "未知"
+        }
+    }
+}

@@ -199,19 +199,10 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Plan Content (Placeholder)
+    // MARK: - Plan Content
 
     private var planContent: some View {
-        NavigationView {
-            VStack {
-                Text("训练计划")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                Text("即将推出")
-                    .foregroundColor(.secondary)
-            }
-            .navigationTitle("计划")
-        }
+        TrainingPlanView()
     }
 }
 

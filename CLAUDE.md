@@ -5,12 +5,13 @@
 用户通过跑步记录轨迹、获得成就、参与社区互动，AI教练提供实时语音指导。
 
 ## 技术栈
-- **UI框架**: SwiftUI (iOS 16.6+)
+- **UI框架**: SwiftUI (iOS 16.0+)
 - **地图**: Apple MapKit
 - **后端**: Supabase (PostgreSQL + PostGIS)
 - **架构**: MVVM + Manager模式
-- **语言**: Swift 5
+- **语言**: Swift 5 (需要 5.5+ 特性：async/await, @MainActor)
 - **认证**: Supabase Auth + Apple Sign In
+- **项目管理**: XcodeGen (project.yml)
 
 ## 代码规范
 
@@ -32,6 +33,9 @@
 
 ## 构建命令
 ```bash
+# 生成/更新 Xcode 项目（新增文件后必须运行）
+xcodegen generate
+
 # 构建（必须使用--quiet避免输出过多）
 xcodebuild -scheme AIRunningCoach -sdk iphonesimulator -quiet
 
@@ -44,7 +48,7 @@ xcodebuild test -scheme AIRunningCoach -sdk iphonesimulator -quiet
 2. 复杂界面拆分为多个子组件
 3. 优先使用SF Symbols图标
 4. 避免使用shadow和blur等消耗GPU的效果
-5. 新增文件后需在Xcode中手动添加到项目
+5. 新增文件后需运行 xcodegen 更新项目
 
 ## 目录结构说明
 ```
