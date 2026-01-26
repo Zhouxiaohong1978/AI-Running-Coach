@@ -38,3 +38,6 @@ fastlane/test_output
 # Temporary files
 *.tmp
 *.temp
+
+# MCP Configuration
+.mcp.json

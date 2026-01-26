@@ -8,19 +8,53 @@
 
 /* Begin PBXBuildFile section */
 		2B2F60F72F20AC6E000F3E02 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 2B2F60F62F20AC6E000F3E02 /* Supabase */; };
+		2B8D4EF12F2651D600687348 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B8D4EDF2F2651D600687348 /* Assets.xcassets */; };
+		2B8D4EF22F2651D600687348 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EEF2F2651D600687348 /* SignInWithAppleButton.swift */; };
+		2B8D4EF32F2651D600687348 /* DetailedStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE32F2651D600687348 /* DetailedStatsView.swift */; };
+		2B8D4EF42F2651D600687348 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE12F2651D600687348 /* ContentView.swift */; };
+		2B8D4EF52F2651D600687348 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EEE2F2651D600687348 /* SettingsView.swift */; };
+		2B8D4EF62F2651D600687348 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EED2F2651D600687348 /* RunSummaryView.swift */; };
+		2B8D4EF72F2651D600687348 /* RunMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EEB2F2651D600687348 /* RunMapView.swift */; };
+		2B8D4EF82F2651D600687348 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE72F2651D600687348 /* HomeView.swift */; };
+		2B8D4EF92F2651D600687348 /* ActiveRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EDC2F2651D600687348 /* ActiveRunView.swift */; };
+		2B8D4EFA2F2651D600687348 /* SupabaseTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EF02F2651D600687348 /* SupabaseTestView.swift */; };
+		2B8D4EFB2F2651D600687348 /* HistoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE52F2651D600687348 /* HistoryDetailView.swift */; };
+		2B8D4EFC2F2651D600687348 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE82F2651D600687348 /* LocationManager.swift */; };
+		2B8D4EFD2F2651D600687348 /* RunDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EEA2F2651D600687348 /* RunDataManager.swift */; };
+		2B8D4EFF2F2651D600687348 /* CoordinateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE22F2651D600687348 /* CoordinateConverter.swift */; };
+		2B8D4F002F2651D600687348 /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE42F2651D600687348 /* ForgotPasswordView.swift */; };
+		2B8D4F012F2651D600687348 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE92F2651D600687348 /* LoginView.swift */; };
+		2B8D4F022F2651D600687348 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE62F2651D600687348 /* HistoryView.swift */; };
+		2B8D4F032F2651D600687348 /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EEC2F2651D600687348 /* RunRecord.swift */; };
+		2B8D4F042F2651D600687348 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4EE02F2651D600687348 /* AuthManager.swift */; };
+		2B8D4F0B2F26614600687348 /* AIRunningCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B8D4F0A2F26614600687348 /* AIRunningCoachApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2B2F60E72F20A161000F3E02 /* AI跑步教练.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI跑步教练.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B2F60E72F20A161000F3E02 /* AIRunningCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B8D4EDC2F2651D600687348 /* ActiveRunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveRunView.swift; sourceTree = "<group>"; };
+		2B8D4EDD2F2651D600687348 /* AIRunningCoach.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIRunningCoach.entitlements; sourceTree = "<group>"; };
+		2B8D4EDF2F2651D600687348 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2B8D4EE02F2651D600687348 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		2B8D4EE12F2651D600687348 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2B8D4EE22F2651D600687348 /* CoordinateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateConverter.swift; sourceTree = "<group>"; };
+		2B8D4EE32F2651D600687348 /* DetailedStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedStatsView.swift; sourceTree = "<group>"; };
+		2B8D4EE42F2651D600687348 /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
+		2B8D4EE52F2651D600687348 /* HistoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDetailView.swift; sourceTree = "<group>"; };
+		2B8D4EE62F2651D600687348 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		2B8D4EE72F2651D600687348 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2B8D4EE82F2651D600687348 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		2B8D4EE92F2651D600687348 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		2B8D4EEA2F2651D600687348 /* RunDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunDataManager.swift; sourceTree = "<group>"; };
+		2B8D4EEB2F2651D600687348 /* RunMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunMapView.swift; sourceTree = "<group>"; };
+		2B8D4EEC2F2651D600687348 /* RunRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunRecord.swift; sourceTree = "<group>"; };
+		2B8D4EED2F2651D600687348 /* RunSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunSummaryView.swift; sourceTree = "<group>"; };
+		2B8D4EEE2F2651D600687348 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		2B8D4EEF2F2651D600687348 /* SignInWithAppleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleButton.swift; sourceTree = "<group>"; };
+		2B8D4EF02F2651D600687348 /* SupabaseTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseTestView.swift; sourceTree = "<group>"; };
+		2B8D4F052F26520500687348 /* AIRunningCoach-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AIRunningCoach-Bridging-Header.h"; sourceTree = "<group>"; };
+		2B8D4F0A2F26614600687348 /* AIRunningCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRunningCoachApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		2B2F60E92F20A161000F3E02 /* AI跑步教练 */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "AI跑步教练";
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		2B2F60E42F20A161000F3E02 /* Frameworks */ = {
@@ -34,28 +68,81 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B0CA7362F2711DB002315D3 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		2B2F60DE2F20A161000F3E02 = {
 			isa = PBXGroup;
 			children = (
-				2B2F60E92F20A161000F3E02 /* AI跑步教练 */,
+				2B0CA7362F2711DB002315D3 /* Models */,
+				2B8D4EEC2F2651D600687348 /* RunRecord.swift */,
+				2B8D4F0A2F26614600687348 /* AIRunningCoachApp.swift */,
+				2B8D4EDD2F2651D600687348 /* AIRunningCoach.entitlements */,
+				2B8D4EDF2F2651D600687348 /* Assets.xcassets */,
+				2B8D4EDB2F26454800687348 /* Utils */,
+				2B8D4EDA2F26452300687348 /* Managers */,
+				2B8D4ED92F2644E700687348 /* Views */,
 				2B2F60E82F20A161000F3E02 /* Products */,
+				2B8D4F052F26520500687348 /* AIRunningCoach-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
 		2B2F60E82F20A161000F3E02 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2B2F60E72F20A161000F3E02 /* AI跑步教练.app */,
+				2B2F60E72F20A161000F3E02 /* AIRunningCoach.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2B8D4ED92F2644E700687348 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2B8D4EE42F2651D600687348 /* ForgotPasswordView.swift */,
+				2B8D4EEF2F2651D600687348 /* SignInWithAppleButton.swift */,
+				2B8D4EE12F2651D600687348 /* ContentView.swift */,
+				2B8D4EDC2F2651D600687348 /* ActiveRunView.swift */,
+				2B8D4EE32F2651D600687348 /* DetailedStatsView.swift */,
+				2B8D4EE52F2651D600687348 /* HistoryDetailView.swift */,
+				2B8D4EE62F2651D600687348 /* HistoryView.swift */,
+				2B8D4EE72F2651D600687348 /* HomeView.swift */,
+				2B8D4EF02F2651D600687348 /* SupabaseTestView.swift */,
+				2B8D4EE92F2651D600687348 /* LoginView.swift */,
+				2B8D4EEB2F2651D600687348 /* RunMapView.swift */,
+				2B8D4EEE2F2651D600687348 /* SettingsView.swift */,
+				2B8D4EED2F2651D600687348 /* RunSummaryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		2B8D4EDA2F26452300687348 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				2B8D4EE02F2651D600687348 /* AuthManager.swift */,
+				2B8D4EE82F2651D600687348 /* LocationManager.swift */,
+				2B8D4EEA2F2651D600687348 /* RunDataManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		2B8D4EDB2F26454800687348 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				2B8D4EE22F2651D600687348 /* CoordinateConverter.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2B2F60E62F20A161000F3E02 /* AI跑步教练 */ = {
+		2B2F60E62F20A161000F3E02 /* AIRunningCoach */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2B2F60F22F20A163000F3E02 /* Build configuration list for PBXNativeTarget "AI跑步教练" */;
+			buildConfigurationList = 2B2F60F22F20A163000F3E02 /* Build configuration list for PBXNativeTarget "AIRunningCoach" */;
 			buildPhases = (
 				2B2F60E32F20A161000F3E02 /* Sources */,
 				2B2F60E42F20A161000F3E02 /* Frameworks */,
@@ -65,15 +152,12 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				2B2F60E92F20A161000F3E02 /* AI跑步教练 */,
-			);
-			name = "AI跑步教练";
+			name = AIRunningCoach;
 			packageProductDependencies = (
 				2B2F60F62F20AC6E000F3E02 /* Supabase */,
 			);
 			productName = "AI跑步教练";
-			productReference = 2B2F60E72F20A161000F3E02 /* AI跑步教练.app */;
+			productReference = 2B2F60E72F20A161000F3E02 /* AIRunningCoach.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -88,10 +172,11 @@
 				TargetAttributes = {
 					2B2F60E62F20A161000F3E02 = {
 						CreatedOnToolsVersion = 26.2;
+						LastSwiftMigration = 2620;
 					};
 				};
 			};
-			buildConfigurationList = 2B2F60E22F20A161000F3E02 /* Build configuration list for PBXProject "AI跑步教练" */;
+			buildConfigurationList = 2B2F60E22F20A161000F3E02 /* Build configuration list for PBXProject "AIRunningCoach" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -108,7 +193,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2B2F60E62F20A161000F3E02 /* AI跑步教练 */,
+				2B2F60E62F20A161000F3E02 /* AIRunningCoach */,
 			);
 		};
 /* End PBXProject section */
@@ -118,6 +203,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B8D4EF12F2651D600687348 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +214,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2B8D4EF22F2651D600687348 /* SignInWithAppleButton.swift in Sources */,
+				2B8D4EF32F2651D600687348 /* DetailedStatsView.swift in Sources */,
+				2B8D4F0B2F26614600687348 /* AIRunningCoachApp.swift in Sources */,
+				2B8D4EF42F2651D600687348 /* ContentView.swift in Sources */,
+				2B8D4EF52F2651D600687348 /* SettingsView.swift in Sources */,
+				2B8D4EF62F2651D600687348 /* RunSummaryView.swift in Sources */,
+				2B8D4EF72F2651D600687348 /* RunMapView.swift in Sources */,
+				2B8D4EF82F2651D600687348 /* HomeView.swift in Sources */,
+				2B8D4EF92F2651D600687348 /* ActiveRunView.swift in Sources */,
+				2B8D4EFA2F2651D600687348 /* SupabaseTestView.swift in Sources */,
+				2B8D4EFB2F2651D600687348 /* HistoryDetailView.swift in Sources */,
+				2B8D4EFC2F2651D600687348 /* LocationManager.swift in Sources */,
+				2B8D4EFD2F2651D600687348 /* RunDataManager.swift in Sources */,
+				2B8D4EFF2F2651D600687348 /* CoordinateConverter.swift in Sources */,
+				2B8D4F002F2651D600687348 /* ForgotPasswordView.swift in Sources */,
+				2B8D4F012F2651D600687348 /* LoginView.swift in Sources */,
+				2B8D4F022F2651D600687348 /* HistoryView.swift in Sources */,
+				2B8D4F032F2651D600687348 /* RunRecord.swift in Sources */,
+				2B8D4F042F2651D600687348 /* AuthManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,12 +365,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "AI跑步教练/AI跑步教练.entitlements";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PW83W8JG6H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AI跑步教练";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离，即使应用在后台运行";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -286,6 +393,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "AIRunningCoach-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -297,12 +406,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "AI跑步教练/AI跑步教练.entitlements";
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = PW83W8JG6H;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AI跑步教练";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离，即使应用在后台运行";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -323,6 +434,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "AIRunningCoach-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -332,7 +444,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2B2F60E22F20A161000F3E02 /* Build configuration list for PBXProject "AI跑步教练" */ = {
+		2B2F60E22F20A161000F3E02 /* Build configuration list for PBXProject "AIRunningCoach" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2B2F60F02F20A163000F3E02 /* Debug */,
@@ -341,7 +453,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2B2F60F22F20A163000F3E02 /* Build configuration list for PBXNativeTarget "AI跑步教练" */ = {
+		2B2F60F22F20A163000F3E02 /* Build configuration list for PBXNativeTarget "AIRunningCoach" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2B2F60F32F20A163000F3E02 /* Debug */,
