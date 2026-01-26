@@ -74,3 +74,10 @@ xcodebuild test -scheme AIRunningCoach -sdk iphonesimulator -quiet
 
 ## 复用来源
 本项目95%代码复用自《地球新主》(EarthLord)项目，详见 `功能复用规划.md`
+
+## Claude 提醒事项
+当项目达到以下条件时，需要提醒用户添加细化的 CLAUDE.md 文件：
+- Views/ 文件超过 **20个** → 添加 `Views/CLAUDE.md`
+- Managers/ 文件超过 **10个** → 添加 `Managers/CLAUDE.md`
+- Models/ 数据模型超过 **10个** → 添加 `Models/CLAUDE.md`
+- 代码总行数超过 **10000行** → 全面细化规范
