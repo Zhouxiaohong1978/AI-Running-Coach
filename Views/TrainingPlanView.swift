@@ -16,6 +16,17 @@ struct TrainingPlanView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedWeek: Int = 1
+    @State private var viewMode: PlanViewMode = .week
+
+    // UserDefaults key for saving plan
+    private let planStorageKey = "saved_training_plan"
+
+    // 视图模式
+    enum PlanViewMode: String, CaseIterable {
+        case week = "周视图"
+        case calendar = "月历"
+        case overview = "月概览"
+    }
 
     var body: some View {
         NavigationView {
@@ -29,9 +40,13 @@ struct TrainingPlanView: View {
                 }
             }
             .navigationTitle("训练计划")
+            .onAppear {
+                loadSavedPlan()
+            }
             .sheet(isPresented: $showGoalSelection) {
                 GoalSelectionView(onPlanGenerated: { plan in
                     currentPlan = plan
+                    savePlan(plan)
                     showGoalSelection = false
                 })
             }
@@ -40,6 +55,24 @@ struct TrainingPlanView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
+        }
+    }
+
+    // MARK: - Persistence
+
+    /// 加载保存的训练计划
+    private func loadSavedPlan() {
+        guard currentPlan == nil else { return }
+        if let data = UserDefaults.standard.data(forKey: planStorageKey),
+           let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) {
+            currentPlan = plan
+        }
+    }
+
+    /// 保存训练计划
+    private func savePlan(_ plan: TrainingPlanData) {
+        if let data = try? JSONEncoder().encode(plan) {
+            UserDefaults.standard.set(data, forKey: planStorageKey)
         }
     }
 
@@ -93,23 +126,38 @@ struct TrainingPlanView: View {
     // MARK: - Plan Detail View
 
     private func planDetailView(plan: TrainingPlanData) -> some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // 计划概览卡片
-                planOverviewCard(plan: plan)
+        VStack(spacing: 0) {
+            // 视图模式切换
+            viewModePicker
 
-                // 周选择器
-                weekSelector(plan: plan)
+            ScrollView {
+                VStack(spacing: 20) {
+                    // 计划概览卡片
+                    planOverviewCard(plan: plan)
 
-                // 当前周任务列表
-                if let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == selectedWeek }) {
-                    weekTasksView(weekPlan: weekPlan)
+                    // 根据视图模式显示不同内容
+                    switch viewMode {
+                    case .week:
+                        weekSelector(plan: plan)
+                        if let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == selectedWeek }) {
+                            weekTasksView(weekPlan: weekPlan)
+                        }
+                    case .calendar:
+                        monthCalendarView(plan: plan)
+                    case .overview:
+                        monthOverviewView(plan: plan)
+                    }
+
+                    // 训练建议
+                    tipsCard(tips: plan.tips)
                 }
+                .padding()
+                .padding(.bottom, 20)
+            }
 
-                // 训练建议
-                tipsCard(tips: plan.tips)
-
-                // 重新生成按钮
+            // 固定在底部的重新生成按钮
+            VStack(spacing: 0) {
+                Divider()
                 Button(action: { showGoalSelection = true }) {
                     HStack {
                         Image(systemName: "arrow.clockwise")
@@ -117,11 +165,208 @@ struct TrainingPlanView: View {
                     }
                     .font(.subheadline)
                     .foregroundColor(.blue)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
                 }
-                .padding(.top, 10)
+                .background(Color(.systemBackground))
             }
-            .padding()
+            .padding(.bottom, 50)  // 留出 TabBar 空间
         }
+    }
+
+    // MARK: - View Mode Picker
+
+    private var viewModePicker: some View {
+        Picker("视图模式", selection: $viewMode) {
+            ForEach(PlanViewMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue).tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Month Calendar View
+
+    private func monthCalendarView(plan: TrainingPlanData) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // 按月份分组显示
+            let months = groupWeeksByMonth(plan: plan)
+            ForEach(Array(months.keys.sorted()), id: \.self) { monthIndex in
+                if let weeks = months[monthIndex] {
+                    monthCalendarCard(monthIndex: monthIndex, weeks: weeks)
+                }
+            }
+        }
+    }
+
+    private func monthCalendarCard(monthIndex: Int, weeks: [WeekPlanData]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("第 \(monthIndex) 月")
+                .font(.headline)
+                .foregroundColor(.blue)
+
+            // 星期标题
+            HStack(spacing: 4) {
+                ForEach(["一", "二", "三", "四", "五", "六", "日"], id: \.self) { day in
+                    Text(day)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+
+            // 日历格子
+            ForEach(weeks, id: \.weekNumber) { week in
+                HStack(spacing: 4) {
+                    ForEach(1...7, id: \.self) { dayOfWeek in
+                        if let task = week.dailyTasks.first(where: { $0.dayOfWeek == dayOfWeek }) {
+                            calendarDayCell(task: task, weekNumber: week.weekNumber)
+                        } else {
+                            // 休息日
+                            calendarRestCell(weekNumber: week.weekNumber, dayOfWeek: dayOfWeek)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 10)
+    }
+
+    private func calendarDayCell(task: DailyTaskData, weekNumber: Int) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: taskIcon(task.type))
+                .font(.system(size: 14))
+                .foregroundColor(taskColor(task.type))
+            Text("W\(weekNumber)")
+                .font(.system(size: 8))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 44)
+        .background(taskColor(task.type).opacity(0.1))
+        .cornerRadius(8)
+    }
+
+    private func calendarRestCell(weekNumber: Int, dayOfWeek: Int) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: "bed.double.fill")
+                .font(.system(size: 14))
+                .foregroundColor(.gray.opacity(0.5))
+            Text("W\(weekNumber)")
+                .font(.system(size: 8))
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 44)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+
+    // MARK: - Month Overview View
+
+    private func monthOverviewView(plan: TrainingPlanData) -> some View {
+        VStack(spacing: 16) {
+            let months = groupWeeksByMonth(plan: plan)
+            ForEach(Array(months.keys.sorted()), id: \.self) { monthIndex in
+                if let weeks = months[monthIndex] {
+                    monthOverviewCard(monthIndex: monthIndex, weeks: weeks)
+                }
+            }
+        }
+    }
+
+    private func monthOverviewCard(monthIndex: Int, weeks: [WeekPlanData]) -> some View {
+        let allTasks = weeks.flatMap { $0.dailyTasks }
+        let totalDistance = allTasks.compactMap { $0.targetDistance }.reduce(0, +)
+        let trainingDays = allTasks.filter { $0.type != "rest" }.count
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("第 \(monthIndex) 月")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("第\(weeks.first?.weekNumber ?? 0)-\(weeks.last?.weekNumber ?? 0)周")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Divider()
+
+            // 月度统计
+            HStack(spacing: 20) {
+                VStack {
+                    Text("\(weeks.count)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                    Text("周")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack {
+                    Text("\(trainingDays)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.orange)
+                    Text("训练日")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack {
+                    Text(String(format: "%.0f", totalDistance))
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+                    Text("公里")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+
+            // 每周主题列表
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(weeks, id: \.weekNumber) { week in
+                    HStack {
+                        Text("第\(week.weekNumber)周")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .frame(width: 60, alignment: .leading)
+                        Text(week.theme)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.top, 8)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 10)
+    }
+
+    // MARK: - Helper: Group Weeks by Month
+
+    private func groupWeeksByMonth(plan: TrainingPlanData) -> [Int: [WeekPlanData]] {
+        var result: [Int: [WeekPlanData]] = [:]
+        for week in plan.weeklyPlans {
+            let monthIndex = (week.weekNumber - 1) / 4 + 1  // 每4周算一个月
+            if result[monthIndex] == nil {
+                result[monthIndex] = []
+            }
+            result[monthIndex]?.append(week)
+        }
+        return result
     }
 
     // MARK: - Plan Overview Card

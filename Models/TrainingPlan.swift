@@ -61,12 +61,12 @@ struct TrainingProgress: Codable {
 
 /// 训练目标类型
 enum TrainingGoal: String, CaseIterable, Identifiable {
+    case threeK = "3km新手"
     case fiveK = "5km入门"
     case tenK = "10km进阶"
     case halfMarathon = "半程马拉松"
     case fullMarathon = "全程马拉松"
     case weightLoss = "减肥燃脂"
-    case endurance = "耐力提升"
 
     var id: String { rawValue }
 
@@ -74,6 +74,8 @@ enum TrainingGoal: String, CaseIterable, Identifiable {
 
     var description: String {
         switch self {
+        case .threeK:
+            return "零基础新手，6周完成首个3公里"
         case .fiveK:
             return "适合跑步新手，8周完成首个5公里"
         case .tenK:
@@ -84,30 +86,28 @@ enum TrainingGoal: String, CaseIterable, Identifiable {
             return "完成42.195公里梦想，16周专业训练"
         case .weightLoss:
             return "科学燃脂，8周养成跑步习惯"
-        case .endurance:
-            return "提升心肺功能，增强跑步耐力"
         }
     }
 
     var recommendedWeeks: Int {
         switch self {
+        case .threeK: return 6
         case .fiveK: return 8
         case .tenK: return 10
         case .halfMarathon: return 12
         case .fullMarathon: return 16
         case .weightLoss: return 8
-        case .endurance: return 8
         }
     }
 
     var icon: String {
         switch self {
+        case .threeK: return "figure.walk"
         case .fiveK: return "figure.run"
         case .tenK: return "figure.run.circle"
         case .halfMarathon: return "trophy"
         case .fullMarathon: return "trophy.fill"
         case .weightLoss: return "flame"
-        case .endurance: return "heart.fill"
         }
     }
 }
