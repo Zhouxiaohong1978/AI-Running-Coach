@@ -91,7 +91,11 @@ final class SpeechManager: NSObject, ObservableObject {
     ///   - text: 要播报的文本
     ///   - priority: 优先级
     func speak(_ text: String, priority: SpeechPriority = .normal) {
-        guard isEnabled else { return }
+        print("🎤 speak 被调用: \"\(text)\", isEnabled=\(isEnabled)")
+        guard isEnabled else {
+            print("🎤 语音已禁用，跳过")
+            return
+        }
         guard !text.isEmpty else { return }
 
         let item = SpeechItem(text: text, priority: priority)
@@ -235,13 +239,17 @@ final class SpeechManager: NSObject, ObservableObject {
 
     /// 执行语音播报
     private func speakText(_ text: String) {
+        print("🔊 speakText 执行: \"\(text)\"")
+
         let utterance = AVSpeechUtterance(string: text)
 
         // 设置中文语音
         if let voice = AVSpeechSynthesisVoice(identifier: voiceIdentifier) {
             utterance.voice = voice
+            print("🔊 使用语音: \(voiceIdentifier)")
         } else {
             utterance.voice = AVSpeechSynthesisVoice(language: "zh-CN")
+            print("🔊 使用默认中文语音")
         }
 
         // 设置语音参数
@@ -251,6 +259,7 @@ final class SpeechManager: NSObject, ObservableObject {
         utterance.preUtteranceDelay = 0.1
         utterance.postUtteranceDelay = 0.1
 
+        print("🔊 开始播报，volume=\(volume)")
         synthesizer.speak(utterance)
     }
 }

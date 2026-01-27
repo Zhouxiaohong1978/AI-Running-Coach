@@ -45,11 +45,11 @@ struct RunSummaryView: View {
                                 .frame(height: 250)
 
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("跑得真棒！")
-                                    .font(.system(size: 24, weight: .bold))
+                                Text("GREAT RUN!")
+                                    .font(.system(size: 28, weight: .black))
                                     .foregroundColor(.white)
 
-                                Text("周一，晨跑")
+                                Text(formatRunDate(runRecord?.startTime ?? Date()))
                                     .font(.system(size: 14))
                                     .foregroundColor(.white.opacity(0.9))
                             }
@@ -217,6 +217,29 @@ struct RunSummaryView: View {
         } else {
             return String(format: "%02d:%02d", minutes, seconds)
         }
+    }
+
+    private func formatRunDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+
+        let weekday = formatter.weekdaySymbols[Calendar.current.component(.weekday, from: date) - 1]
+        let hour = Calendar.current.component(.hour, from: date)
+        let timeOfDay: String
+        if hour < 6 {
+            timeOfDay = "凌晨跑"
+        } else if hour < 12 {
+            timeOfDay = "晨跑"
+        } else if hour < 18 {
+            timeOfDay = "午后跑"
+        } else {
+            timeOfDay = "夜跑"
+        }
+
+        formatter.dateFormat = "M月d日"
+        let dateStr = formatter.string(from: date)
+
+        return "\(weekday) \(timeOfDay) · \(dateStr)"
     }
 }
 

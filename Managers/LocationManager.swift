@@ -30,13 +30,20 @@ class LocationManager: NSObject, ObservableObject {
     private var isTracking = false
     private var timer: Timer?
 
+    // GPS 过滤参数
+    private let minHorizontalAccuracy: Double = 50.0  // 最小精度要求（米），放宽以确保初始定位
+    private let minMovementDistance: Double = 8.0     // 最小移动距离（米），小于此值视为漂移
+    private let minSpeed: Double = 0.8                // 最小速度（米/秒），低于此值可能是静止（正常步行约1.2m/s）
+
     override init() {
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.activityType = .fitness
-        locationManager.distanceFilter = 10 // 每10米更新一次
+        locationManager.distanceFilter = 5 // 每5米更新一次
         locationManager.requestWhenInUseAuthorization()
+        // 立即开始获取位置
+        locationManager.startUpdatingLocation()
     }
 
     func startTracking() {
@@ -105,31 +112,58 @@ extension LocationManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
 
-        // 更新用户位置
+        // 总是更新用户位置（用于显示蓝点）
         userLocation = location.coordinate
 
-        // 更新地图区域
+        // 总是更新地图区域（确保地图跟随用户）
         region = MKCoordinateRegion(
             center: location.coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            span: MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.008)
         )
+
+        // 精度太差时，只更新位置显示，不计入距离
+        guard location.horizontalAccuracy >= 0 &&
+              location.horizontalAccuracy <= minHorizontalAccuracy else {
+            print("🛰️ 低精度定位，仅更新显示: \(location.horizontalAccuracy)米")
+            return
+        }
 
         // 如果正在跟踪，添加到路线
         if isTracking {
-            routeCoordinates.append(location.coordinate)
-            pathUpdateVersion += 1 // 递增版本号触发地图更新
-
-            // 计算距离
+            // 计算与上一个点的距离
             if let lastLoc = lastLocation {
                 let delta = location.distance(from: lastLoc)
-                // 过滤异常值（超过100米的单次跳动可能是GPS漂移）
-                if delta < 100 {
-                    distance += delta
-                    calculatePace()
-                }
-            }
+                let timeDelta = location.timestamp.timeIntervalSince(lastLoc.timestamp)
+                let speed = timeDelta > 0 ? delta / timeDelta : 0
 
-            lastLocation = location
+                // 过滤条件（必须同时满足）：
+                // 1. 距离 >= 8米（过滤GPS漂移）
+                // 2. 距离 < 100米（过滤GPS跳点）
+                // 3. 速度 >= 0.8m/s（确保是真正在移动，不是静止漂移）
+                let isValidMovement = delta >= minMovementDistance &&
+                                      delta < 100 &&
+                                      speed >= minSpeed
+
+                if isValidMovement {
+                    distance += delta
+                    routeCoordinates.append(location.coordinate)
+                    pathUpdateVersion += 1
+                    calculatePace()
+                    lastLocation = location
+                    print("✅ 有效移动: 距离=\(String(format: "%.1f", delta))米, 速度=\(String(format: "%.1f", speed))米/秒")
+                } else {
+                    // 即使不计入距离，也更新 lastLocation 以避免累积误差
+                    if timeDelta > 3 {  // 超过3秒没有有效移动，更新基准点
+                        lastLocation = location
+                    }
+                    print("🚫 过滤: 距离=\(String(format: "%.1f", delta))米, 速度=\(String(format: "%.1f", speed))米/秒")
+                }
+            } else {
+                // 第一个点，直接记录
+                routeCoordinates.append(location.coordinate)
+                pathUpdateVersion += 1
+                lastLocation = location
+            }
         }
     }
 

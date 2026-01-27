@@ -8,16 +8,7 @@
 import SwiftUI
 import Supabase
 
-// 在 View 外部初始化 Supabase 客户端
-let supabase = SupabaseClient(
-    supabaseURL: URL(string: "https://aisgbqzksfzdlbjdcwpn.supabase.co")!,
-    supabaseKey: "sb_publishable_Mr8yLtY7MDtlWReRFidL3w_Jn_Kswgl",
-    options: SupabaseClientOptions(
-        auth: SupabaseClientOptions.AuthOptions(
-            emitLocalSessionAsInitialSession: true
-        )
-    )
-)
+// 使用全局的 supabase 实例（定义在 Utils/SupabaseClient.swift）
 
 struct SupabaseTestView: View {
     @State private var connectionStatus: ConnectionStatus = .notTested

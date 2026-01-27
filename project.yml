@@ -28,6 +28,7 @@ targets:
       - Utils
       - Assets.xcassets
       - AIRunningCoach-Bridging-Header.h
+      - CLAUDE.md
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zhouxiaohong.AIRunningCoach

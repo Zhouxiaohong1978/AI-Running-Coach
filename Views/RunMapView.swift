@@ -23,11 +23,37 @@ struct RunMapView: UIViewRepresentable {
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
         mapView.userTrackingMode = .follow
-        mapView.setRegion(region, animated: false)
+        // 设置内边距，让用户位置显示在可见区域中心（底部有数据卡片遮挡）
+        mapView.layoutMargins = UIEdgeInsets(top: 100, left: 0, bottom: 350, right: 0)
         return mapView
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
+        // 当有用户位置时，更新地图中心
+        if let location = userLocation {
+            let currentCenter = mapView.region.center
+
+            // 将地图中心向南偏移，让用户位置显示在配速文字上方
+            let offsetLatitude = location.latitude + 0.012  // 继续增大偏移，让蓝点在配速上方
+            let newCenter = CLLocationCoordinate2D(latitude: offsetLatitude, longitude: location.longitude)
+
+            // 计算当前中心和新位置的距离
+            let distance = sqrt(
+                pow(currentCenter.latitude - newCenter.latitude, 2) +
+                pow(currentCenter.longitude - newCenter.longitude, 2)
+            )
+
+            // 如果距离较大（超过0.0005度，约50米），更新地图
+            if distance > 0.0005 || context.coordinator.isFirstUpdate {
+                context.coordinator.isFirstUpdate = false
+                let newRegion = MKCoordinateRegion(
+                    center: newCenter,
+                    span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
+                )
+                mapView.setRegion(newRegion, animated: true)
+            }
+        }
+
         // 只有版本号变化时才更新轨迹
         if context.coordinator.lastPathVersion != pathUpdateVersion {
             context.coordinator.lastPathVersion = pathUpdateVersion
@@ -43,23 +69,12 @@ struct RunMapView: UIViewRepresentable {
                 mapView.addOverlay(polyline)
             }
         }
-
-        // 更新地图区域跟随用户
-        if let location = userLocation {
-            let currentCenter = mapView.region.center
-            let distance = CLLocation(latitude: currentCenter.latitude, longitude: currentCenter.longitude)
-                .distance(from: CLLocation(latitude: location.latitude, longitude: location.longitude))
-
-            // 只有当用户移动超过50米时才更新地图中心
-            if distance > 50 {
-                mapView.setRegion(region, animated: true)
-            }
-        }
     }
 
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RunMapView
         var lastPathVersion: Int = -1
+        var isFirstUpdate: Bool = true
 
         init(_ parent: RunMapView) {
             self.parent = parent

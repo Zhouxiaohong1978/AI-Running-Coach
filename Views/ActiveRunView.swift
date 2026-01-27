@@ -24,6 +24,9 @@ struct ActiveRunView: View {
     @State private var lastFeedbackTime: Date = Date()
     @State private var showCoachFeedback = false
     @State private var currentFeedback: String = ""
+    @State private var holdProgress: CGFloat = 0
+    @State private var isHolding = false
+    @State private var holdTimer: Timer?
 
     var body: some View {
         ZStack {
@@ -39,6 +42,7 @@ struct ActiveRunView: View {
             VStack {
                 // Top Status Bar
                 HStack {
+                    // 左侧：GPS 状态
                     HStack(spacing: 4) {
                         Circle()
                             .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
@@ -54,14 +58,14 @@ struct ActiveRunView: View {
 
                     Spacer()
 
-                    // 语音开关按钮
+                    // 语音开关按钮（麦克风图标）
                     Button(action: {
                         isVoiceEnabled.toggle()
                         speechManager.isEnabled = isVoiceEnabled
                     }) {
-                        Image(systemName: isVoiceEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                        Image(systemName: isVoiceEnabled ? "mic.fill" : "mic.slash.fill")
                             .font(.system(size: 16))
-                            .foregroundColor(.white)
+                            .foregroundColor(isVoiceEnabled ? .green : .white)
                             .padding(10)
                             .background(Color.black.opacity(0.6))
                             .clipShape(Circle())
@@ -69,6 +73,30 @@ struct ActiveRunView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 50)
+
+                // 定位按钮（点击回到用户位置中心）
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        // 触发地图更新回到用户位置
+                        if let location = locationManager.userLocation {
+                            locationManager.region = MKCoordinateRegion(
+                                center: location,
+                                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                            )
+                        }
+                    }) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.blue)
+                            .padding(10)
+                            .background(Color.white.opacity(0.9))
+                            .clipShape(Circle())
+                            .shadow(radius: 2)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
 
                 // AI 教练反馈气泡
                 if showCoachFeedback && !currentFeedback.isEmpty {
@@ -90,41 +118,83 @@ struct ActiveRunView: View {
 
                 Spacer()
 
-                // Metrics Cards
-                VStack(spacing: 16) {
-                    HStack(spacing: 12) {
-                        // Pace Card
-                        MetricCard(
-                            label: "配速",
-                            value: formatPace(locationManager.currentPace),
-                            unit: ""
-                        )
-
-                        // Time Card
-                        MetricCard(
-                            label: "时间",
-                            value: formatDuration(locationManager.duration),
-                            unit: ""
-                        )
+                // Metrics Display - 按设计稿样式
+                VStack(spacing: 12) {
+                    // 配速（最大显示）
+                    VStack(spacing: 0) {
+                        Text("配速")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.7))
+                        Text(formatPace(locationManager.currentPace))
+                            .font(.system(size: 72, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
                     }
 
-                    HStack(spacing: 12) {
-                        // Distance Card
-                        MetricCard(
-                            label: "距离",
-                            value: String(format: "%.2f", locationManager.distance / 1000.0),
-                            unit: " km"
-                        )
+                    // 距离和时间
+                    HStack(spacing: 40) {
+                        // 距离
+                        VStack(spacing: 2) {
+                            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                                Text(String(format: "%.2f", locationManager.distance / 1000.0))
+                                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Text("km")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            Text("距离")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
 
-                        // Calories Card
-                        MetricCard(
-                            label: "卡路里",
-                            value: String(format: "%.0f", locationManager.calories),
-                            unit: " kcal"
-                        )
+                        // 时间
+                        VStack(spacing: 2) {
+                            Text(formatDuration(locationManager.duration))
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("时间")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
+
+                    // 卡路里和心率
+                    HStack(spacing: 30) {
+                        // 卡路里
+                        HStack(spacing: 6) {
+                            Image(systemName: "flame.fill")
+                                .foregroundColor(.orange)
+                                .font(.system(size: 18))
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("\(Int(locationManager.calories))")
+                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Text("卡路里")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                        }
+
+                        // 心率
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                                .font(.system(size: 18))
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("--")
+                                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                Text("心率")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(Color.black.opacity(0.5))
+                .cornerRadius(20)
 
                 Spacer()
                     .frame(height: 40)
@@ -143,8 +213,8 @@ struct ActiveRunView: View {
                     .frame(height: 80)
                     .padding(.bottom, 40)
                 } else {
-                    HStack(spacing: 40) {
-                        // Pause Button
+                    HStack(spacing: 60) {
+                        // Pause Button（左侧）
                         Button(action: {
                             isPaused.toggle()
                             if isPaused {
@@ -156,38 +226,75 @@ struct ActiveRunView: View {
                             }
                         }) {
                             Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                                .font(.system(size: 24))
+                                .font(.system(size: 28))
                                 .foregroundColor(.white)
                                 .frame(width: 60, height: 60)
                                 .background(Color.white.opacity(0.2))
                                 .clipShape(Circle())
                         }
 
-                        // Stop Button
-                        Button(action: {
-                            endRun()
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.red)
-                                    .frame(width: 80, height: 80)
+                        // Stop Button（右侧，长按停止 + 进度环）
+                        ZStack {
+                            // 背景圆
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 80, height: 80)
 
-                                Text("结束")
-                                    .font(.system(size: 12, weight: .bold))
+                            // 进度环（在按钮外圈）
+                            Circle()
+                                .trim(from: 0, to: holdProgress)
+                                .stroke(Color.white, lineWidth: 5)
+                                .frame(width: 88, height: 88)
+                                .rotationEffect(.degrees(-90))
+                                .animation(.linear(duration: 0.1), value: holdProgress)
+
+                            // 内容
+                            VStack(spacing: 2) {
+                                Image(systemName: "stop.fill")
+                                    .font(.system(size: 24))
                                     .foregroundColor(.white)
+                                Text("长按\n结束")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .multilineTextAlignment(.center)
                             }
                         }
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !isHolding {
+                                        isHolding = true
+                                        startHoldAnimation()
+                                    }
+                                }
+                                .onEnded { _ in
+                                    isHolding = false
+                                    holdTimer?.invalidate()
+                                    holdTimer = nil
+                                    // 进度不足时重置
+                                    if holdProgress < 1.0 {
+                                        withAnimation(.easeOut(duration: 0.2)) {
+                                            holdProgress = 0
+                                        }
+                                    }
+                                }
+                        )
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 120)  // 上移避免被 TabBar 挡住
                 }
             }
         }
         .navigationBarHidden(true)
         .onAppear {
             locationManager.startTracking()
-            speechManager.isEnabled = isVoiceEnabled
-            speechManager.announceStart()
             lastFeedbackTime = Date()
+
+            // 延迟一点播报，确保视图完全加载
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                speechManager.isEnabled = isVoiceEnabled
+                print("🏃 开始跑步，准备播报，isVoiceEnabled=\(isVoiceEnabled)")
+                speechManager.announceStart()
+            }
         }
         .onDisappear {
             locationManager.stopTracking()
@@ -294,6 +401,26 @@ struct ActiveRunView: View {
                 }
             } catch {
                 print("AI反馈获取失败: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func startHoldAnimation() {
+        holdProgress = 0
+        holdTimer?.invalidate()
+
+        // 使用 Timer 实现进度，1.5秒完成
+        holdTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { timer in
+            if self.isHolding {
+                self.holdProgress += 0.05 / 1.5  // 1.5秒完成
+                if self.holdProgress >= 1.0 {
+                    timer.invalidate()
+                    self.holdTimer = nil
+                    self.endRun()
+                }
+            } else {
+                timer.invalidate()
+                self.holdTimer = nil
             }
         }
     }
