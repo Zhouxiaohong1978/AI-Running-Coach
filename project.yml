@@ -63,5 +63,4 @@ targets:
           SWIFT_COMPILATION_MODE: wholemodule
     dependencies:
       - package: Supabase
-    entitlements:
-      path: AIRunningCoach.entitlements
+    # entitlements managed via CODE_SIGN_ENTITLEMENTS build setting
