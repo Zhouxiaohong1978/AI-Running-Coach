@@ -638,7 +638,8 @@ struct TaskEditorView: View {
     @State private var selectedDayOfWeek: Int
     @State private var selectedTaskType: String
     @State private var targetDistance: Double
-    @State private var targetPace: String
+    @State private var selectedPaceMinutes: Int
+    @State private var selectedPaceSeconds: Int
     @State private var taskDescription: String
 
     init(task: DailyTaskData, weekNumber: Int, onSave: @escaping (DailyTaskData) -> Void) {
@@ -648,8 +649,20 @@ struct TaskEditorView: View {
         _selectedDayOfWeek = State(initialValue: task.dayOfWeek)
         _selectedTaskType = State(initialValue: task.type)
         _targetDistance = State(initialValue: task.targetDistance ?? 5.0)
-        _targetPace = State(initialValue: task.targetPace ?? "6'30\"")
         _taskDescription = State(initialValue: task.description)
+
+        // 解析配速
+        let pace = task.targetPace ?? "6'30\""
+        let components = pace.replacingOccurrences(of: "\"", with: "").split(separator: "'")
+        if components.count == 2,
+           let mins = Int(components[0]),
+           let secs = Int(components[1]) {
+            _selectedPaceMinutes = State(initialValue: mins)
+            _selectedPaceSeconds = State(initialValue: secs)
+        } else {
+            _selectedPaceMinutes = State(initialValue: 6)
+            _selectedPaceSeconds = State(initialValue: 30)
+        }
     }
 
     var body: some View {
@@ -676,8 +689,8 @@ struct TaskEditorView: View {
                     .pickerStyle(.menu)
                 }
 
-                // 目标距离
-                Section(header: Text("目标距离")) {
+                // 目标距离（适合新手：0.5-10km）
+                Section(header: Text("目标距离"), footer: Text("适合新手起步，后续可根据能力调整")) {
                     VStack(spacing: 12) {
                         HStack {
                             Text("距离")
@@ -687,15 +700,60 @@ struct TaskEditorView: View {
                                 .fontWeight(.semibold)
                         }
 
-                        Slider(value: $targetDistance, in: 1...50, step: 0.5)
+                        Slider(value: $targetDistance, in: 0.5...10, step: 0.5)
                             .tint(Color(red: 0.5, green: 0.8, blue: 0.1))
+
+                        HStack {
+                            Text("0.5km")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("新手友好范围")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("10km")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
 
-                // 目标配速
-                Section(header: Text("目标配速")) {
-                    TextField("如：6'30\"", text: $targetPace)
-                        .keyboardType(.asciiCapable)
+                // 目标配速（选择器）
+                Section(header: Text("目标配速"), footer: Text("配速越小越快，建议新手从7-8分钟/公里开始")) {
+                    HStack {
+                        Text("配速")
+                        Spacer()
+
+                        // 分钟选择器
+                        Picker("分钟", selection: $selectedPaceMinutes) {
+                            ForEach(4...10, id: \.self) { min in
+                                Text("\(min)'").tag(min)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 80, height: 100)
+                        .clipped()
+
+                        // 秒选择器
+                        Picker("秒", selection: $selectedPaceSeconds) {
+                            ForEach([0, 15, 30, 45], id: \.self) { sec in
+                                Text(String(format: "%02d\"", sec)).tag(sec)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 80, height: 100)
+                        .clipped()
+
+                        Text("/km")
+                            .foregroundColor(.secondary)
+                    }
+
+                    // 配速提示
+                    VStack(alignment: .leading, spacing: 4) {
+                        paceHint(minutes: selectedPaceMinutes, seconds: selectedPaceSeconds)
+                    }
+                    .padding(.vertical, 4)
                 }
 
                 // 任务描述
@@ -735,12 +793,47 @@ struct TaskEditorView: View {
         ]
     }
 
+    // 配速提示
+    private func paceHint(minutes: Int, seconds: Int) -> some View {
+        let totalMinutes = Double(minutes) + Double(seconds) / 60.0
+        let emoji: String
+        let hint: String
+
+        if totalMinutes < 5 {
+            emoji = "🔥"
+            hint = "专业配速 - 需要高水平训练"
+        } else if totalMinutes < 6 {
+            emoji = "💪"
+            hint = "进阶配速 - 适合有经验跑者"
+        } else if totalMinutes < 7 {
+            emoji = "👍"
+            hint = "标准配速 - 适合有基础跑者"
+        } else if totalMinutes < 8 {
+            emoji = "🌟"
+            hint = "轻松配速 - 非常适合新手"
+        } else {
+            emoji = "✨"
+            hint = "舒适配速 - 新手入门首选"
+        }
+
+        return HStack(spacing: 8) {
+            Text(emoji)
+                .font(.title3)
+            Text(hint)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+
     private func saveTask() {
+        // 格式化配速
+        let formattedPace = "\(selectedPaceMinutes)'\(String(format: "%02d", selectedPaceSeconds))\""
+
         let updatedTask = DailyTaskData(
             dayOfWeek: selectedDayOfWeek,
             type: selectedTaskType,
             targetDistance: selectedTaskType == "rest" ? nil : targetDistance,
-            targetPace: selectedTaskType == "rest" ? nil : targetPace,
+            targetPace: selectedTaskType == "rest" ? nil : formattedPace,
             description: taskDescription
         )
 
