@@ -17,6 +17,9 @@ struct TrainingPlanView: View {
     @State private var errorMessage: String?
     @State private var selectedWeek: Int = 1
     @State private var viewMode: PlanViewMode = .week
+    @State private var editingTask: DailyTaskData?
+    @State private var editingWeekNumber: Int?
+    @State private var showTaskEditor = false
 
     // UserDefaults key for saving plan
     private let planStorageKey = "saved_training_plan"
@@ -50,6 +53,18 @@ struct TrainingPlanView: View {
                     showGoalSelection = false
                 })
             }
+            .sheet(isPresented: $showTaskEditor) {
+                if let task = editingTask, let weekNumber = editingWeekNumber {
+                    TaskEditorView(
+                        task: task,
+                        weekNumber: weekNumber,
+                        onSave: { updatedTask in
+                            updateTask(updatedTask, weekNumber: weekNumber)
+                            showTaskEditor = false
+                        }
+                    )
+                }
+            }
             .alert("错误", isPresented: .constant(errorMessage != nil)) {
                 Button("确定") { errorMessage = nil }
             } message: {
@@ -73,6 +88,27 @@ struct TrainingPlanView: View {
     private func savePlan(_ plan: TrainingPlanData) {
         if let data = try? JSONEncoder().encode(plan) {
             UserDefaults.standard.set(data, forKey: planStorageKey)
+        }
+    }
+
+    /// 更新任务
+    private func updateTask(_ updatedTask: DailyTaskData, weekNumber: Int) {
+        guard var plan = currentPlan else { return }
+
+        // 找到对应的周计划
+        if let weekIndex = plan.weeklyPlans.firstIndex(where: { $0.weekNumber == weekNumber }) {
+            var weekPlan = plan.weeklyPlans[weekIndex]
+
+            // 找到对应的任务
+            if let taskIndex = weekPlan.dailyTasks.firstIndex(where: { $0.dayOfWeek == updatedTask.dayOfWeek }) {
+                // 更新任务
+                weekPlan.dailyTasks[taskIndex] = updatedTask
+                plan.weeklyPlans[weekIndex] = weekPlan
+
+                // 保存更新后的计划
+                currentPlan = plan
+                savePlan(plan)
+            }
         }
     }
 
@@ -459,6 +495,11 @@ struct TrainingPlanView: View {
 
             ForEach(weekPlan.dailyTasks, id: \.dayOfWeek) { task in
                 taskRow(task: task)
+                    .onTapGesture {
+                        editingTask = task
+                        editingWeekNumber = weekPlan.weekNumber
+                        showTaskEditor = true
+                    }
             }
         }
         .padding()
@@ -503,8 +544,16 @@ struct TrainingPlanView: View {
             }
 
             Spacer()
+
+            // 编辑图标
+            Image(systemName: "pencil.circle.fill")
+                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                .font(.system(size: 20))
         }
         .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color(.systemGray6).opacity(0.5))
+        .cornerRadius(12)
     }
 
     // MARK: - Tips Card
@@ -576,6 +625,127 @@ struct TrainingPlanView: View {
         case "cross_training": return .purple
         default: return .blue
         }
+    }
+}
+
+// MARK: - Task Editor View
+
+struct TaskEditorView: View {
+    @Environment(\.dismiss) var dismiss
+    let weekNumber: Int
+    let onSave: (DailyTaskData) -> Void
+
+    @State private var selectedDayOfWeek: Int
+    @State private var selectedTaskType: String
+    @State private var targetDistance: Double
+    @State private var targetPace: String
+    @State private var taskDescription: String
+
+    init(task: DailyTaskData, weekNumber: Int, onSave: @escaping (DailyTaskData) -> Void) {
+        self.weekNumber = weekNumber
+        self.onSave = onSave
+
+        _selectedDayOfWeek = State(initialValue: task.dayOfWeek)
+        _selectedTaskType = State(initialValue: task.type)
+        _targetDistance = State(initialValue: task.targetDistance ?? 5.0)
+        _targetPace = State(initialValue: task.targetPace ?? "6'30\"")
+        _taskDescription = State(initialValue: task.description)
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                // 星期选择
+                Section(header: Text("训练日期")) {
+                    Picker("星期", selection: $selectedDayOfWeek) {
+                        ForEach(1...7, id: \.self) { day in
+                            Text(day.dayOfWeekName).tag(day)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                // 任务类型
+                Section(header: Text("训练类型")) {
+                    Picker("类型", selection: $selectedTaskType) {
+                        ForEach(taskTypes, id: \.value) { type in
+                            Label(type.name, systemImage: type.icon)
+                                .tag(type.value)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+
+                // 目标距离
+                Section(header: Text("目标距离")) {
+                    VStack(spacing: 12) {
+                        HStack {
+                            Text("距离")
+                            Spacer()
+                            Text(String(format: "%.1f km", targetDistance))
+                                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                                .fontWeight(.semibold)
+                        }
+
+                        Slider(value: $targetDistance, in: 1...50, step: 0.5)
+                            .tint(Color(red: 0.5, green: 0.8, blue: 0.1))
+                    }
+                }
+
+                // 目标配速
+                Section(header: Text("目标配速")) {
+                    TextField("如：6'30\"", text: $targetPace)
+                        .keyboardType(.asciiCapable)
+                }
+
+                // 任务描述
+                Section(header: Text("任务描述")) {
+                    TextEditor(text: $taskDescription)
+                        .frame(height: 100)
+                }
+            }
+            .navigationTitle("编辑训练任务")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("取消") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("保存") {
+                        saveTask()
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                }
+            }
+        }
+    }
+
+    private var taskTypes: [(name: String, value: String, icon: String)] {
+        [
+            ("轻松跑", "easy_run", "figure.walk"),
+            ("节奏跑", "tempo_run", "figure.run"),
+            ("间歇跑", "interval", "bolt.fill"),
+            ("长距离跑", "long_run", "figure.run.circle.fill"),
+            ("休息", "rest", "bed.double.fill"),
+            ("交叉训练", "cross_training", "figure.mixed.cardio")
+        ]
+    }
+
+    private func saveTask() {
+        let updatedTask = DailyTaskData(
+            dayOfWeek: selectedDayOfWeek,
+            type: selectedTaskType,
+            targetDistance: selectedTaskType == "rest" ? nil : targetDistance,
+            targetPace: selectedTaskType == "rest" ? nil : targetPace,
+            description: taskDescription
+        )
+
+        onSave(updatedTask)
+        dismiss()
     }
 }
 
