@@ -20,6 +20,7 @@ struct TrainingPlanView: View {
     @State private var editingTask: DailyTaskData?
     @State private var editingWeekNumber: Int?
     @State private var showTaskEditor = false
+    @State private var isRegenerating = false
 
     // UserDefaults key for saving plan
     private let planStorageKey = "saved_training_plan"
@@ -70,6 +71,37 @@ struct TrainingPlanView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
+            .overlay {
+                if isRegenerating {
+                    regeneratingOverlay
+                }
+            }
+        }
+    }
+
+    // MARK: - Regenerating Overlay
+
+    private var regeneratingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(.white)
+
+                Text("AI正在重新生成训练计划...")
+                    .font(.headline)
+                    .foregroundColor(.white)
+
+                Text("根据你的修改优化中")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .padding(40)
+            .background(Color(.systemGray5).opacity(0.9))
+            .cornerRadius(20)
         }
     }
 
@@ -108,6 +140,35 @@ struct TrainingPlanView: View {
                 // 保存更新后的计划
                 currentPlan = plan
                 savePlan(plan)
+            }
+        }
+    }
+
+    /// 根据用户修改重新生成计划
+    private func regeneratePlan() {
+        guard let plan = currentPlan else { return }
+
+        isRegenerating = true
+
+        Task {
+            do {
+                let newPlan = try await aiManager.generateTrainingPlan(
+                    goal: plan.goal,
+                    runHistory: dataManager.runRecords,
+                    durationWeeks: plan.durationWeeks,
+                    currentPlan: plan  // 传入用户修改后的计划作为参考
+                )
+
+                await MainActor.run {
+                    currentPlan = newPlan
+                    savePlan(newPlan)
+                    isRegenerating = false
+                }
+            } catch {
+                await MainActor.run {
+                    isRegenerating = false
+                    errorMessage = "重新生成失败: \(error.localizedDescription)"
+                }
             }
         }
     }
@@ -191,19 +252,42 @@ struct TrainingPlanView: View {
                 .padding(.bottom, 20)
             }
 
-            // 固定在底部的重新生成按钮
+            // 固定在底部的按钮组
             VStack(spacing: 0) {
                 Divider()
-                Button(action: { showGoalSelection = true }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("重新制定计划")
+
+                HStack(spacing: 12) {
+                    // 重新生成计划按钮
+                    Button(action: { regeneratePlan() }) {
+                        HStack {
+                            Image(systemName: "sparkles")
+                            Text("重新生成计划")
+                        }
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(red: 0.5, green: 0.8, blue: 0.1))
+                        .cornerRadius(10)
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+
+                    // 更换目标按钮
+                    Button(action: { showGoalSelection = true }) {
+                        HStack {
+                            Image(systemName: "arrow.clockwise")
+                            Text("更换目标")
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
                 .background(Color(.systemBackground))
             }
             .padding(.bottom, 50)  // 留出 TabBar 空间
@@ -488,12 +572,20 @@ struct TrainingPlanView: View {
     // MARK: - Week Tasks View
 
     private func weekTasksView(weekPlan: WeekPlanData) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        // 补全7天：有任务的用AI生成的，没有的补充为休息日
+        let fullWeekTasks: [DailyTaskData] = (1...7).map { day in
+            if let existingTask = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == day }) {
+                return existingTask
+            }
+            return DailyTaskData(dayOfWeek: day, type: "rest", targetDistance: nil, targetPace: nil, description: "休息日")
+        }
+
+        return VStack(alignment: .leading, spacing: 12) {
             Text(weekPlan.theme)
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            ForEach(weekPlan.dailyTasks, id: \.dayOfWeek) { task in
+            ForEach(fullWeekTasks, id: \.dayOfWeek) { task in
                 taskRow(task: task)
                     .onTapGesture {
                         editingTask = task

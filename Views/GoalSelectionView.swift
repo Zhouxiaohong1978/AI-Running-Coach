@@ -97,39 +97,79 @@ struct GoalSelectionView: View {
 
     // MARK: - Goal Card
 
+    @ViewBuilder
     private func goalCard(goal: TrainingGoal) -> some View {
+        let isUnlocked = isGoalUnlocked(goal)
+        let isSelected = selectedGoal == goal
+
         Button(action: {
+            guard isUnlocked else { return }
             withAnimation(.spring(response: 0.3)) {
                 selectedGoal = goal
                 customWeeks = goal.recommendedWeeks
             }
         }) {
             VStack(spacing: 12) {
-                Image(systemName: goal.icon)
-                    .font(.system(size: 32))
-                    .foregroundColor(selectedGoal == goal ? .white : .blue)
+                // 锁定图标或目标图标
+                ZStack {
+                    if !isUnlocked {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.gray)
+                    } else {
+                        Image(systemName: goal.icon)
+                            .font(.system(size: 32))
+                            .foregroundColor(isSelected ? .white : .blue)
+                    }
+                }
 
                 Text(goal.displayName)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(selectedGoal == goal ? .white : .primary)
+                    .foregroundColor(isUnlocked ? (isSelected ? .white : .primary) : .gray)
 
-                Text(goal.description)
-                    .font(.caption)
-                    .foregroundColor(selectedGoal == goal ? .white.opacity(0.8) : .secondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                if !isUnlocked {
+                    // 显示解锁条件
+                    if let prerequisite = goal.prerequisite {
+                        Text("完成\(prerequisite.displayName)解锁")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                    }
+                } else {
+                    Text(goal.description)
+                        .font(.caption)
+                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(selectedGoal == goal ? Color.blue : Color(.systemGray6))
+            .background(isUnlocked ? (isSelected ? Color.blue : Color(.systemGray6)) : Color(.systemGray5))
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(selectedGoal == goal ? Color.blue : Color.clear, lineWidth: 2)
+                    .stroke(isUnlocked ? (isSelected ? Color.blue : Color.clear) : Color.gray.opacity(0.3), lineWidth: 2)
             )
+            .opacity(isUnlocked ? 1.0 : 0.6)
         }
         .buttonStyle(.plain)
+        .disabled(!isUnlocked)
+    }
+
+    // MARK: - Goal Unlock Logic
+
+    /// 检查目标是否已解锁
+    private func isGoalUnlocked(_ goal: TrainingGoal) -> Bool {
+        // 没有前置条件的目标默认解锁（3km新手 和 减肥燃脂）
+        guard goal.prerequisite != nil else {
+            return true
+        }
+
+        // 检查用户跑步历史：只要跑过目标所需的最低距离就自动解锁
+        let maxDistance = dataManager.runRecords.map { $0.distance }.max() ?? 0
+        return maxDistance >= goal.requiredDistance
     }
 
     // MARK: - Duration Section

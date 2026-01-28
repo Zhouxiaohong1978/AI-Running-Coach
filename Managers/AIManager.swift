@@ -39,6 +39,7 @@ struct GeneratePlanRequest: Codable {
     let maxDistance: Double?
     let weeklyRuns: Int
     let durationWeeks: Int
+    let currentPlan: TrainingPlanData?  // 用户修改后的当前计划，用于重新生成时参考
 }
 
 /// 训练计划生成响应
@@ -141,11 +142,13 @@ final class AIManager: ObservableObject {
     ///   - goal: 训练目标（如"5km入门"、"10km进阶"、"减肥"）
     ///   - runHistory: 用户历史跑步记录
     ///   - durationWeeks: 计划周期（周）
+    ///   - currentPlan: 用户已修改的当前计划（重新生成时传入）
     /// - Returns: 生成的训练计划数据
     func generateTrainingPlan(
         goal: String,
         runHistory: [RunRecord],
-        durationWeeks: Int = 8
+        durationWeeks: Int = 8,
+        currentPlan: TrainingPlanData? = nil
     ) async throws -> TrainingPlanData {
         guard AuthManager.shared.currentUser != nil else {
             throw AIManagerError.notAuthenticated
@@ -159,7 +162,7 @@ final class AIManager: ObservableObject {
         let maxDistance = runHistory.map { $0.distance / 1000.0 }.max()
         let weeklyRuns = calculateWeeklyRuns(from: runHistory)
 
-        print("🤖 开始生成训练计划: \(goal)")
+        print("🤖 开始生成训练计划: \(goal), 是否有修改参考: \(currentPlan != nil)")
         print("   平均配速: \(avgPace ?? 0), 最长距离: \(maxDistance ?? 0)km, 每周跑步: \(weeklyRuns)次")
 
         // 构建请求
@@ -168,7 +171,8 @@ final class AIManager: ObservableObject {
             avgPace: avgPace,
             maxDistance: maxDistance,
             weeklyRuns: weeklyRuns,
-            durationWeeks: durationWeeks
+            durationWeeks: durationWeeks,
+            currentPlan: currentPlan
         )
 
         do {

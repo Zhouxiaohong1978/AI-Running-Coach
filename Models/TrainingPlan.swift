@@ -62,11 +62,11 @@ struct TrainingProgress: Codable {
 /// 训练目标类型
 enum TrainingGoal: String, CaseIterable, Identifiable {
     case threeK = "3km新手"
+    case weightLoss = "减肥燃脂"
     case fiveK = "5km入门"
     case tenK = "10km进阶"
     case halfMarathon = "半程马拉松"
     case fullMarathon = "全程马拉松"
-    case weightLoss = "减肥燃脂"
 
     var id: String { rawValue }
 
@@ -108,6 +108,50 @@ enum TrainingGoal: String, CaseIterable, Identifiable {
         case .halfMarathon: return "trophy"
         case .fullMarathon: return "trophy.fill"
         case .weightLoss: return "flame"
+        }
+    }
+
+    /// 前置目标（需要完成哪个目标才能解锁）
+    var prerequisite: TrainingGoal? {
+        switch self {
+        case .threeK, .weightLoss:
+            return nil  // 默认解锁
+        case .fiveK:
+            return .threeK  // 需要完成3km或减肥燃脂
+        case .tenK:
+            return .fiveK   // 需要完成5km
+        case .halfMarathon:
+            return .tenK    // 需要完成10km
+        case .fullMarathon:
+            return .halfMarathon  // 需要完成半马
+        }
+    }
+
+    /// 解锁所需的最低跑步距离（米）- 用户只要跑过该距离就自动解锁
+    var requiredDistance: Double {
+        switch self {
+        case .threeK, .weightLoss:
+            return 0  // 默认解锁
+        case .fiveK:
+            return 3000  // 跑过3km即可解锁
+        case .tenK:
+            return 5000  // 跑过5km即可解锁
+        case .halfMarathon:
+            return 10000  // 跑过10km即可解锁
+        case .fullMarathon:
+            return 21095  // 跑过半马即可解锁
+        }
+    }
+
+    /// 解锁顺序
+    var unlockOrder: Int {
+        switch self {
+        case .threeK: return 0
+        case .weightLoss: return 0
+        case .fiveK: return 1
+        case .tenK: return 2
+        case .halfMarathon: return 3
+        case .fullMarathon: return 4
         }
     }
 }
