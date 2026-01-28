@@ -305,6 +305,12 @@ struct ActiveRunView: View {
         .onChange(of: locationManager.distance) { newDistance in
             checkAndAnnounce(distance: newDistance)
         }
+        .onChange(of: showSummary) { newValue in
+            // 当跑步结束后，摘要页面被关闭时，自动返回主页
+            if !newValue && savedRecord != nil {
+                dismiss()
+            }
+        }
         .fullScreenCover(isPresented: $showSummary) {
             if let record = savedRecord {
                 RunSummaryView(runRecord: record)
@@ -343,9 +349,11 @@ struct ActiveRunView: View {
         Task {
             await dataManager.addRunRecord(record)
 
-            // 延迟 2 秒后显示结束页面
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            showSummary = true
+            // 立即显示结束页面
+            await MainActor.run {
+                isEnding = false  // 重置加载状态
+                showSummary = true
+            }
         }
     }
 

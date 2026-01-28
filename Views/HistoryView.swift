@@ -129,7 +129,7 @@ struct StatsSummaryCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white)
+        .background(Color(UIColor.systemBackground))
         .cornerRadius(12)
     }
 

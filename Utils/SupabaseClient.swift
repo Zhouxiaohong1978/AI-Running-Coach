@@ -12,10 +12,5 @@ import Supabase
 /// 在整个应用中共享使用
 let supabase = SupabaseClient(
     supabaseURL: URL(string: "https://aisgbqzksfzdlbjdcwpn.supabase.co")!,
-    supabaseKey: "sb_publishable_Mr8yLtY7MDtlWReRFidL3w_Jn_Kswgl",
-    options: SupabaseClientOptions(
-        auth: SupabaseClientOptions.AuthOptions(
-            emitLocalSessionAsInitialSession: true
-        )
-    )
+    supabaseKey: "sb_publishable_Mr8yLtY7MDtlWReRFidL3w_Jn_Kswgl"
 )

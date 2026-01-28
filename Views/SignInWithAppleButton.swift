@@ -10,13 +10,10 @@ import AuthenticationServices
 import CryptoKit
 
 struct SignInWithAppleButton: View {
-    @StateObject private var authManager = AuthManager.shared
-    @State private var currentNonce: String?
-    @State private var errorMessage: String?
-    @State private var coordinator: AppleSignInCoordinator?
+    @StateObject private var viewModel = AppleSignInViewModel()
 
     var body: some View {
-        Button(action: handleAppleSignIn) {
+        Button(action: viewModel.handleAppleSignIn) {
             HStack(spacing: 10) {
                 Image(systemName: "apple.logo")
                     .font(.system(size: 18, weight: .medium))
@@ -29,12 +26,27 @@ struct SignInWithAppleButton: View {
             .background(Color.black)
             .cornerRadius(12)
         }
+        .alert("登录失败", isPresented: $viewModel.showError) {
+            Button("确定", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "未知错误")
+        }
     }
+}
 
-    private func handleAppleSignIn() {
+// MARK: - ViewModel
+
+@MainActor
+class AppleSignInViewModel: ObservableObject {
+    @Published var showError = false
+    @Published var errorMessage: String?
+
+    private var coordinator: AppleSignInCoordinator?
+    private let authManager = AuthManager.shared
+
+    func handleAppleSignIn() {
         print("🍎 [Apple Sign In] 按钮被点击")
         let nonce = randomNonceString()
-        currentNonce = nonce
 
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         let request = appleIDProvider.createRequest()
@@ -46,8 +58,9 @@ struct SignInWithAppleButton: View {
         let newCoordinator = AppleSignInCoordinator(
             nonce: nonce,
             authManager: authManager,
-            onError: { error in
-                errorMessage = error
+            onError: { [weak self] error in
+                self?.errorMessage = error
+                self?.showError = true
             }
         )
         coordinator = newCoordinator
