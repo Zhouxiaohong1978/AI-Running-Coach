@@ -29,31 +29,8 @@ struct RunMapView: UIViewRepresentable {
     }
 
     func updateUIView(_ mapView: MKMapView, context: Context) {
-        // 当有用户位置时，更新地图中心
-        if let location = userLocation {
-            let currentCenter = mapView.region.center
-
-            // 将地图中心向南偏移，让用户位置（蓝点）显示在屏幕上方可见区域
-            // 因为底部有数据卡片遮挡，需要让蓝点显示在上半部分
-            let offsetLatitude = location.latitude - 0.006  // 地图中心向南移（减小纬度），蓝点就会在屏幕上方可见
-            let newCenter = CLLocationCoordinate2D(latitude: offsetLatitude, longitude: location.longitude)
-
-            // 计算当前中心和新位置的距离
-            let distance = sqrt(
-                pow(currentCenter.latitude - newCenter.latitude, 2) +
-                pow(currentCenter.longitude - newCenter.longitude, 2)
-            )
-
-            // 如果距离较大（超过0.0005度，约50米），更新地图
-            if distance > 0.0005 || context.coordinator.isFirstUpdate {
-                context.coordinator.isFirstUpdate = false
-                let newRegion = MKCoordinateRegion(
-                    center: newCenter,
-                    span: MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
-                )
-                mapView.setRegion(newRegion, animated: true)
-            }
-        }
+        // 使用 userTrackingMode = .follow + layoutMargins 自动跟踪用户位置
+        // 不手动 setRegion，避免破坏自动追踪和蓝点显示
 
         // 只有版本号变化时才更新轨迹
         if context.coordinator.lastPathVersion != pathUpdateVersion {
@@ -75,7 +52,6 @@ struct RunMapView: UIViewRepresentable {
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: RunMapView
         var lastPathVersion: Int = -1
-        var isFirstUpdate: Bool = true
 
         init(_ parent: RunMapView) {
             self.parent = parent
