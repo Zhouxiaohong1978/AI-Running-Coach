@@ -17,10 +17,15 @@ struct TrainingPlanView: View {
     @State private var errorMessage: String?
     @State private var selectedWeek: Int = 1
     @State private var viewMode: PlanViewMode = .week
-    @State private var editingTask: DailyTaskData?
-    @State private var editingWeekNumber: Int?
-    @State private var showTaskEditor = false
+    @State private var taskEditContext: TaskEditContext?
     @State private var isRegenerating = false
+
+    /// 编辑任务上下文，用于 sheet(item:) 模式
+    struct TaskEditContext: Identifiable {
+        let task: DailyTaskData
+        let weekNumber: Int
+        var id: String { "\(weekNumber)-\(task.dayOfWeek)" }
+    }
 
     // UserDefaults key for saving plan
     private let planStorageKey = "saved_training_plan"
@@ -54,17 +59,15 @@ struct TrainingPlanView: View {
                     showGoalSelection = false
                 })
             }
-            .sheet(isPresented: $showTaskEditor) {
-                if let task = editingTask, let weekNumber = editingWeekNumber {
-                    TaskEditorView(
-                        task: task,
-                        weekNumber: weekNumber,
-                        onSave: { updatedTask in
-                            updateTask(updatedTask, weekNumber: weekNumber)
-                            showTaskEditor = false
-                        }
-                    )
-                }
+            .sheet(item: $taskEditContext) { context in
+                TaskEditorView(
+                    task: context.task,
+                    weekNumber: context.weekNumber,
+                    onSave: { updatedTask in
+                        updateTask(updatedTask, weekNumber: context.weekNumber)
+                        taskEditContext = nil
+                    }
+                )
             }
             .alert("错误", isPresented: .constant(errorMessage != nil)) {
                 Button("确定") { errorMessage = nil }
@@ -131,16 +134,17 @@ struct TrainingPlanView: View {
         if let weekIndex = plan.weeklyPlans.firstIndex(where: { $0.weekNumber == weekNumber }) {
             var weekPlan = plan.weeklyPlans[weekIndex]
 
-            // 找到对应的任务
             if let taskIndex = weekPlan.dailyTasks.firstIndex(where: { $0.dayOfWeek == updatedTask.dayOfWeek }) {
-                // 更新任务
+                // 已有该天的任务，直接更新
                 weekPlan.dailyTasks[taskIndex] = updatedTask
-                plan.weeklyPlans[weekIndex] = weekPlan
-
-                // 保存更新后的计划
-                currentPlan = plan
-                savePlan(plan)
+            } else {
+                // 该天原本是补充的休息日（不在 dailyTasks 中），需要插入
+                weekPlan.dailyTasks.append(updatedTask)
             }
+
+            plan.weeklyPlans[weekIndex] = weekPlan
+            currentPlan = plan
+            savePlan(plan)
         }
     }
 
@@ -588,9 +592,7 @@ struct TrainingPlanView: View {
             ForEach(fullWeekTasks, id: \.dayOfWeek) { task in
                 taskRow(task: task)
                     .onTapGesture {
-                        editingTask = task
-                        editingWeekNumber = weekPlan.weekNumber
-                        showTaskEditor = true
+                        taskEditContext = TaskEditContext(task: task, weekNumber: weekPlan.weekNumber)
                     }
             }
         }
@@ -603,11 +605,14 @@ struct TrainingPlanView: View {
     // MARK: - Task Row
 
     private func taskRow(task: DailyTaskData) -> some View {
-        HStack(spacing: 12) {
+        let isRest = task.type == "rest"
+
+        return HStack(spacing: 12) {
             // 星期
             Text(task.dayOfWeek.dayOfWeekName)
                 .font(.subheadline)
                 .fontWeight(.medium)
+                .foregroundColor(isRest ? .secondary : .primary)
                 .frame(width: 40)
 
             // 任务类型图标
@@ -619,18 +624,25 @@ struct TrainingPlanView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.description)
                     .font(.subheadline)
+                    .foregroundColor(isRest ? .secondary : .primary)
                     .lineLimit(2)
 
-                HStack(spacing: 8) {
-                    if let distance = task.targetDistance {
-                        Text("\(String(format: "%.1f", distance))km")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    if let pace = task.targetPace {
-                        Text(pace)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                if isRest {
+                    Text("点击可添加训练")
+                        .font(.caption)
+                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                } else {
+                    HStack(spacing: 8) {
+                        if let distance = task.targetDistance {
+                            Text("\(String(format: "%.1f", distance))km")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        if let pace = task.targetPace {
+                            Text(pace)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }
@@ -638,14 +650,17 @@ struct TrainingPlanView: View {
             Spacer()
 
             // 编辑图标
-            Image(systemName: "pencil.circle.fill")
-                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+            Image(systemName: isRest ? "plus.circle.fill" : "pencil.circle.fill")
+                .foregroundColor(isRest ? Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.6) : Color(red: 0.5, green: 0.8, blue: 0.1))
                 .font(.system(size: 20))
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(isRest ? Color(.systemGray6).opacity(0.3) : Color(.systemGray6).opacity(0.5))
         .cornerRadius(12)
+        .overlay(
+            isRest ? RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray4), style: StrokeStyle(lineWidth: 1, dash: [4])) : nil
+        )
     }
 
     // MARK: - Tips Card
