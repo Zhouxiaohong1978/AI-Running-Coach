@@ -264,6 +264,7 @@ struct StatCard: View {
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 Text(value)
                     .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.primary)
 
                 if !unit.isEmpty {
                     Text(unit)

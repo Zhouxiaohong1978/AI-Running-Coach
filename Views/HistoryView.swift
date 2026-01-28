@@ -14,13 +14,31 @@ struct HistoryView: View {
     @State private var showDetailView = false
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color(UIColor.systemGroupedBackground)
-                    .ignoresSafeArea()
+        ZStack {
+            Color(UIColor.systemGroupedBackground)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // 自定义标题栏
+                HStack {
+                    Text("历史记录")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    if dataManager.isLoading || dataManager.isSyncing {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 60)
+                .padding(.bottom, 12)
 
                 if dataManager.runRecords.isEmpty {
                     // 空状态
+                    Spacer()
                     VStack(spacing: 16) {
                         Image(systemName: "figure.run.circle")
                             .font(.system(size: 60))
@@ -34,13 +52,13 @@ struct HistoryView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                     }
+                    Spacer()
                 } else {
                     ScrollView {
                         VStack(spacing: 12) {
                             // 统计卡片
                             StatsSummaryCard(dataManager: dataManager)
                                 .padding(.horizontal)
-                                .padding(.top, 16)
 
                             // 记录列表
                             LazyVStack(spacing: 12) {
@@ -53,27 +71,15 @@ struct HistoryView: View {
                                 }
                             }
                             .padding(.horizontal)
-                            .padding(.bottom, 20)
+                            .padding(.bottom, 100)
                         }
                     }
                 }
             }
-            .navigationTitle("历史记录")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                if dataManager.isLoading || dataManager.isSyncing {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        ProgressView()
-                    }
-                }
-            }
-            .refreshable {
-                await dataManager.fetchFromCloud()
-            }
-            .sheet(isPresented: $showDetailView) {
-                if let record = selectedRecord {
-                    HistoryDetailView(runRecord: record)
-                }
+        }
+        .sheet(isPresented: $showDetailView) {
+            if let record = selectedRecord {
+                HistoryDetailView(runRecord: record)
             }
         }
     }
