@@ -199,7 +199,7 @@ struct ActiveRunView: View {
                 .cornerRadius(20)
 
                 Spacer()
-                    .frame(height: 40)
+                    .frame(height: 12)
 
                 // Control Buttons or Loading
                 if isEnding {
