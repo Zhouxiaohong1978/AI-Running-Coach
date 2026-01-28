@@ -33,8 +33,9 @@ struct RunMapView: UIViewRepresentable {
         if let location = userLocation {
             let currentCenter = mapView.region.center
 
-            // 将地图中心向南偏移，让用户位置显示在配速文字上方
-            let offsetLatitude = location.latitude + 0.012  // 继续增大偏移，让蓝点在配速上方
+            // 将地图中心向南偏移，让用户位置（蓝点）显示在屏幕上方可见区域
+            // 因为底部有数据卡片遮挡，需要让蓝点显示在上半部分
+            let offsetLatitude = location.latitude - 0.006  // 地图中心向南移（减小纬度），蓝点就会在屏幕上方可见
             let newCenter = CLLocationCoordinate2D(latitude: offsetLatitude, longitude: location.longitude)
 
             // 计算当前中心和新位置的距离
@@ -48,7 +49,7 @@ struct RunMapView: UIViewRepresentable {
                 context.coordinator.isFirstUpdate = false
                 let newRegion = MKCoordinateRegion(
                     center: newCenter,
-                    span: MKCoordinateSpan(latitudeDelta: 0.012, longitudeDelta: 0.012)
+                    span: MKCoordinateSpan(latitudeDelta: 0.004, longitudeDelta: 0.004)
                 )
                 mapView.setRegion(newRegion, animated: true)
             }

@@ -22,6 +22,7 @@ struct ActiveRunView: View {
     @State private var isVoiceEnabled = true
     @State private var lastAnnouncedKm: Int = 0
     @State private var lastFeedbackTime: Date = Date()
+    @State private var lastFeedbackDistance: Double = 0
     @State private var showCoachFeedback = false
     @State private var currentFeedback: String = ""
     @State private var holdProgress: CGFloat = 0
@@ -102,10 +103,11 @@ struct ActiveRunView: View {
                 if showCoachFeedback && !currentFeedback.isEmpty {
                     HStack {
                         Image(systemName: "bubble.left.fill")
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                         Text(currentFeedback)
                             .font(.subheadline)
                             .fontWeight(.medium)
+                            .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
@@ -351,22 +353,41 @@ struct ActiveRunView: View {
 
     /// 检查并播报里程和 AI 反馈
     private func checkAndAnnounce(distance: Double) {
-        let currentKm = Int(distance / 1000.0)
+        let distanceMeters = Int(distance)
+        let current200m = distanceMeters / 200
 
-        // 每公里播报一次
-        if currentKm > lastAnnouncedKm && currentKm > 0 {
-            lastAnnouncedKm = currentKm
-            speechManager.announceDistance(Double(currentKm))
+        // 每 200 米播报一次距离
+        if current200m > lastAnnouncedKm && current200m > 0 {
+            lastAnnouncedKm = current200m
 
-            // 获取 AI 教练反馈
-            fetchAIFeedback()
+            // 播报距离（格式化为公里或米）
+            let distanceKm = distance / 1000.0
+            if distanceKm >= 1.0 {
+                // 大于等于 1km，播报公里数
+                speechManager.announceDistance(distanceKm)
+            } else {
+                // 小于 1km，播报米数
+                speechManager.speak("已跑\(distanceMeters)米", priority: .low)
+            }
         }
 
-        // 每 5 分钟也触发一次 AI 反馈
+        // AI 反馈触发：每 200m 触发一次，或每 3 分钟触发一次
         let timeSinceLastFeedback = Date().timeIntervalSince(lastFeedbackTime)
-        if timeSinceLastFeedback >= 300 && locationManager.duration > 60 {
+        let distanceMetersInt = Int(distance)
+        let lastFeedbackDistanceInt = Int(lastFeedbackDistance)
+        // 每 200m 触发（跨过 200m 边界）
+        let is200mMilestone = distanceMetersInt / 200 > lastFeedbackDistanceInt / 200 && distanceMetersInt >= 200
+        // 时间触发
+        let isTimeTrigger = timeSinceLastFeedback >= 180 && locationManager.duration > 60
+        let shouldTrigger = isTimeTrigger || (is200mMilestone && timeSinceLastFeedback > 15)
+
+        if shouldTrigger {
             lastFeedbackTime = Date()
-            fetchAIFeedback()
+            lastFeedbackDistance = distance
+            // 延迟一秒，让距离播报先完成
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.fetchAIFeedback()
+            }
         }
     }
 
@@ -385,24 +406,62 @@ struct ActiveRunView: View {
 
                 await MainActor.run {
                     currentFeedback = feedback
-                    speechManager.speak(feedback, priority: .normal)
+                    speechManager.speak(feedback, priority: .high)
 
                     // 显示反馈气泡
                     withAnimation(.spring()) {
                         showCoachFeedback = true
                     }
 
-                    // 3秒后隐藏
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    // 5秒后隐藏
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         withAnimation {
                             showCoachFeedback = false
                         }
                     }
                 }
             } catch {
-                print("AI反馈获取失败: \(error.localizedDescription)")
+                print("❌ AI反馈获取失败: \(error.localizedDescription)")
+
+                // 使用后备反馈（即使 AI 失败也要给用户反馈）
+                await MainActor.run {
+                    let fallbackFeedback = getFallbackFeedback()
+                    currentFeedback = fallbackFeedback
+                    speechManager.speak(fallbackFeedback, priority: .high)
+
+                    // 显示反馈气泡
+                    withAnimation(.spring()) {
+                        showCoachFeedback = true
+                    }
+
+                    // 5秒后隐藏
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        withAnimation {
+                            showCoachFeedback = false
+                        }
+                    }
+                }
             }
         }
+    }
+
+    /// 获取后备反馈（AI 失败时使用）
+    private func getFallbackFeedback() -> String {
+        let fallbacks = [
+            "配速稳定，保持节奏，你做得很好！",
+            "继续坚持，你已经跑了这么远了！",
+            "呼吸均匀，保持这个状态！",
+            "很棒的表现，继续加油！",
+            "注意配速，不要太快也不要太慢。",
+            "保持节奏，稳定前进！",
+            "你的状态不错，继续保持！",
+            "专注呼吸，放松肩膀，跑得更轻松。"
+        ]
+
+        // 基于距离选择不同的反馈
+        let distanceKm = locationManager.distance / 1000.0
+        let index = Int(distanceKm) % fallbacks.count
+        return fallbacks[index]
     }
 
     private func startHoldAnimation() {
