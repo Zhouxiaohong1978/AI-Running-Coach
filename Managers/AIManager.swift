@@ -75,24 +75,24 @@ struct TrainingPlanData: Codable {
     let goal: String
     let durationWeeks: Int
     let difficulty: String
-    let weeklyPlans: [WeekPlanData]
-    let tips: [String]
+    var weeklyPlans: [WeekPlanData]  // 改为 var 以支持编辑
+    var tips: [String]  // 改为 var 以支持编辑
 }
 
 /// 周计划数据
 struct WeekPlanData: Codable {
     let weekNumber: Int
-    let theme: String
-    let dailyTasks: [DailyTaskData]
+    var theme: String  // 改为 var 以支持编辑
+    var dailyTasks: [DailyTaskData]  // 改为 var 以支持编辑
 }
 
 /// 每日任务数据
 struct DailyTaskData: Codable {
-    let dayOfWeek: Int
-    let type: String
-    let targetDistance: Double?
-    let targetPace: String?
-    let description: String
+    var dayOfWeek: Int  // 改为 var 以支持编辑
+    var type: String  // 改为 var 以支持编辑
+    var targetDistance: Double?  // 改为 var 以支持编辑
+    var targetPace: String?  // 改为 var 以支持编辑
+    var description: String  // 改为 var 以支持编辑
 }
 
 // MARK: - Coach Style
