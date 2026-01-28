@@ -31,9 +31,26 @@ class AuthManager: ObservableObject {
     func checkSession() async {
         do {
             let session = try await supabase.auth.session
-            currentUser = session.user
-            isAuthenticated = true
-            print("✅ [AuthManager] 检测到活跃会话: \(session.user.email ?? "unknown")")
+
+            // 检查 session 是否过期
+            if session.isExpired {
+                print("⚠️ [AuthManager] Session 已过期，尝试刷新...")
+                // 尝试刷新 session
+                do {
+                    let refreshedSession = try await supabase.auth.refreshSession()
+                    currentUser = refreshedSession.user
+                    isAuthenticated = true
+                    print("✅ [AuthManager] Session 刷新成功: \(refreshedSession.user.email ?? "unknown")")
+                } catch {
+                    print("❌ [AuthManager] Session 刷新失败: \(error.localizedDescription)")
+                    currentUser = nil
+                    isAuthenticated = false
+                }
+            } else {
+                currentUser = session.user
+                isAuthenticated = true
+                print("✅ [AuthManager] 检测到活跃会话: \(session.user.email ?? "unknown")")
+            }
         } catch {
             print("⚠️ [AuthManager] 无活跃会话: \(error.localizedDescription)")
             currentUser = nil
