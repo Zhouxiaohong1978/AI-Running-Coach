@@ -11,8 +11,10 @@ import MapKit
 struct HistoryDetailView: View {
     @Environment(\.dismiss) var dismiss
     let runRecord: RunRecord
+    @StateObject private var dataManager = RunDataManager.shared
 
     @State private var region: MKCoordinateRegion
+    @State private var showDeleteConfirmation = false
 
     init(runRecord: RunRecord) {
         self.runRecord = runRecord
@@ -36,6 +38,10 @@ struct HistoryDetailView: View {
             ZStack {
                 Color(UIColor.systemGroupedBackground)
                     .ignoresSafeArea()
+                    .onAppear {
+                        // 确保视图完全加载
+                        print("📍 详情页加载: 距离=\(runRecord.distance)m, 时长=\(runRecord.duration)s")
+                    }
 
                 ScrollView {
                     VStack(spacing: 0) {
@@ -87,14 +93,16 @@ struct HistoryDetailView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("跑步时间")
                                 .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.black)
 
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("开始时间")
                                         .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.black.opacity(0.6))
                                     Text(formatDateTime(runRecord.startTime))
                                         .font(.system(size: 14))
+                                        .foregroundColor(.black)
                                 }
 
                                 Spacer()
@@ -102,9 +110,10 @@ struct HistoryDetailView: View {
                                 VStack(alignment: .trailing, spacing: 4) {
                                     Text("结束时间")
                                         .font(.system(size: 12))
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(.black.opacity(0.6))
                                     Text(formatDateTime(runRecord.endTime))
                                         .font(.system(size: 14))
+                                        .foregroundColor(.black)
                                 }
                             }
                         }
@@ -123,7 +132,7 @@ struct HistoryDetailView: View {
 
                             Text(runRecord.syncedToCloud ? "已同步到云端" : "仅保存在本地")
                                 .font(.system(size: 12))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white.opacity(0.7))
                         }
                         .padding(.top, 16)
                         .padding(.bottom, 40)
@@ -137,13 +146,44 @@ struct HistoryDetailView: View {
                     Button("关闭") {
                         dismiss()
                     }
+                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "square.and.arrow.up")
+                    HStack(spacing: 16) {
+                        Button(action: {}) {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                        }
+
+                        Button(action: {
+                            showDeleteConfirmation = true
+                        }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
                     }
                 }
+            }
+        }
+        .navigationViewStyle(.stack)
+        .alert("确认删除", isPresented: $showDeleteConfirmation) {
+            Button("取消", role: .cancel) {}
+            Button("删除", role: .destructive) {
+                deleteRecord()
+            }
+        } message: {
+            Text("确定要删除这条跑步记录吗？删除后无法恢复。")
+        }
+    }
+
+    // MARK: - Delete Function
+
+    private func deleteRecord() {
+        Task {
+            await dataManager.deleteRunRecord(runRecord)
+            await MainActor.run {
+                dismiss()
             }
         }
     }
@@ -184,26 +224,43 @@ struct DetailStatCard: View {
     let value: String
     let unit: String
 
+    // 根据图标名称返回对应的颜色
+    private var iconColor: Color {
+        switch icon {
+        case "location.fill":
+            return .blue
+        case "clock.fill":
+            return .orange
+        case "bolt.fill":
+            return .purple
+        case "flame.fill":
+            return .red
+        default:
+            return .secondary
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(iconColor)
 
                 Text(label)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.black)
             }
 
             HStack(alignment: .lastTextBaseline, spacing: 4) {
                 Text(value)
                     .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
 
                 if !unit.isEmpty {
                     Text(unit)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.black.opacity(0.7))
                 }
             }
         }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var selectedTab = 0
+    @StateObject private var dataManager = RunDataManager.shared
+    @StateObject private var authManager = AuthManager.shared
 
     var body: some View {
         ZStack {
@@ -68,9 +70,9 @@ struct HomeView: View {
                             // Weather and Greeting
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack(spacing: 6) {
-                                    Text("☀️")
+                                    Text(getWeatherEmoji())
                                         .font(.title3)
-                                    Text("晴天, 24°C")
+                                    Text(getWeatherText())
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
@@ -78,7 +80,7 @@ struct HomeView: View {
                                 HStack(spacing: 0) {
                                     Text("准备好今天的跑步了吗，")
                                         .font(.system(size: 32, weight: .bold))
-                                    Text("小红")
+                                    Text(getUserName())
                                         .font(.system(size: 32, weight: .bold))
                                         .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                                     Text("?")
@@ -122,54 +124,9 @@ struct HomeView: View {
                             .padding(.vertical, 20)
 
                             // 每周目标 Card
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("每周目标")
-                                            .font(.system(size: 18, weight: .semibold))
-                                        Text("1月21日 - 1月27日")
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.secondary)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "arrow.up.right")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
-                                }
-
-                                HStack(alignment: .lastTextBaseline, spacing: 8) {
-                                    Text("12.5")
-                                        .font(.system(size: 48, weight: .bold))
-                                    Text("/ 20 km")
-                                        .font(.system(size: 18))
-                                        .foregroundColor(.secondary)
-                                }
-
-                                // Progress bar
-                                GeometryReader { geometry in
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(Color.gray.opacity(0.2))
-                                            .frame(height: 8)
-
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
-                                            .frame(width: geometry.size.width * 0.625, height: 8)
-                                    }
-                                }
-                                .frame(height: 8)
-
-                                Text("你已超前完成2.5公里！")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(20)
-                            .background(Color.white)
-                            .cornerRadius(16)
-                            .padding(.horizontal, 24)
-                            .padding(.bottom, 20)
+                            WeeklyGoalCard(dataManager: dataManager)
+                                .padding(.horizontal, 24)
+                                .padding(.bottom, 20)
                         }
                     }
                 }
@@ -204,7 +161,150 @@ struct HomeView: View {
     private var planContent: some View {
         TrainingPlanView()
     }
+
+    // MARK: - Helper Functions
+
+    private func getUserName() -> String {
+        // 从用户数据中获取名字，暂时使用"小红"
+        return authManager.currentUser?.email?.components(separatedBy: "@").first ?? "小红"
+    }
+
+    private func getWeatherEmoji() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        // 根据时间段返回不同的 emoji
+        if hour >= 6 && hour < 18 {
+            return "☀️"  // 白天
+        } else {
+            return "🌙"  // 晚上
+        }
+    }
+
+    private func getWeatherText() -> String {
+        // TODO: 集成真实天气 API
+        // 暂时根据时间段返回基本信息
+        let hour = Calendar.current.component(.hour, from: Date())
+        let timeOfDay = hour >= 6 && hour < 12 ? "早上" : hour >= 12 && hour < 18 ? "下午" : "晚上"
+        return "\(timeOfDay)好"
+    }
 }
+
+// MARK: - Weekly Goal Card
+
+struct WeeklyGoalCard: View {
+    @ObservedObject var dataManager: RunDataManager
+
+    private var weeklyStats: (current: Double, goal: Double, progress: Double, message: String) {
+        // 获取本周的开始和结束日期（周一到周日）
+        let calendar = Calendar.current
+        let now = Date()
+
+        // 获取本周周一
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        components.weekday = 2 // 周一
+        let startOfWeek = calendar.date(from: components) ?? now
+
+        // 获取本周周日结束
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? now
+
+        // 计算本周跑步总距离（米转公里）
+        let weeklyDistance = dataManager.runRecords
+            .filter { $0.startTime >= startOfWeek && $0.startTime < endOfWeek }
+            .reduce(0.0) { $0 + $1.distance }
+
+        let currentKm = weeklyDistance / 1000.0
+
+        // 周目标（公里），TODO: 从训练计划获取
+        let goalKm = 20.0
+
+        // 计算进度
+        let progress = min(currentKm / goalKm, 1.0)
+
+        // 生成提示信息
+        let remaining = goalKm - currentKm
+        let message: String
+        if currentKm >= goalKm {
+            let excess = currentKm - goalKm
+            message = String(format: "你已超前完成%.1f公里！", excess)
+        } else if remaining > 0 {
+            message = String(format: "还需跑%.1f公里完成目标", remaining)
+        } else {
+            message = "继续加油！"
+        }
+
+        return (currentKm, goalKm, progress, message)
+    }
+
+    private var weekDateRange: String {
+        let calendar = Calendar.current
+        let now = Date()
+
+        // 获取本周周一
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        components.weekday = 2 // 周一
+        let startOfWeek = calendar.date(from: components) ?? now
+
+        // 获取本周周日
+        let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek) ?? now
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M月d日"
+
+        return "\(formatter.string(from: startOfWeek)) - \(formatter.string(from: endOfWeek))"
+    }
+
+    var body: some View {
+        let stats = weeklyStats
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("每周目标")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text(weekDateRange)
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 20))
+                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+            }
+
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
+                Text(String(format: "%.1f", stats.current))
+                    .font(.system(size: 48, weight: .bold))
+                Text("/ \(Int(stats.goal)) km")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
+            }
+
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 8)
+
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
+                        .frame(width: geometry.size.width * stats.progress, height: 8)
+                }
+            }
+            .frame(height: 8)
+
+            Text(stats.message)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+        }
+        .padding(20)
+        .background(Color.white)
+        .cornerRadius(16)
+    }
+}
+
+// MARK: - Tab Bar Item
 
 struct TabBarItem: View {
     let icon: String

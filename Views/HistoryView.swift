@@ -11,7 +11,6 @@ import MapKit
 struct HistoryView: View {
     @StateObject private var dataManager = RunDataManager.shared
     @State private var selectedRecord: RunRecord?
-    @State private var showDetailView = false
 
     var body: some View {
         ZStack {
@@ -66,7 +65,6 @@ struct HistoryView: View {
                                     RunRecordCard(record: record)
                                         .onTapGesture {
                                             selectedRecord = record
-                                            showDetailView = true
                                         }
                                 }
                             }
@@ -77,10 +75,8 @@ struct HistoryView: View {
                 }
             }
         }
-        .sheet(isPresented: $showDetailView) {
-            if let record = selectedRecord {
-                HistoryDetailView(runRecord: record)
-            }
+        .sheet(item: $selectedRecord) { record in
+            HistoryDetailView(runRecord: record)
         }
     }
 }
@@ -157,19 +153,31 @@ struct RunRecordCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(formatDate(record.startTime))
                         .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.black)
 
                     Text(formatTime(record.startTime))
                         .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.black.opacity(0.6))
                 }
 
                 Spacer()
 
-                // 云同步状态
-                if record.syncedToCloud {
-                    Image(systemName: "cloud.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.green)
+                // 右侧图标（云同步状态 + 箭头）
+                VStack(spacing: 6) {
+                    // 云同步状态
+                    if record.syncedToCloud {
+                        Image(systemName: "cloud.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.green)
+                    } else {
+                        Spacer()
+                            .frame(height: 14)
+                    }
+
+                    // 查看详情箭头
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.gray)
                 }
             }
 
@@ -180,25 +188,28 @@ struct RunRecordCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("距离")
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.black.opacity(0.6))
                     Text("\(String(format: "%.2f", record.distance / 1000)) km")
                         .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("时长")
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.black.opacity(0.6))
                     Text(formatDuration(record.duration))
                         .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("配速")
                         .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.black.opacity(0.6))
                     Text(formatPace(record.pace))
                         .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                 }
             }
         }
