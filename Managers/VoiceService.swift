@@ -35,7 +35,9 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             let audioSession = AVAudioSession.sharedInstance()
             // 设置为播放类别，确保即使静音开关打开也能播放
             try audioSession.setCategory(.playback, mode: .default, options: [.duckOthers])
-            try audioSession.setActive(true)
+            // 激活会话，允许与其他音频共存
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            print("✅ 音频会话配置成功")
         } catch {
             print("❌ 音频会话配置失败: \(error)")
         }
@@ -90,10 +92,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             // 3. 在主线程配置和播放音频
             return await MainActor.run {
                 do {
-                    // 重新激活音频会话
-                    try AVAudioSession.sharedInstance().setActive(true)
-
-                    // 创建播放器
+                    // 创建播放器（音频会话已在 init 时激活）
                     let player = try AVAudioPlayer(data: data)
                     player.delegate = self
                     player.volume = 1.0
