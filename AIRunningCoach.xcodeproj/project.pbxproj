@@ -35,6 +35,11 @@
 		C6D16A9278F4F9E055C07886 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F4408E09232A697F86A2C0 /* SignInWithAppleButton.swift */; };
 		D1CA8A1D5E3ECAC654312872 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */; };
 		E54ECD75E3E6F871ADD559FB /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35628295DD86A50D091E306 /* GoalSelectionView.swift */; };
+		AA11111111111111111111AA /* VoiceScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11111111111111111111BB /* VoiceScript.swift */; };
+		AA22222222222222222222AA /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22222222222222222222BB /* VoiceService.swift */; };
+		AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33333333333333333333BB /* VoiceScriptManager.swift */; };
+		AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB44444444444444444444BB /* VoiceTriggerEngine.swift */; };
+		AA55555555555555555555AA /* RunningDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB55555555555555555555BB /* RunningDemoView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +72,11 @@
 		C85B8C6E7A65B45D6851C6F9 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB11111111111111111111BB /* VoiceScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScript.swift; sourceTree = "<group>"; };
+		BB22222222222222222222BB /* VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceService.swift; sourceTree = "<group>"; };
+		BB33333333333333333333BB /* VoiceScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScriptManager.swift; sourceTree = "<group>"; };
+		BB44444444444444444444BB /* VoiceTriggerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTriggerEngine.swift; sourceTree = "<group>"; };
+		BB55555555555555555555BB /* RunningDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningDemoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +120,7 @@
 				C85B8C6E7A65B45D6851C6F9 /* LoginView.swift */,
 				3AFA0A9E0B60BB59445969ED /* RunMapView.swift */,
 				422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */,
+				BB55555555555555555555BB /* RunningDemoView.swift */,
 				C65651F0929BD30431988091 /* SettingsView.swift */,
 				71F4408E09232A697F86A2C0 /* SignInWithAppleButton.swift */,
 				BB377A3912ACCB629159CE88 /* SupabaseTestView.swift */,
@@ -131,6 +142,7 @@
 			children = (
 				62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */,
 				729CB00236199C7E5B34912F /* TrainingPlan.swift */,
+				BB11111111111111111111BB /* VoiceScript.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -143,6 +155,9 @@
 				19618B5AC9B32D7DC89473B9 /* LocationManager.swift */,
 				9BFE82D22737A33E13E702B6 /* RunDataManager.swift */,
 				57817154FCD67BD41E729CD8 /* SpeechManager.swift */,
+				BB22222222222222222222BB /* VoiceService.swift */,
+				BB33333333333333333333BB /* VoiceScriptManager.swift */,
+				BB44444444444444444444BB /* VoiceTriggerEngine.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -258,6 +273,11 @@
 				7C84765157F01D1DE0C61DDF /* SupabaseTestView.swift in Sources */,
 				71D726EF4727282DE5BA5ACD /* TrainingPlan.swift in Sources */,
 				65D6A1C2AB0176C6B9DD43FF /* TrainingPlanView.swift in Sources */,
+				AA11111111111111111111AA /* VoiceScript.swift in Sources */,
+				AA22222222222222222222AA /* VoiceService.swift in Sources */,
+				AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */,
+				AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */,
+				AA55555555555555555555AA /* RunningDemoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
