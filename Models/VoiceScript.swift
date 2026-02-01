@@ -17,6 +17,20 @@ struct VoiceScript: Codable, Identifiable {
     let text: String
     let voice: String
     let order: Int
+    let cooldown: TimeInterval  // 冷却时间（秒），防止语音轰炸
+
+    // 自定义初始化器，提供 cooldown 默认值
+    init(id: String, mode: RunMode, triggerType: TriggerType, triggerValue: Double,
+         text: String, voice: String, order: Int, cooldown: TimeInterval = 15.0) {
+        self.id = id
+        self.mode = mode
+        self.triggerType = triggerType
+        self.triggerValue = triggerValue
+        self.text = text
+        self.voice = voice
+        self.order = order
+        self.cooldown = cooldown
+    }
 
     func resolvedText(with context: RunContext) -> String {
         var resolved = text

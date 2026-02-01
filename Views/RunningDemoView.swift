@@ -9,10 +9,11 @@ struct RunningDemoView: View {
     @State private var selectedMode: RunMode = .beginner
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("AI跑步教练演示")
-                .font(.title)
-                .padding()
+        ScrollView {
+            VStack(spacing: 20) {
+                Text("AI跑步教练演示")
+                    .font(.title)
+                    .padding()
 
             // 模式选择
             Picker("跑步模式", selection: $selectedMode) {
@@ -59,8 +60,13 @@ struct RunningDemoView: View {
                 Button("开始跑步") {
                     distance = 0
                     calories = 0
+                    print("\n\n\n")
+                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    print("🚀🚀🚀 开始跑步按钮被点击了！🚀🚀🚀")
+                    print("模式：\(selectedMode == .beginner ? "新手3公里" : "减肥燃脂")")
+                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                    print("\n")
                     engine.start(for: selectedMode)
-                    print("📍 数据重置，距离: \(distance)km")
                 }
                 .buttonStyle(.borderedProminent)
 
@@ -101,34 +107,57 @@ struct RunningDemoView: View {
                     print("💓 心率: 165 BPM")
                 }
 
-                // 快速完成按钮
-                Button("快速到达3公里（测试完成语音）") {
-                    distance = 3.0
-                    calories = 180
-                    engine.updateContext(distance: distance, calories: calories)
-                    print("🏁 到达终点: 3.0km")
+                // 测试冷却机制
+                VStack(spacing: 8) {
+                    Text("🧪 冷却机制测试")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+
+                    Button("测试2.5km触发（验证无冲突）") {
+                        distance = 2.5
+                        calories = 150
+                        engine.updateContext(distance: distance, calories: calories, duration: 1500)
+                        print("═══════════════════════════════════════")
+                        print("🧪 【测试开始】跳转到 2.5km")
+                        print("📊 当前数据：距离=\(distance)km, 热量=\(calories)大卡, 时长=1500秒")
+                        print("🎯 预期：应该只触发 beginner_15_2_5km 一条语音")
+                        print("═══════════════════════════════════════")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+                    .font(.caption)
+
+                    Button("快速到达3公里（测试完成语音）") {
+                        distance = 3.0
+                        calories = 180
+                        engine.updateContext(distance: distance, calories: calories)
+                        print("🏁 到达终点: 3.0km")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .font(.caption)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .font(.caption)
 
                 Button("停止跑步") {
+                    print("═══════════════════════════════════════")
+                    print("🛑 【停止跑步】")
+                    print("═══════════════════════════════════════")
                     engine.stop()
                     distance = 0
                     calories = 0
                 }
-                .buttonStyle(.bordered)
-                .foregroundColor(.red)
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
             }
             .padding()
-
-            Spacer()
 
             Text("当前模式: \(selectedMode == .beginner ? "新手3公里" : "减肥燃脂")")
                 .font(.caption)
                 .foregroundColor(.gray)
+                .padding(.bottom, 100)  // 给底部 Tab Bar 留出空间
+            }
+            .padding()
         }
-        .padding()
     }
 }
 

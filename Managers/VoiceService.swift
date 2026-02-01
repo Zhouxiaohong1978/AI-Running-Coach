@@ -8,9 +8,26 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private var audioPlayer: AVAudioPlayer?
     @Published var isPlaying = false
 
+    // 冷却管理
+    private var lastSpeechTime: Date = Date.distantPast
+    private let globalCooldown: TimeInterval = 15.0  // 全局最小冷却 15 秒
+
     override init() {
         super.init()
         configureAudioSession()
+    }
+
+    // 检查是否可以说话
+    func canSpeakNow(minimumInterval: TimeInterval = 0) -> Bool {
+        let requiredInterval = max(globalCooldown, minimumInterval)
+        let timeSinceLast = Date().timeIntervalSince(lastSpeechTime)
+        return timeSinceLast > requiredInterval
+    }
+
+    // 重置冷却（开始新跑步时调用）
+    func resetCooldown() {
+        lastSpeechTime = Date.distantPast
+        print("🔄 语音冷却已重置")
     }
 
     private func configureAudioSession() {
@@ -24,8 +41,15 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 
-    func speak(text: String, voice: String = "cherry") async -> Bool {
+    func speak(text: String, voice: String = "cherry", scriptCooldown: TimeInterval = 0) async -> Bool {
         print("🔊 开始 TTS 请求: \(text.prefix(20))...")
+
+        // 检查冷却
+        guard canSpeakNow(minimumInterval: scriptCooldown) else {
+            let timeSinceLast = Date().timeIntervalSince(lastSpeechTime)
+            print("⏸️ 语音冷却中（距上次 \(String(format: "%.1f", timeSinceLast))秒，需要 \(max(globalCooldown, scriptCooldown))秒），跳过播放")
+            return false
+        }
 
         // 停止之前的播放
         await MainActor.run {
@@ -90,6 +114,9 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
                     self.audioPlayer = player
                     self.isPlaying = true
+
+                    // 播放成功后更新冷却时间
+                    self.lastSpeechTime = Date()
 
                     print("🎵 开始播放")
                     return true
