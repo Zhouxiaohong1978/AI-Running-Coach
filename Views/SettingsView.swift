@@ -101,6 +101,22 @@ struct SettingsView: View {
                     }
                 }
 
+                // 开发者选项
+                Section {
+                    NavigationLink(destination: RunningDemoView()) {
+                        HStack {
+                            Image(systemName: "waveform")
+                                .font(.system(size: 20))
+                            Text("AI语音教练演示")
+                            Spacer()
+                        }
+                    }
+                } header: {
+                    Text("开发者选项")
+                } footer: {
+                    Text("测试 AI 语音教练系统的 50 条语音脚本")
+                }
+
                 // 关于部分
                 Section {
                     HStack {
