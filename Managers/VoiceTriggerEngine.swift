@@ -176,6 +176,11 @@ class VoiceTriggerEngine: ObservableObject {
     }
 
     private func trigger(_ script: VoiceScript) {
+        // 如果是疲劳或心率区间相关的语音，打印检测结果
+        if script.triggerType == .fatigue || script.triggerType == .heartRateZone {
+            print("[触发检查] 脚本: \(script.id), 类型: \(script.triggerType)")
+        }
+
         scriptManager.markAsPlayed(script.id)
         isSpeaking = true
         let text = script.resolvedText(with: context)

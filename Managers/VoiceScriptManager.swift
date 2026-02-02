@@ -208,11 +208,19 @@ class VoiceScriptManager: ObservableObject {
                 shouldTrigger = false
             }
         case .fatigue:
-            shouldTrigger = context.fatigueLevel == "high"
+            // 使用量化检测替代主观判断
+            shouldTrigger = SimpleConditionCheck.isFatigueHigh(
+                context: context,
+                userMaxHeartRate: SimpleConditionCheck.getUserMaxHeartRate()
+            )
         case .pace:
             shouldTrigger = context.pace > 0 && context.pace < script.triggerValue
         case .heartRateZone:
-            shouldTrigger = context.heartRateZone == "optimal"
+            // 使用量化检测替代模糊判断
+            shouldTrigger = SimpleConditionCheck.isInFatBurnZone(
+                heartRate: context.heartRate,
+                userMaxHeartRate: SimpleConditionCheck.getUserMaxHeartRate()
+            )
         }
 
         return shouldTrigger
