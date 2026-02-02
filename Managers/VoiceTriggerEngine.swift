@@ -14,6 +14,9 @@ class VoiceTriggerEngine: ObservableObject {
     private var lastTriggerTime: Date = Date.distantPast
     private let minTriggerInterval: TimeInterval = 2.0  // 触发检查最小间隔
 
+    // 记录上次距离，用于增量触发检查
+    private var lastDistance: Double = 0.0
+
     func start(for mode: RunMode) {
         print("\n")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
@@ -26,10 +29,11 @@ class VoiceTriggerEngine: ObservableObject {
         isSpeaking = false
         voiceService.stop()
 
-        // 重置冷却
+        // 重置冷却和距离
         print("🔄 正在重置语音冷却...")
         voiceService.resetCooldown()
         lastTriggerTime = Date.distantPast
+        lastDistance = 0.0
 
         print("⏰ 启动定时器...")
         startTimer()
@@ -57,7 +61,10 @@ class VoiceTriggerEngine: ObservableObject {
 
     func updateContext(distance: Double? = nil, calories: Double? = nil,
                       heartRate: Int? = nil, duration: TimeInterval? = nil) {
-        if let d = distance { context.distance = d }
+        if let d = distance {
+            lastDistance = context.distance  // 记录旧距离
+            context.distance = d
+        }
         if let c = calories { context.calories = c }
         if let hr = heartRate { context.heartRate = hr }
         if let t = duration { context.duration = t }
@@ -92,9 +99,21 @@ class VoiceTriggerEngine: ObservableObject {
 
         print("🔍 检查触发条件（距离=\(context.distance)km, 热量=\(Int(context.calories))大卡）")
 
-        // 获取所有满足条件的脚本
+        // 获取所有满足条件的脚本，并增加距离增量检查
         let scripts = scriptManager.scripts(for: currentMode)
             .filter { scriptManager.shouldTrigger(script: $0, context: context) }
+            .filter { script in
+                // 对于距离触发的脚本，只触发"刚刚到达"的里程碑
+                // 即 lastDistance < triggerValue <= currentDistance
+                if script.triggerType == .distance {
+                    let justReached = lastDistance < script.triggerValue && script.triggerValue <= context.distance
+                    if !justReached {
+                        print("  ⏩ 跳过 \(script.id)（已超过里程碑：上次=\(lastDistance)km, 触发值=\(script.triggerValue)km）")
+                    }
+                    return justReached
+                }
+                return true  // 非距离触发的脚本保持原逻辑
+            }
 
         print("   满足条件的脚本数量：\(scripts.count)")
 
