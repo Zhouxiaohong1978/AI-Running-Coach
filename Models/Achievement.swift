@@ -1,0 +1,445 @@
+//
+//  Achievement.swift
+//  AIRunningCoach
+//
+//  Created by Claude Code
+//
+
+import Foundation
+
+// MARK: - 成就类型
+
+enum AchievementCategory: String, Codable, CaseIterable {
+    case distance = "distance"           // 距离成就
+    case duration = "duration"           // 时长成就
+    case frequency = "frequency"         // 频率成就
+    case calories = "calories"           // 燃脂成就 🔥
+    case pace = "pace"                   // 配速成就
+    case special = "special"             // 特殊成就
+    case milestone = "milestone"         // 里程碑成就
+
+    var displayName: String {
+        switch self {
+        case .distance: return "距离成就"
+        case .duration: return "时长成就"
+        case .frequency: return "频率成就"
+        case .calories: return "燃脂成就"
+        case .pace: return "配速成就"
+        case .special: return "特殊成就"
+        case .milestone: return "里程碑成就"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .distance: return "figure.run"
+        case .duration: return "clock.fill"
+        case .frequency: return "flame.fill"
+        case .calories: return "flame.circle.fill"
+        case .pace: return "bolt.fill"
+        case .special: return "star.fill"
+        case .milestone: return "trophy.fill"
+        }
+    }
+}
+
+// MARK: - 成就模型
+
+struct Achievement: Identifiable, Codable {
+    var id: String                           // 唯一标识符
+    var category: AchievementCategory        // 类别
+    var title: String                        // 标题
+    var description: String                  // 描述
+    var icon: String                         // SF Symbol 图标
+    var targetValue: Double                  // 目标值
+    var currentValue: Double                 // 当前进度值
+    var isUnlocked: Bool                     // 是否已解锁
+    var unlockedAt: Date?                    // 解锁时间
+    var celebrationMessage: String           // AI语音庆祝文本
+
+    // 计算属性：进度百分比
+    var progress: Double {
+        guard targetValue > 0 else { return 0 }
+        return min(currentValue / targetValue, 1.0)
+    }
+
+    // 计算属性：进度描述
+    var progressText: String {
+        if isUnlocked {
+            return "已完成"
+        }
+
+        switch category {
+        case .distance:
+            return String(format: "%.1f/%.0f 公里", currentValue / 1000, targetValue / 1000)
+        case .duration:
+            return String(format: "%.1f/%.0f 小时", currentValue / 3600, targetValue / 3600)
+        case .frequency:
+            return String(format: "%.0f/%.0f 天", currentValue, targetValue)
+        case .calories:
+            return String(format: "%.0f/%.0f 卡", currentValue, targetValue)
+        case .pace:
+            let currentPace = Int(currentValue / 60)
+            let targetPace = Int(targetValue / 60)
+            return "\(currentPace)'\(Int(currentValue.truncatingRemainder(dividingBy: 60)))\" / \(targetPace)'00\""
+        case .special:
+            return String(format: "%.0f/%.0f 次", currentValue, targetValue)
+        case .milestone:
+            return String(format: "%.0f/%.0f 公里", currentValue / 1000, targetValue / 1000)
+        }
+    }
+}
+
+// MARK: - 预定义成就数据
+
+extension Achievement {
+    static let allAchievements: [Achievement] = [
+        // ===== 1. 距离成就（单次距离）=====
+        Achievement(
+            id: "distance_1km",
+            category: .distance,
+            title: "起步阶段",
+            description: "完成1公里跑步",
+            icon: "figure.walk",
+            targetValue: 1000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【起步阶段】！完成1公里跑步，每一步都是进步的开始！"
+        ),
+        Achievement(
+            id: "distance_5km",
+            category: .distance,
+            title: "进阶挑战",
+            description: "完成5公里跑步",
+            icon: "figure.run",
+            targetValue: 5000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【进阶挑战】！完成5公里，你已经进入跑者的行列！"
+        ),
+        Achievement(
+            id: "distance_10km",
+            category: .distance,
+            title: "半马征程",
+            description: "完成10公里跑步",
+            icon: "figure.run.circle",
+            targetValue: 10000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【半马征程】！完成10公里，你的耐力令人敬佩！"
+        ),
+        Achievement(
+            id: "distance_21km",
+            category: .distance,
+            title: "全马英雄",
+            description: "完成21公里跑步",
+            icon: "medal.fill",
+            targetValue: 21000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "震撼全场！解锁成就【全马英雄】！完成半程马拉松21公里，你是真正的跑者！"
+        ),
+        Achievement(
+            id: "distance_42km",
+            category: .distance,
+            title: "极限挑战",
+            description: "完成42公里跑步",
+            icon: "trophy.fill",
+            targetValue: 42000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "传奇诞生！解锁成就【极限挑战】！完成全程马拉松42公里，你已经突破人类极限！"
+        ),
+
+        // ===== 2. 时长成就（累计时间）=====
+        Achievement(
+            id: "duration_5hours",
+            category: .duration,
+            title: "时光起步",
+            description: "累计跑步5小时",
+            icon: "clock",
+            targetValue: 5 * 3600,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【时光起步】！累计跑步5小时，时间见证你的坚持！"
+        ),
+        Achievement(
+            id: "duration_10hours",
+            category: .duration,
+            title: "持之以恒",
+            description: "累计跑步10小时",
+            icon: "clock.fill",
+            targetValue: 10 * 3600,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【持之以恒】！累计跑步10小时，你的毅力无人能敌！"
+        ),
+        Achievement(
+            id: "duration_50hours",
+            category: .duration,
+            title: "马拉松精神",
+            description: "累计跑步50小时",
+            icon: "hourglass",
+            targetValue: 50 * 3600,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【马拉松精神】！累计跑步50小时，你已经成为跑步专家！"
+        ),
+        Achievement(
+            id: "duration_100hours",
+            category: .duration,
+            title: "时间征服者",
+            description: "累计跑步100小时",
+            icon: "clock.badge.checkmark",
+            targetValue: 100 * 3600,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "传奇成就！解锁【时间征服者】！累计跑步100小时，你已经用时间书写了传奇！"
+        ),
+
+        // ===== 3. 频率成就（连续天数）=====
+        Achievement(
+            id: "frequency_3days",
+            category: .frequency,
+            title: "初露锋芒",
+            description: "连续跑步3天",
+            icon: "flame",
+            targetValue: 3,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【初露锋芒】！连续跑步3天，习惯的种子已经发芽！"
+        ),
+        Achievement(
+            id: "frequency_7days",
+            category: .frequency,
+            title: "坚持不懈",
+            description: "连续跑步7天",
+            icon: "flame.fill",
+            targetValue: 7,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【坚持不懈】！连续跑步7天，你已经养成了跑步习惯！"
+        ),
+        Achievement(
+            id: "frequency_30days",
+            category: .frequency,
+            title: "铁人意志",
+            description: "连续跑步30天",
+            icon: "flame.circle.fill",
+            targetValue: 30,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【铁人意志】！连续跑步30天，你的意志力如钢铁般坚韧！"
+        ),
+        Achievement(
+            id: "frequency_100days",
+            category: .frequency,
+            title: "跑步狂人",
+            description: "连续跑步100天",
+            icon: "bolt.heart.fill",
+            targetValue: 100,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "传奇诞生！解锁成就【跑步狂人】！连续跑步100天，你已经成为跑步界的传奇人物！"
+        ),
+
+        // ===== 4. 🔥 燃脂成就（卡路里消耗）=====
+        Achievement(
+            id: "calories_300",
+            category: .calories,
+            title: "初见成效",
+            description: "单次跑步燃烧300卡",
+            icon: "flame",
+            targetValue: 300,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【初见成效】！单次跑步燃烧300卡路里，减肥之路开了个好头！坚持下去，你会看到更大的改变！"
+        ),
+        Achievement(
+            id: "calories_500",
+            category: .calories,
+            title: "燃脂达人",
+            description: "单次跑步燃烧500卡",
+            icon: "flame.fill",
+            targetValue: 500,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【燃脂达人】！单次燃烧500卡，相当于慢跑一个小时，你的努力正在让身体变得更健康！"
+        ),
+        Achievement(
+            id: "calories_1000",
+            category: .calories,
+            title: "燃脂狂魔",
+            description: "单次跑步燃烧1000卡",
+            icon: "bolt.fill",
+            targetValue: 1000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【燃脂狂魔】！单次燃烧1000卡，这是超高强度训练，你的毅力令人震撼！"
+        ),
+        Achievement(
+            id: "calories_total_10k",
+            category: .calories,
+            title: "卡路里杀手",
+            description: "累计燃烧10,000卡",
+            icon: "flame.circle",
+            targetValue: 10000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【卡路里杀手】！累计燃烧1万卡，相当于减掉约1.3公斤脂肪，你的身体正在发生质变！"
+        ),
+        Achievement(
+            id: "calories_total_50k",
+            category: .calories,
+            title: "减肥战士",
+            description: "累计燃烧50,000卡",
+            icon: "flame.circle.fill",
+            targetValue: 50000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【减肥战士】！累计燃烧5万卡，相当于减掉约6.5公斤脂肪，你已经是真正的减肥战士！"
+        ),
+        Achievement(
+            id: "calories_total_100k",
+            category: .calories,
+            title: "脂肪克星",
+            description: "累计燃烧100,000卡",
+            icon: "bolt.heart.fill",
+            targetValue: 100000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "传奇诞生！解锁成就【脂肪克星】！累计燃烧10万卡路里，相当于减重13公斤的脂肪！你已经是真正的脂肪克星了！"
+        ),
+
+        // ===== 5. 配速成就（最快配速）=====
+        Achievement(
+            id: "pace_6min",
+            category: .pace,
+            title: "速度觉醒",
+            description: "配速低于6分钟/公里",
+            icon: "hare",
+            targetValue: 6 * 60,
+            currentValue: 999,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【速度觉醒】！配速突破6分钟每公里，速度觉醒了！"
+        ),
+        Achievement(
+            id: "pace_5min",
+            category: .pace,
+            title: "飞毛腿",
+            description: "配速低于5分钟/公里",
+            icon: "hare.fill",
+            targetValue: 5 * 60,
+            currentValue: 999,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【飞毛腿】！配速突破5分钟每公里，你的速度如同飞毛腿！"
+        ),
+        Achievement(
+            id: "pace_4min",
+            category: .pace,
+            title: "闪电侠",
+            description: "配速低于4分钟/公里",
+            icon: "bolt.fill",
+            targetValue: 4 * 60,
+            currentValue: 999,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【闪电侠】！配速突破4分钟每公里，你就是闪电侠！"
+        ),
+
+        // ===== 6. 特殊成就（时间段）=====
+        Achievement(
+            id: "special_morning_5times",
+            category: .special,
+            title: "早起的鸟儿",
+            description: "完成5次晨跑（5:00-8:00）",
+            icon: "sunrise.fill",
+            targetValue: 5,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【早起的鸟儿】！完成5次晨跑，你的自律令人敬佩！"
+        ),
+        Achievement(
+            id: "special_night_5times",
+            category: .special,
+            title: "夜跑勇士",
+            description: "完成5次夜跑（20:00-23:00）",
+            icon: "moon.stars.fill",
+            targetValue: 5,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【夜跑勇士】！完成5次夜跑，你是夜晚的勇士！"
+        ),
+        Achievement(
+            id: "special_rainy_1time",
+            category: .special,
+            title: "风雨无阻",
+            description: "在雨天完成跑步",
+            icon: "cloud.rain.fill",
+            targetValue: 1,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "不可思议！解锁成就【风雨无阻】！在雨天完成跑步，你的意志力坚如磐石！"
+        ),
+
+        // ===== 7. 里程碑成就（累计距离）=====
+        Achievement(
+            id: "milestone_100km",
+            category: .milestone,
+            title: "环球旅行",
+            description: "累计跑步100公里",
+            icon: "globe.asia.australia",
+            targetValue: 100000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "恭喜你！解锁成就【环球旅行】！累计跑步100公里，你已经开启环球旅行！"
+        ),
+        Achievement(
+            id: "milestone_500km",
+            category: .milestone,
+            title: "横跨中国",
+            description: "累计跑步500公里",
+            icon: "map.fill",
+            targetValue: 500000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "太棒了！解锁成就【横跨中国】！累计跑步500公里，足以横跨中国！"
+        ),
+        Achievement(
+            id: "milestone_1000km",
+            category: .milestone,
+            title: "绕地球一圈",
+            description: "累计跑步1000公里",
+            icon: "globe",
+            targetValue: 1000000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "传奇诞生！解锁成就【绕地球一圈】！累计跑步1000公里，相当于绕地球赤道的1/40！你已经是跑步界的传奇！"
+        )
+    ]
+}
+
+// MARK: - Supabase 数据库模型
+
+struct AchievementDTO: Codable {
+    var id: UUID
+    var userId: UUID
+    var achievementId: String
+    var currentValue: Double
+    var isUnlocked: Bool
+    var unlockedAt: Date?
+    var sharedCount: Int
+    var createdAt: Date
+    var updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case achievementId = "achievement_id"
+        case currentValue = "current_value"
+        case isUnlocked = "is_unlocked"
+        case unlockedAt = "unlocked_at"
+        case sharedCount = "shared_count"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}

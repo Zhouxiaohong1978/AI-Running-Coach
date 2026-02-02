@@ -111,10 +111,20 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+
+                    NavigationLink(destination: AchievementTestView()) {
+                        HStack {
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.orange)
+                            Text("成就系统测试")
+                            Spacer()
+                        }
+                    }
                 } header: {
                     Text("开发者选项")
                 } footer: {
-                    Text("测试 AI 语音教练系统的 50 条语音脚本")
+                    Text("测试 AI 语音教练系统和成就系统")
                 }
 
                 // 关于部分

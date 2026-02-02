@@ -11,6 +11,7 @@ import MapKit
 struct RunSummaryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var dataManager = RunDataManager.shared
+    @StateObject private var achievementManager = AchievementManager.shared
     var runRecord: RunRecord?
 
     @State private var region = MKCoordinateRegion(
@@ -18,6 +19,7 @@ struct RunSummaryView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
     )
     @State private var weeklyStats: [WeeklyRunStats] = []
+    @State private var showAchievementSheet = false
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -55,33 +57,19 @@ struct RunSummaryView: View {
                         .padding(20)
                     }
 
-                    // Achievement Banner
-                    HStack(spacing: 12) {
-                        Text("🏆")
-                            .font(.system(size: 24))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("成就解锁！")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.black)
-
-                            Text("早起的鸟儿：本次完成5次跑步。")
-                                .font(.system(size: 12))
-                                .foregroundColor(.black.opacity(0.6))
+                    // Achievement Banner（仅在有新成就时显示）
+                    if !achievementManager.recentlyUnlocked.isEmpty {
+                        VStack(spacing: 12) {
+                            ForEach(achievementManager.recentlyUnlocked.prefix(3)) { achievement in
+                                AchievementBanner(achievement: achievement)
+                            }
                         }
-
-                        Spacer()
+                        .padding(.horizontal, 20)
+                        .padding(.top, -30)
+                        .onTapGesture {
+                            showAchievementSheet = true
+                        }
                     }
-                    .padding(16)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.purple, Color.purple.opacity(0.6)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.top, -30)
 
                     // Stats Grid
                     VStack(spacing: 16) {
@@ -222,6 +210,9 @@ struct RunSummaryView: View {
         }
         .onAppear {
             calculateWeeklyStats()
+        }
+        .sheet(isPresented: $showAchievementSheet) {
+            AchievementSheetView()
         }
     }
 
@@ -393,6 +384,44 @@ struct WeekBar: View {
                 .foregroundColor(.purple)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Achievement Banner
+
+struct AchievementBanner: View {
+    let achievement: Achievement
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(achievement.icon)
+                .font(.system(size: 28))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("🏆 成就解锁！")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.white)
+
+                Text("\(achievement.title)：\(achievement.description)")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.6))
+        }
+        .padding(16)
+        .background(
+            LinearGradient(
+                colors: [Color.purple, Color.purple.opacity(0.7)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .cornerRadius(12)
     }
 }
 

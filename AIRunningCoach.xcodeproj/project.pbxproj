@@ -40,6 +40,12 @@
 		AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33333333333333333333BB /* VoiceScriptManager.swift */; };
 		AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB44444444444444444444BB /* VoiceTriggerEngine.swift */; };
 		AA55555555555555555555AA /* RunningDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB55555555555555555555BB /* RunningDemoView.swift */; };
+		CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD66666666666666666666DD /* SimpleConditionCheck.swift */; };
+		CC77777777777777777777CC /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD77777777777777777777DD /* AchievementManager.swift */; };
+		CC88888888888888888888CC /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD88888888888888888888DD /* Achievement.swift */; };
+		CC99999999999999999999CC /* AchievementSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD99999999999999999999DD /* AchievementSheetView.swift */; };
+		CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */; };
+		CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +83,12 @@
 		BB33333333333333333333BB /* VoiceScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScriptManager.swift; sourceTree = "<group>"; };
 		BB44444444444444444444BB /* VoiceTriggerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTriggerEngine.swift; sourceTree = "<group>"; };
 		BB55555555555555555555BB /* RunningDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningDemoView.swift; sourceTree = "<group>"; };
+		DD66666666666666666666DD /* SimpleConditionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleConditionCheck.swift; sourceTree = "<group>"; };
+		DD77777777777777777777DD /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
+		DD88888888888888888888DD /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
+		DD99999999999999999999DD /* AchievementSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSheetView.swift; sourceTree = "<group>"; };
+		DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementShareView.swift; sourceTree = "<group>"; };
+		DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementTestView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				5492D4946BDDB9584CBD3AA8 /* ActiveRunView.swift */,
+				DD99999999999999999999DD /* AchievementSheetView.swift */,
+				DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */,
+				DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */,
 				31B78260DAB77DEDF48D8765 /* ContentView.swift */,
 				74744F7FF003A409921152AB /* DetailedStatsView.swift */,
 				F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */,
@@ -140,6 +155,7 @@
 		3F5C132E5FDB4128CB8C1BFC /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DD88888888888888888888DD /* Achievement.swift */,
 				62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */,
 				729CB00236199C7E5B34912F /* TrainingPlan.swift */,
 				BB11111111111111111111BB /* VoiceScript.swift */,
@@ -150,10 +166,12 @@
 		569AAD41CFF77AC7B4D12F2E /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				DD77777777777777777777DD /* AchievementManager.swift */,
 				08283168190FCE5DFD3E65E2 /* AIManager.swift */,
 				70FCE61FF494009D17442EF2 /* AuthManager.swift */,
 				19618B5AC9B32D7DC89473B9 /* LocationManager.swift */,
 				9BFE82D22737A33E13E702B6 /* RunDataManager.swift */,
+				DD66666666666666666666DD /* SimpleConditionCheck.swift */,
 				57817154FCD67BD41E729CD8 /* SpeechManager.swift */,
 				BB22222222222222222222BB /* VoiceService.swift */,
 				BB33333333333333333333BB /* VoiceScriptManager.swift */,
@@ -278,6 +296,12 @@
 				AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */,
 				AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */,
 				AA55555555555555555555AA /* RunningDemoView.swift in Sources */,
+				CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */,
+				CC77777777777777777777CC /* AchievementManager.swift in Sources */,
+				CC88888888888888888888CC /* Achievement.swift in Sources */,
+				CC99999999999999999999CC /* AchievementSheetView.swift in Sources */,
+				CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */,
+				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

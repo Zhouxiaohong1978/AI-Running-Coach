@@ -56,6 +56,9 @@ class RunDataManager: ObservableObject {
         runRecords.insert(newRecord, at: 0)
         saveToLocal()
 
+        // 🏆 检查成就解锁
+        AchievementManager.shared.checkAchievements(from: newRecord, allRecords: runRecords)
+
         // 如果用户已登录，同步到云端
         if authManager.isAuthenticated {
             await syncToCloud(newRecord)
