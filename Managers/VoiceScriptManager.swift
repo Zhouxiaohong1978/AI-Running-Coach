@@ -70,7 +70,7 @@ class VoiceScriptManager: ObservableObject {
                        text: "最后100米！感受心脏有力的跳动，这是生命的鼓点。",
                        voice: "cherry", order: 19, cooldown: 15),
             VoiceScript(id: "beginner_20_countdown", mode: .beginner, triggerType: .distance, triggerValue: 3.0,
-                       text: "3…2…1…完成！3公里达成！",
+                       text: "倒数，三、二、一、完成！三公里达成！",
                        voice: "cherry", order: 20, cooldown: 15),
             VoiceScript(id: "beginner_21_cooldown", mode: .beginner, triggerType: .state, triggerValue: 2,
                        text: "慢慢停下，不要立刻静止。走一会儿，让心跳平稳回落。",
