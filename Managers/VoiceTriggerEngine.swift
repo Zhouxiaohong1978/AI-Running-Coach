@@ -104,11 +104,16 @@ class VoiceTriggerEngine: ObservableObject {
             .filter { scriptManager.shouldTrigger(script: $0, context: context) }
             .filter { script in
                 // 对于距离触发的脚本，只触发"刚刚到达"的里程碑
-                // 即 lastDistance < triggerValue <= currentDistance
                 if script.triggerType == .distance {
+                    // 特殊处理：triggerValue = 0（开场语音）只在距离 = 0 时触发
+                    if script.triggerValue == 0 {
+                        return context.distance == 0
+                    }
+
+                    // 普通里程碑：lastDistance < triggerValue <= currentDistance
                     let justReached = lastDistance < script.triggerValue && script.triggerValue <= context.distance
                     if !justReached {
-                        print("  ⏩ 跳过 \(script.id)（已超过里程碑：上次=\(lastDistance)km, 触发值=\(script.triggerValue)km）")
+                        print("  ⏩ 跳过 \(script.id)（未刚到达：上次=\(lastDistance)km, 触发值=\(script.triggerValue)km, 当前=\(context.distance)km）")
                     }
                     return justReached
                 }
@@ -141,6 +146,14 @@ class VoiceTriggerEngine: ObservableObject {
         print("───────────────────────────────────────")
 
         lastTriggerTime = Date()
+
+        // 如果是距离触发的脚本，更新 lastDistance 为当前触发的里程碑
+        // 这样下次检查时，已触发的里程碑不会再满足条件
+        if script.triggerType == .distance {
+            lastDistance = script.triggerValue
+            print("   📍 更新 lastDistance → \(lastDistance)km")
+        }
+
         trigger(script)
     }
 
