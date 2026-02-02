@@ -6,6 +6,8 @@ struct RunningDemoView: View {
     @StateObject private var voiceService = VoiceService.shared
     @State private var distance: Double = 0
     @State private var calories: Double = 0
+    @State private var duration: TimeInterval = 0  // 新增：跑步时长
+    @State private var heartRate: Int = 120  // 新增：可调节心率
     @State private var selectedMode: RunMode = .beginner
 
     var body: some View {
@@ -27,7 +29,9 @@ struct RunningDemoView: View {
             VStack(spacing: 10) {
                 Text("距离: \(distance, specifier: "%.2f") km")
                 Text("热量: \(Int(calories)) 大卡")
-                Text("心率: \(engine.context.heartRate) BPM")
+                Text("时长: \(Int(duration/60)) 分钟")
+                Text("心率: \(heartRate) BPM")
+                    .foregroundColor(heartRate >= 111 && heartRate <= 130 ? .green : (heartRate > 157 ? .red : .primary))
             }
             .padding()
 
@@ -60,6 +64,8 @@ struct RunningDemoView: View {
                 Button("开始跑步") {
                     distance = 0
                     calories = 0
+                    duration = 0
+                    heartRate = 120
                     print("\n\n\n")
                     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                     print("🚀🚀🚀 开始跑步按钮被点击了！🚀🚀🚀")
@@ -70,28 +76,35 @@ struct RunningDemoView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
+                // 距离控制
+                Text("距离控制")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 HStack(spacing: 10) {
                     Button("+100米") {
                         distance += 0.1
                         calories += 6
-                        engine.updateContext(distance: distance, calories: calories)
-                        print("📍 距离: \(distance)km")
+                        duration += 60  // 假设配速6分钟/公里
+                        engine.updateContext(distance: distance, calories: calories, heartRate: heartRate, duration: duration)
+                        print("📍 距离: \(distance)km, 时长: \(Int(duration))秒")
                     }
                     .buttonStyle(.bordered)
 
                     Button("+500米") {
                         distance += 0.5
                         calories += 30
-                        engine.updateContext(distance: distance, calories: calories)
-                        print("📍 距离: \(distance)km")
+                        duration += 300
+                        engine.updateContext(distance: distance, calories: calories, heartRate: heartRate, duration: duration)
+                        print("📍 距离: \(distance)km, 时长: \(Int(duration))秒")
                     }
                     .buttonStyle(.bordered)
 
                     Button("+1公里") {
                         distance += 1.0
                         calories += 60
-                        engine.updateContext(distance: distance, calories: calories)
-                        print("📍 距离: \(distance)km")
+                        duration += 600
+                        engine.updateContext(distance: distance, calories: calories, heartRate: heartRate, duration: duration)
+                        print("📍 距离: \(distance)km, 时长: \(Int(duration))秒")
                     }
                     .buttonStyle(.bordered)
                 }
@@ -101,10 +114,103 @@ struct RunningDemoView: View {
                     engine.updateContext(calories: calories)
                     print("🔥 热量: \(Int(calories))卡")
                 }
+                .buttonStyle(.bordered)
 
-                Button("模拟心率升高") {
-                    engine.updateContext(heartRate: 165)
-                    print("💓 心率: 165 BPM")
+                // 时间控制
+                Text("时间控制")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 10) {
+                    Button("+5分钟") {
+                        duration += 300
+                        engine.updateContext(duration: duration)
+                        print("⏱️ 时长: \(Int(duration/60))分钟")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("+10分钟") {
+                        duration += 600
+                        engine.updateContext(duration: duration)
+                        print("⏱️ 时长: \(Int(duration/60))分钟")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("+20分钟") {
+                        duration += 1200
+                        engine.updateContext(duration: duration)
+                        print("⏱️ 时长: \(Int(duration/60))分钟")
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                // 心率控制
+                Text("心率控制")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 10) {
+                    Button("低心率110") {
+                        heartRate = 110
+                        engine.updateContext(heartRate: heartRate)
+                        print("💓 心率: \(heartRate) BPM (低)")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("燃脂120") {
+                        heartRate = 120
+                        engine.updateContext(heartRate: heartRate)
+                        print("💓 心率: \(heartRate) BPM (燃脂区间✅)")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.green)
+
+                    Button("高心率160") {
+                        heartRate = 160
+                        engine.updateContext(heartRate: heartRate)
+                        print("💓 心率: \(heartRate) BPM (高)")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                }
+
+                // 快捷测试按钮（测试新的量化条件）
+                VStack(spacing: 8) {
+                    Text("🎯 量化条件测试")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+
+                    HStack(spacing: 10) {
+                        Button("测试疲劳语音") {
+                            distance = 2.0
+                            calories = 120
+                            duration = 1500  // 25分钟
+                            heartRate = 160  // 高心率
+                            engine.updateContext(distance: distance, calories: calories, heartRate: heartRate, duration: duration)
+                            print("═══════════════════════════════════════")
+                            print("🧪 【疲劳检测测试】")
+                            print("📊 数据：时长=25分钟, 心率=160bpm, 距离=2km")
+                            print("🎯 预期：应触发疲劳相关语音（满足时长>20分钟且心率>157）")
+                            print("═══════════════════════════════════════")
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.blue)
+                        .font(.caption)
+
+                        Button("测试燃脂区间") {
+                            distance = 1.5
+                            calories = 90
+                            duration = 900  // 15分钟
+                            heartRate = 120  // 燃脂区间
+                            engine.updateContext(distance: distance, calories: calories, heartRate: heartRate, duration: duration)
+                            print("═══════════════════════════════════════")
+                            print("🧪 【燃脂区间测试】")
+                            print("📊 数据：心率=120bpm (燃脂区间111-130)")
+                            print("🎯 预期：应触发燃脂区间语音")
+                            print("═══════════════════════════════════════")
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.green)
+                        .font(.caption)
+                    }
                 }
 
                 // 测试冷却机制
@@ -145,6 +251,8 @@ struct RunningDemoView: View {
                     engine.stop()
                     distance = 0
                     calories = 0
+                    duration = 0
+                    heartRate = 120
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
