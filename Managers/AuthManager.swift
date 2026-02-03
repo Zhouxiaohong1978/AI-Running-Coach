@@ -140,12 +140,12 @@ class AuthManager: ObservableObject {
         print("✅ [AuthManager] 已退出登录")
     }
 
-    /// 删除账户（删除云端数据并退出登录）
+    /// 删除账户（真正删除，包括 auth.users 记录）
     func deleteAccount() async throws {
         isLoading = true
         defer { isLoading = false }
 
-        guard let userId = currentUserId else {
+        guard currentUserId != nil else {
             throw NSError(
                 domain: "AuthManager",
                 code: -5,
@@ -153,23 +153,25 @@ class AuthManager: ObservableObject {
             )
         }
 
-        print("🗑️ [AuthManager] 开始删除账户数据: \(userId)")
+        print("🗑️ [AuthManager] 开始删除账户...")
 
-        // 删除云端跑步记录
+        // 调用 Supabase 函数删除账户（包括 auth.users 和 run_records）
         do {
-            try await supabase
-                .from("run_records")
-                .delete()
-                .eq("user_id", value: userId.uuidString)
+            let _: EmptyResponse = try await supabase
+                .rpc("delete_user_account")
                 .execute()
-            print("✅ [AuthManager] 云端数据已删除")
+                .value
+
+            print("✅ [AuthManager] 账户已完全删除（包括认证记录）")
         } catch {
-            print("⚠️ [AuthManager] 删除云端数据失败: \(error.localizedDescription)")
+            print("❌ [AuthManager] 删除账户失败: \(error.localizedDescription)")
+            throw error
         }
 
-        // 退出登录（账户保留，但数据已清空）
-        try await signOut()
-        print("✅ [AuthManager] 已退出登录，本地和云端数据已清空")
+        // 清空本地状态
+        currentUser = nil
+        isAuthenticated = false
+        print("✅ [AuthManager] 已退出登录，账户已完全删除")
     }
 
     /// 重置密码（发送邮件）
@@ -276,3 +278,8 @@ class AuthManager: ObservableObject {
         return currentUser?.email
     }
 }
+
+// MARK: - Helper Types
+
+/// 空响应类型（用于不返回数据的 RPC 调用）
+private struct EmptyResponse: Codable {}
