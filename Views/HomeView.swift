@@ -165,26 +165,28 @@ struct HomeView: View {
     // MARK: - Helper Functions
 
     private func getUserName() -> String {
-        // 从用户数据中获取名字，暂时使用"小红"
-        return authManager.currentUser?.email?.components(separatedBy: "@").first ?? "小红"
+        // 从用户数据中获取名字
+        // TODO: 添加用户设置真实姓名的功能
+        // 暂时使用"跑友"作为默认称呼
+        if let email = authManager.currentUser?.email {
+            // 如果有用户自定义昵称，使用昵称
+            if let nickname = UserDefaults.standard.string(forKey: "user_nickname"), !nickname.isEmpty {
+                return nickname
+            }
+        }
+        return "跑友"
     }
 
     private func getWeatherEmoji() -> String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        // 根据时间段返回不同的 emoji
-        if hour >= 6 && hour < 18 {
-            return "☀️"  // 白天
-        } else {
-            return "🌙"  // 晚上
-        }
+        // TODO: 集成真实天气 API
+        // 暂时返回晴天图标
+        return "☀️"
     }
 
     private func getWeatherText() -> String {
-        // TODO: 集成真实天气 API
-        // 暂时根据时间段返回基本信息
-        let hour = Calendar.current.component(.hour, from: Date())
-        let timeOfDay = hour >= 6 && hour < 12 ? "早上" : hour >= 12 && hour < 18 ? "下午" : "晚上"
-        return "\(timeOfDay)好"
+        // TODO: 集成真实天气 API (高德/和风天气)
+        // 暂时显示固定天气
+        return "晴天, 24°C"
     }
 }
 
@@ -297,10 +299,55 @@ struct WeeklyGoalCard: View {
             Text(stats.message)
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
+
+            // 周一到周日的日期栏
+            weekDaysView
         }
         .padding(20)
         .background(Color.white)
         .cornerRadius(16)
+    }
+
+    // 周一到周日日期显示
+    private var weekDaysView: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<7) { index in
+                VStack(spacing: 4) {
+                    Text(getWeekdayShort(index: index))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.black)  // 改为黑色，更清晰
+
+                    Text(getDayOfMonth(index: index))
+                        .font(.system(size: 10))
+                        .foregroundColor(.black.opacity(0.8))  // 改为黑色，更清晰
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    // 获取周几的简写（周一、周二...）
+    private func getWeekdayShort(index: Int) -> String {
+        let weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+        return weekdays[index]
+    }
+
+    // 获取对应日期的几号
+    private func getDayOfMonth(index: Int) -> String {
+        let calendar = Calendar.current
+        let now = Date()
+
+        // 获取本周周一
+        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
+        components.weekday = 2 // 周一
+        guard let startOfWeek = calendar.date(from: components) else { return "" }
+
+        // 计算对应日期
+        guard let targetDate = calendar.date(byAdding: .day, value: index, to: startOfWeek) else { return "" }
+
+        let day = calendar.component(.day, from: targetDate)
+        return "\(day)"
     }
 }
 
