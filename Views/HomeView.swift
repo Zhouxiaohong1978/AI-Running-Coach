@@ -11,6 +11,8 @@ struct HomeView: View {
     @State private var selectedTab = 0
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var authManager = AuthManager.shared
+    @StateObject private var weatherManager = WeatherManager.shared
+    @StateObject private var locationManager = LocationManager()
 
     var body: some View {
         ZStack {
@@ -82,7 +84,7 @@ struct HomeView: View {
                                         .font(.system(size: 32, weight: .bold))
                                     Text(getUserName())
                                         .font(.system(size: 32, weight: .bold))
-                                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                                        .foregroundColor(.black)  // 改为黑色
                                     Text("?")
                                         .font(.system(size: 32, weight: .bold))
                                 }
@@ -153,6 +155,27 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear {
+                // 获取天气（位置已在 LocationManager init 中自动请求）
+                print("🏠 [HomeView] onAppear - lastLocation: \(locationManager.lastLocation?.coordinate.latitude ?? 0), \(locationManager.lastLocation?.coordinate.longitude ?? 0)")
+                Task {
+                    if let location = locationManager.lastLocation {
+                        print("🏠 [HomeView] 开始获取天气...")
+                        await weatherManager.fetchWeather(for: location)
+                    } else {
+                        print("⚠️ [HomeView] 位置为空，无法获取天气")
+                    }
+                }
+            }
+            .onChange(of: locationManager.lastLocation) { newLocation in
+                // 位置更新后获取天气
+                print("🏠 [HomeView] onChange - 位置更新: \(newLocation?.coordinate.latitude ?? 0), \(newLocation?.coordinate.longitude ?? 0)")
+                if let location = newLocation {
+                    Task {
+                        await weatherManager.fetchWeather(for: location)
+                    }
+                }
+            }
         }
     }
 
@@ -165,28 +188,32 @@ struct HomeView: View {
     // MARK: - Helper Functions
 
     private func getUserName() -> String {
-        // 从用户数据中获取名字
-        // TODO: 添加用户设置真实姓名的功能
-        // 暂时使用"跑友"作为默认称呼
+        // 从用户数据中获取真实姓名
+        // 优先级：真实姓名 > 邮箱前缀 > 默认"跑友"
+
+        // 1. 从UserDefaults获取用户真实姓名（注册时填写）
+        if let realName = UserDefaults.standard.string(forKey: "user_real_name"), !realName.isEmpty {
+            return realName
+        }
+
+        // 2. 使用邮箱前缀
         if let email = authManager.currentUser?.email {
-            // 如果有用户自定义昵称，使用昵称
-            if let nickname = UserDefaults.standard.string(forKey: "user_nickname"), !nickname.isEmpty {
-                return nickname
+            let username = email.components(separatedBy: "@").first ?? ""
+            if !username.isEmpty {
+                return username
             }
         }
+
+        // 3. 默认显示"跑友"
         return "跑友"
     }
 
     private func getWeatherEmoji() -> String {
-        // TODO: 集成真实天气 API
-        // 暂时返回晴天图标
-        return "☀️"
+        return weatherManager.currentWeather?.emoji ?? "☀️"
     }
 
     private func getWeatherText() -> String {
-        // TODO: 集成真实天气 API (高德/和风天气)
-        // 暂时显示固定天气
-        return "晴天, 24°C"
+        return weatherManager.currentWeather?.displayText ?? "获取天气中..."
     }
 }
 
@@ -262,9 +289,10 @@ struct WeeklyGoalCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("每周目标")
                         .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.black)
                     Text(weekDateRange)
-                        .font(.system(size: 14))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.black)  // 改为黑色
                 }
 
                 Spacer()
@@ -277,9 +305,10 @@ struct WeeklyGoalCard: View {
             HStack(alignment: .lastTextBaseline, spacing: 8) {
                 Text(String(format: "%.1f", stats.current))
                     .font(.system(size: 48, weight: .bold))
+                    .foregroundColor(.black)
                 Text("/ \(Int(stats.goal)) km")
-                    .font(.system(size: 18))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.black)  // 改为黑色
             }
 
             // Progress bar
@@ -297,57 +326,12 @@ struct WeeklyGoalCard: View {
             .frame(height: 8)
 
             Text(stats.message)
-                .font(.system(size: 14))
-                .foregroundColor(.secondary)
-
-            // 周一到周日的日期栏
-            weekDaysView
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.black)  // 改为黑色
         }
         .padding(20)
         .background(Color.white)
         .cornerRadius(16)
-    }
-
-    // 周一到周日日期显示
-    private var weekDaysView: some View {
-        HStack(spacing: 0) {
-            ForEach(0..<7) { index in
-                VStack(spacing: 4) {
-                    Text(getWeekdayShort(index: index))
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.black)  // 改为黑色，更清晰
-
-                    Text(getDayOfMonth(index: index))
-                        .font(.system(size: 10))
-                        .foregroundColor(.black.opacity(0.8))  // 改为黑色，更清晰
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-        .padding(.top, 8)
-    }
-
-    // 获取周几的简写（周一、周二...）
-    private func getWeekdayShort(index: Int) -> String {
-        let weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
-        return weekdays[index]
-    }
-
-    // 获取对应日期的几号
-    private func getDayOfMonth(index: Int) -> String {
-        let calendar = Calendar.current
-        let now = Date()
-
-        // 获取本周周一
-        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)
-        components.weekday = 2 // 周一
-        guard let startOfWeek = calendar.date(from: components) else { return "" }
-
-        // 计算对应日期
-        guard let targetDate = calendar.date(byAdding: .day, value: index, to: startOfWeek) else { return "" }
-
-        let day = calendar.component(.day, from: targetDate)
-        return "\(day)"
     }
 }
 

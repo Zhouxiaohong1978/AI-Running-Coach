@@ -25,9 +25,9 @@ class LocationManager: NSObject, ObservableObject {
     @Published var currentPace: Double = 0 // 分钟/公里
     @Published var duration: TimeInterval = 0
     @Published var calories: Double = 0
+    @Published var lastLocation: CLLocation?  // 暴露给外部使用（如获取天气）
 
     private var startTime: Date?
-    private var lastLocation: CLLocation?
     private var isTracking = false
     private var timer: Timer?
 
@@ -126,6 +126,12 @@ extension LocationManager: CLLocationManagerDelegate {
         guard location.horizontalAccuracy >= 0 &&
               location.horizontalAccuracy <= minHorizontalAccuracy else {
             print("🛰️ 低精度定位，仅更新显示: \(location.horizontalAccuracy)米")
+            return
+        }
+
+        // 如果不在跟踪状态，只更新 lastLocation（用于主页获取天气等）
+        if !isTracking {
+            lastLocation = location
             return
         }
 
