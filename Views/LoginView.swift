@@ -12,6 +12,7 @@ struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var email = ""
     @State private var password = ""
+    @State private var realName = ""  // 用户真实姓名（仅注册时使用）
     @State private var selectedTab = 0  // 0: 登录, 1: 注册
     @State private var showPassword = false
     @State private var errorMessage: String?
@@ -68,6 +69,27 @@ struct LoginView: View {
 
                     // 输入表单
                     VStack(spacing: 16) {
+                        // 真实姓名输入（仅注册时显示）
+                        if selectedTab == 1 {
+                            HStack(spacing: 12) {
+                                Image(systemName: "person")
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .frame(width: 20)
+
+                                TextField("", text: $realName)
+                                    .placeholder(when: realName.isEmpty) {
+                                        Text("真实姓名")
+                                            .foregroundColor(.white.opacity(0.6))
+                                    }
+                                    .textContentType(.name)
+                                    .autocapitalization(.words)
+                                    .foregroundColor(.white)
+                            }
+                            .padding()
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(12)
+                        }
+
                         // 邮箱输入
                         HStack(spacing: 12) {
                             Image(systemName: "envelope")
@@ -145,7 +167,7 @@ struct LoginView: View {
                         .padding()
                         .background(Color.white)
                         .cornerRadius(12)
-                        .disabled(authManager.isLoading || email.isEmpty || password.isEmpty)
+                        .disabled(authManager.isLoading || email.isEmpty || password.isEmpty || (selectedTab == 1 && realName.isEmpty))
 
                         // 忘记密码（仅登录模式显示）
                         if selectedTab == 0 {
