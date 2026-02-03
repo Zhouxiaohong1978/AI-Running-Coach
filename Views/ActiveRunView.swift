@@ -446,7 +446,7 @@ struct ActiveRunView: View {
 
     /// 成就系统联动检查（90%警告，使用TTS提醒）
     private func checkAchievementProgress(distanceKm: Double) {
-        let calories = locationManager.calories
+        _ = locationManager.calories
 
         // 已移除旧的AI成就提醒语音
         // 现在使用VoiceAssetMap中预录制的真实语音
