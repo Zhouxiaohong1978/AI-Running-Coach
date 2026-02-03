@@ -12,6 +12,7 @@ import Combine
 
 class LocationManager: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
+    private let logger = DebugLogger.shared
 
     @Published var userLocation: CLLocationCoordinate2D?
     @Published var region = MKCoordinateRegion(
@@ -151,7 +152,9 @@ extension LocationManager: CLLocationManagerDelegate {
                     calculatePace()
                     lastLocation = location
                     print("✅ 有效移动: 距离=\(String(format: "%.1f", delta))米, 速度=\(String(format: "%.1f", speed))米/秒")
+                    logger.log("✅ GPS更新: +\(String(format: "%.1f", delta))米, 总距离=\(String(format: "%.0f", distance))米", category: "DATA")
                 } else {
+                    logger.log("⚠️ GPS漂移: delta=\(String(format: "%.1f", delta))米, speed=\(String(format: "%.1f", speed))m/s (已过滤)", category: "WARN")
                     // 即使不计入距离，也更新 lastLocation 以避免累积误差
                     if timeDelta > 3 {  // 超过3秒没有有效移动，更新基准点
                         lastLocation = location
