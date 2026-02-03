@@ -79,14 +79,13 @@ struct HomeView: View {
                                         .foregroundColor(.secondary)
                                 }
 
-                                HStack(spacing: 0) {
-                                    Text("准备好今天的跑步了吗，")
-                                        .font(.system(size: 32, weight: .bold))
+                                VStack(alignment: .leading, spacing: 4) {
                                     Text(getUserName())
-                                        .font(.system(size: 32, weight: .bold))
-                                        .foregroundColor(.black)  // 改为黑色
-                                    Text("?")
-                                        .font(.system(size: 32, weight: .bold))
+                                        .font(.system(size: 24, weight: .heavy))
+                                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))  // 绿色，更突出
+                                    Text("准备好今天的跑步了吗？")
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(.white.opacity(0.7))  // 浅灰色，次要信息
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -193,6 +192,7 @@ struct HomeView: View {
 
         // 1. 从UserDefaults获取用户名（注册时填写）
         if let userName = UserDefaults.standard.string(forKey: "user_name"), !userName.isEmpty {
+            print("🏠 [HomeView] 读取到用户名: \(userName)")
             return userName
         }
 
@@ -200,11 +200,13 @@ struct HomeView: View {
         if let email = authManager.currentUser?.email {
             let username = email.components(separatedBy: "@").first ?? ""
             if !username.isEmpty {
+                print("🏠 [HomeView] 使用邮箱前缀: \(username)")
                 return username
             }
         }
 
         // 3. 默认显示"跑友"
+        print("🏠 [HomeView] 使用默认名称: 跑友")
         return "跑友"
     }
 
