@@ -204,9 +204,10 @@ struct RunSummaryView: View {
                                 .foregroundColor(.gray)
                         } else {
                             Text(aiSuggestion)
-                            .font(.system(size: 15))
-                            .foregroundColor(.black)
-                            .lineSpacing(6)
+                                .font(.system(size: 15))
+                                .foregroundColor(.black)
+                                .lineSpacing(6)
+                        }
                     }
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -439,7 +440,8 @@ struct RunSummaryView: View {
 
         return "\(weekday) \(timeOfDay) · \(dateStr)"
     }
-}
+
+} // struct RunSummaryView
 
 // MARK: - Stat Card
 
