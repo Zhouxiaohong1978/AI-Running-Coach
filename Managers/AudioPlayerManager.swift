@@ -45,6 +45,7 @@ final class AudioPlayerManager: NSObject, ObservableObject {
     // MARK: - Singleton
 
     static let shared = AudioPlayerManager()
+    private let logger = DebugLogger.shared
 
     // MARK: - Published Properties
 
@@ -91,16 +92,19 @@ final class AudioPlayerManager: NSObject, ObservableObject {
     func play(_ fileName: String, priority: AudioPriority = .normal, allowRepeat: Bool = false) {
         guard isEnabled else {
             print("🔇 音频已禁用，跳过播放: \(fileName)")
+            logger.log("🔇 音频已禁用，跳过: \(fileName)", category: "WARN")
             return
         }
 
         // 检查是否已播放过
         if !allowRepeat && playedAudios.contains(fileName) {
             print("⏭️ 音频已播放过，跳过: \(fileName)")
+            logger.log("⏭️ 已播放过，跳过: \(fileName)", category: "WARN")
             return
         }
 
         print("🎵 添加到播放队列: \(fileName), priority: \(priority)")
+        logger.log("🎵 添加到队列: \(fileName)", category: "VOICE")
 
         let item = AudioItem(fileName: fileName, priority: priority)
 
@@ -186,6 +190,7 @@ final class AudioPlayerManager: NSObject, ObservableObject {
         // 查找音频文件路径
         guard let audioPath = findAudioFile(fileName) else {
             print("❌ 找不到音频文件: \(fileName)")
+            logger.log("❌ 找不到音频文件: \(fileName)", category: "ERROR")
             // 继续播放下一个
             processQueue()
             return
@@ -201,12 +206,15 @@ final class AudioPlayerManager: NSObject, ObservableObject {
             if success {
                 isPlaying = true
                 print("🔊 正在播放: \(fileName)")
+                logger.log("🔊 开始播放: \(fileName)", category: "VOICE")
             } else {
                 print("❌ 播放失败: \(fileName)")
+                logger.log("❌ 播放失败: \(fileName)", category: "ERROR")
                 processQueue()
             }
         } catch {
             print("❌ 加载音频失败: \(fileName), error: \(error.localizedDescription)")
+            logger.log("❌ 加载失败: \(fileName) - \(error.localizedDescription)", category: "ERROR")
             processQueue()
         }
     }
