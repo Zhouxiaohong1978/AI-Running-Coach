@@ -213,8 +213,11 @@ final class AudioPlayerManager: NSObject, ObservableObject {
 
     /// 查找音频文件
     private func findAudioFile(_ fileName: String) -> URL? {
+        print("🔍 查找音频文件: \(fileName)")
+
         // 方案1：从Assets中查找
         if let asset = NSDataAsset(name: fileName) {
+            print("✅ 从Assets找到: \(fileName)")
             // 将数据写入临时文件
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName).m4a")
             try? asset.data.write(to: tempURL)
@@ -223,13 +226,27 @@ final class AudioPlayerManager: NSObject, ObservableObject {
 
         // 方案2：从Bundle中查找
         if let path = Bundle.main.path(forResource: fileName, ofType: "m4a") {
+            print("✅ 从Bundle根目录找到: \(fileName)")
             return URL(fileURLWithPath: path)
         }
 
         // 方案3：从voice目录查找（male/female子目录）
         for subdir in ["female", "male"] {
             if let path = Bundle.main.path(forResource: fileName, ofType: "m4a", inDirectory: "voice/\(subdir)") {
+                print("✅ 从voice/\(subdir)找到: \(fileName)")
                 return URL(fileURLWithPath: path)
+            }
+        }
+
+        print("❌ 所有方案都失败: \(fileName)")
+        // 调试：列出Bundle中的资源
+        if let resourcePath = Bundle.main.resourcePath {
+            print("📦 Bundle资源路径: \(resourcePath)")
+            let fm = FileManager.default
+            if let voicePath = Bundle.main.path(forResource: nil, ofType: nil, inDirectory: "voice") {
+                print("📂 voice目录存在: \(voicePath)")
+            } else {
+                print("❌ voice目录不存在于Bundle中")
             }
         }
 

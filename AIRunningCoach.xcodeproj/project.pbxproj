@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -31,23 +31,23 @@
 		A3E9FFE3FC41587E6ADD47AE /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA319CC8959DF6E6FE212DC /* SupabaseClient.swift */; };
 		A85DA2F7B1D1737FEF275F4A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19618B5AC9B32D7DC89473B9 /* LocationManager.swift */; };
 		A9703CD761A26E53EF525DFF /* ActiveRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5492D4946BDDB9584CBD3AA8 /* ActiveRunView.swift */; };
-		B085990262721D8A239355C5 /* CoordinateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E818BB938885DE05E905A0 /* CoordinateConverter.swift */; };
-		C6D16A9278F4F9E055C07886 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F4408E09232A697F86A2C0 /* SignInWithAppleButton.swift */; };
-		D1CA8A1D5E3ECAC654312872 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */; };
-		E54ECD75E3E6F871ADD559FB /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35628295DD86A50D091E306 /* GoalSelectionView.swift */; };
 		AA11111111111111111111AA /* VoiceScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11111111111111111111BB /* VoiceScript.swift */; };
 		AA22222222222222222222AA /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22222222222222222222BB /* VoiceService.swift */; };
 		AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33333333333333333333BB /* VoiceScriptManager.swift */; };
-		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
-		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
 		AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB44444444444444444444BB /* VoiceTriggerEngine.swift */; };
 		AA55555555555555555555AA /* RunningDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB55555555555555555555BB /* RunningDemoView.swift */; };
+		B085990262721D8A239355C5 /* CoordinateConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E818BB938885DE05E905A0 /* CoordinateConverter.swift */; };
+		C6D16A9278F4F9E055C07886 /* SignInWithAppleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F4408E09232A697F86A2C0 /* SignInWithAppleButton.swift */; };
 		CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD66666666666666666666DD /* SimpleConditionCheck.swift */; };
 		CC77777777777777777777CC /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD77777777777777777777DD /* AchievementManager.swift */; };
 		CC88888888888888888888CC /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD88888888888888888888DD /* Achievement.swift */; };
 		CC99999999999999999999CC /* AchievementSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD99999999999999999999DD /* AchievementSheetView.swift */; };
 		CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */; };
 		CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */; };
+		D1CA8A1D5E3ECAC654312872 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */; };
+		E54ECD75E3E6F871ADD559FB /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35628295DD86A50D091E306 /* GoalSelectionView.swift */; };
+		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
+		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,25 +75,29 @@
 		A9E818BB938885DE05E905A0 /* CoordinateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateConverter.swift; sourceTree = "<group>"; };
 		AFA319CC8959DF6E6FE212DC /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
 		B36821D05F7DD4C28B01B428 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		BB377A3912ACCB629159CE88 /* SupabaseTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseTestView.swift; sourceTree = "<group>"; };
-		C65651F0929BD30431988091 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		C85B8C6E7A65B45D6851C6F9 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
-		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB11111111111111111111BB /* VoiceScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScript.swift; sourceTree = "<group>"; };
 		BB22222222222222222222BB /* VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceService.swift; sourceTree = "<group>"; };
 		BB33333333333333333333BB /* VoiceScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScriptManager.swift; sourceTree = "<group>"; };
-		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
-		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
+		BB377A3912ACCB629159CE88 /* SupabaseTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseTestView.swift; sourceTree = "<group>"; };
 		BB44444444444444444444BB /* VoiceTriggerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTriggerEngine.swift; sourceTree = "<group>"; };
 		BB55555555555555555555BB /* RunningDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningDemoView.swift; sourceTree = "<group>"; };
+		C65651F0929BD30431988091 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C85B8C6E7A65B45D6851C6F9 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		DD66666666666666666666DD /* SimpleConditionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleConditionCheck.swift; sourceTree = "<group>"; };
 		DD77777777777777777777DD /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
 		DD88888888888888888888DD /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
 		DD99999999999999999999DD /* AchievementSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSheetView.swift; sourceTree = "<group>"; };
 		DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementShareView.swift; sourceTree = "<group>"; };
 		DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementTestView.swift; sourceTree = "<group>"; };
+		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
+		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
+		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		2B75B9452F31C3D000B0693F /* voice */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = voice; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		ABE2C3781007872B463C8892 /* Frameworks */ = {
@@ -110,6 +114,7 @@
 		16994F433278FFA0F943D8B3 = {
 			isa = PBXGroup;
 			children = (
+				2B75B9452F31C3D000B0693F /* voice */,
 				6A67206C7BB05873D7687676 /* AIRunningCoach-Bridging-Header.h */,
 				88700A4E8EF7AD6D3FABF1D2 /* AIRunningCoachApp.swift */,
 				B36821D05F7DD4C28B01B428 /* Assets.xcassets */,
@@ -210,6 +215,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				2B75B9452F31C3D000B0693F /* voice */,
+			);
 			name = AIRunningCoach;
 			packageProductDependencies = (
 				B2BCBDD4E07AAE7482390283 /* Supabase */,
@@ -246,7 +254,6 @@
 			packageReferences = (
 				CCFF14416EC8272FC0F3C2B2 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
-			preferredProjectObjectVersion = 54;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

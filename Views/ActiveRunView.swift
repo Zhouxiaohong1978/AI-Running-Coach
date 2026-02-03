@@ -12,7 +12,7 @@ struct ActiveRunView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var locationManager = LocationManager()
     @StateObject private var dataManager = RunDataManager.shared
-    @StateObject private var speechManager = SpeechManager.shared
+    // @StateObject private var speechManager = SpeechManager.shared  // 已弃用：改用真实语音
     @StateObject private var aiManager = AIManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
@@ -77,7 +77,7 @@ struct ActiveRunView: View {
                     // 语音开关按钮（麦克风图标）
                     Button(action: {
                         isVoiceEnabled.toggle()
-                        speechManager.isEnabled = isVoiceEnabled
+                        audioPlayerManager.isEnabled = isVoiceEnabled
                     }) {
                         Image(systemName: isVoiceEnabled ? "mic.fill" : "mic.slash.fill")
                             .font(.system(size: 16))
@@ -236,10 +236,11 @@ struct ActiveRunView: View {
                             isPaused.toggle()
                             if isPaused {
                                 locationManager.pauseTracking()
-                                speechManager.announcePause()
+                                // 暂停时停止音频播放
+                                audioPlayerManager.stopAll()
                             } else {
                                 locationManager.resumeTracking()
-                                speechManager.announceResume()
+                                // 继续时无需语音提示
                             }
                         }) {
                             Image(systemName: isPaused ? "play.fill" : "pause.fill")
@@ -438,30 +439,8 @@ struct ActiveRunView: View {
     private func checkAchievementProgress(distanceKm: Double) {
         let calories = locationManager.calories
 
-        // 1公里成就 - 90%提醒（0.9km）
-        if distanceKm >= 0.9 && distanceKm < 1.0 && !achievement1kmWarned {
-            achievement1kmWarned = true
-            let message = "再跑100米就解锁1公里成就了！"
-            speechManager.speak(message, priority: .high)
-            showFeedbackBubble("🏆 " + message)
-        }
-
-        // 3公里成就 - 90%提醒（2.7km）
-        // 注意：2.8km后停止提醒，让完成流程更纯净
-        if distanceKm >= 2.7 && distanceKm < 2.8 && !achievement3kmWarned {
-            achievement3kmWarned = true
-            let message = "还剩300米就能解锁3公里成就，冲啊！"
-            speechManager.speak(message, priority: .high)
-            showFeedbackBubble("🏆 " + message)
-        }
-
-        // 300卡成就 - 90%提醒（270卡）
-        if calories >= 270 && calories < 300 && !achievement300calWarned && distanceKm < 2.8 {
-            achievement300calWarned = true
-            let message = "再坚持一下就能解锁300卡成就！"
-            speechManager.speak(message, priority: .high)
-            showFeedbackBubble("🏆 " + message)
-        }
+        // 已移除旧的AI成就提醒语音
+        // 现在使用VoiceAssetMap中预录制的真实语音
     }
 
     /// 显示教练反馈气泡

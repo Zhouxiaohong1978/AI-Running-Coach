@@ -491,9 +491,17 @@ struct AchievementBanner: View {
 
             Spacer()
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white.opacity(0.6))
+            // 语音播放图标
+            VStack(spacing: 4) {
+                Image(systemName: "speaker.wave.2.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+
+                Text("点击听语音")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+            .padding(.horizontal, 8)
         }
         .padding(16)
         .background(
@@ -504,6 +512,7 @@ struct AchievementBanner: View {
             )
         )
         .cornerRadius(12)
+        .shadow(color: Color.purple.opacity(0.3), radius: 8, x: 0, y: 4)
     }
 }
 
