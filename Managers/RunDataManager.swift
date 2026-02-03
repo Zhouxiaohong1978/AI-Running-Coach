@@ -271,4 +271,12 @@ class RunDataManager: ObservableObject {
         let totalPace = runRecords.reduce(0) { $0 + $1.pace }
         return totalPace / Double(runRecords.count)
     }
+
+    /// 清空所有数据（删除账户时使用）
+    func clearAllData() async {
+        // 清空本地数据
+        runRecords.removeAll()
+        UserDefaults.standard.removeObject(forKey: localStorageKey)
+        print("✅ [RunDataManager] 已清空本地数据")
+    }
 }

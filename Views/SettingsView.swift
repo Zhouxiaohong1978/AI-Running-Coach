@@ -12,6 +12,7 @@ struct SettingsView: View {
     @StateObject private var dataManager = RunDataManager.shared
     @State private var showLoginSheet = false
     @State private var showLogoutAlert = false
+    @State private var showDeleteAccountAlert = false
 
     var body: some View {
         NavigationView {
@@ -37,6 +38,16 @@ struct SettingsView: View {
                         }) {
                             HStack {
                                 Text("退出登录")
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                        }
+
+                        Button(action: {
+                            showDeleteAccountAlert = true
+                        }) {
+                            HStack {
+                                Text("删除账户")
                                     .foregroundColor(.red)
                                 Spacer()
                             }
@@ -170,6 +181,22 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("退出后，您的跑步数据仍会保存在本地")
+            }
+            .alert("删除账户", isPresented: $showDeleteAccountAlert) {
+                Button("取消", role: .cancel) {}
+                Button("删除", role: .destructive) {
+                    Task {
+                        do {
+                            try await authManager.deleteAccount()
+                            // 删除本地数据
+                            await dataManager.clearAllData()
+                        } catch {
+                            print("❌ 删除账户失败: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            } message: {
+                Text("删除账户后，您的所有数据将被永久删除且无法恢复。确定要继续吗？")
             }
         }
     }

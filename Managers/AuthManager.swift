@@ -140,6 +140,30 @@ class AuthManager: ObservableObject {
         print("✅ [AuthManager] 已退出登录")
     }
 
+    /// 删除账户
+    func deleteAccount() async throws {
+        isLoading = true
+        defer { isLoading = false }
+
+        guard let userId = currentUserId else {
+            throw NSError(
+                domain: "AuthManager",
+                code: -5,
+                userInfo: [NSLocalizedDescriptionKey: "未找到用户信息"]
+            )
+        }
+
+        print("🗑️ [AuthManager] 开始删除账户: \(userId)")
+
+        // 调用 Supabase RPC 函数删除用户（需要在 Supabase 后台创建此函数）
+        try await supabase.rpc("delete_user").execute()
+
+        // 退出登录
+        currentUser = nil
+        isAuthenticated = false
+        print("✅ [AuthManager] 账户已删除")
+    }
+
     /// 重置密码（发送邮件）
     func resetPassword(email: String) async throws {
         isLoading = true
