@@ -19,6 +19,9 @@ struct LoginView: View {
     @State private var showError = false
     @State private var showForgotPassword = false
     @State private var forgotPasswordEmail = ""
+    @State private var showOTPVerification = false  // 显示 OTP 验证界面
+    @State private var otpCode = ""  // OTP 验证码
+    @State private var verificationEmail = ""  // 待验证的邮箱
 
     var body: some View {
         NavigationView {
@@ -211,6 +214,19 @@ struct LoginView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
+        .sheet(isPresented: $showOTPVerification) {
+            OTPVerificationView(
+                email: verificationEmail,
+                otpCode: $otpCode,
+                onVerify: verifyOTP,
+                onCancel: {
+                    showOTPVerification = false
+                    otpCode = ""
+                }
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     // MARK: - Actions
@@ -233,9 +249,44 @@ struct LoginView: View {
 
                 // 登录/注册成功后关闭页面
                 dismiss()
+            } catch let error as NSError {
+                print("❌ [认证] 失败: \(error.localizedDescription)")
+
+                // 检查是否需要邮箱验证（code -4）
+                if error.code == -4 && error.domain == "AuthManager" {
+                    print("📧 [注册] 需要邮箱验证，显示 OTP 输入界面")
+                    verificationEmail = email
+                    showOTPVerification = true
+                } else {
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
             } catch {
                 print("❌ [认证] 失败: \(error.localizedDescription)")
                 errorMessage = error.localizedDescription
+                showError = true
+            }
+        }
+    }
+
+    // 验证 OTP
+    private func verifyOTP() {
+        Task {
+            do {
+                try await authManager.verifyOTP(email: verificationEmail, token: otpCode)
+                print("✅ [验证] OTP 验证成功")
+
+                // 保存真实姓名（如果填写了）
+                if !realName.isEmpty {
+                    UserDefaults.standard.set(realName, forKey: "user_real_name")
+                    print("✅ [注册] 已保存真实姓名: \(realName)")
+                }
+
+                showOTPVerification = false
+                dismiss()
+            } catch {
+                print("❌ [验证] OTP 验证失败: \(error.localizedDescription)")
+                errorMessage = "验证码错误，请重新输入"
                 showError = true
             }
         }
@@ -276,6 +327,77 @@ extension View {
         ZStack(alignment: alignment) {
             placeholder().opacity(shouldShow ? 1 : 0)
             self
+        }
+    }
+}
+
+// MARK: - OTP Verification View
+
+struct OTPVerificationView: View {
+    let email: String
+    @Binding var otpCode: String
+    let onVerify: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            // 标题
+            VStack(spacing: 8) {
+                Image(systemName: "envelope.badge.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+
+                Text("验证邮箱")
+                    .font(.system(size: 24, weight: .bold))
+
+                Text("我们已向 \(email) 发送了验证码")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.top, 40)
+
+            // OTP 输入框
+            VStack(alignment: .leading, spacing: 8) {
+                Text("验证码")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.secondary)
+
+                TextField("输入 6 位验证码", text: $otpCode)
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .padding()
+                    .background(Color(UIColor.systemGray6))
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal, 32)
+
+            // 按钮
+            VStack(spacing: 12) {
+                // 验证按钮
+                Button(action: onVerify) {
+                    Text("验证")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(otpCode.count == 6 ? Color(red: 0.5, green: 0.8, blue: 0.1) : Color.gray)
+                        .cornerRadius(12)
+                }
+                .disabled(otpCode.count != 6)
+
+                // 取消按钮
+                Button(action: onCancel) {
+                    Text("取消")
+                        .font(.system(size: 16))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 32)
+
+            Spacer()
         }
     }
 }
