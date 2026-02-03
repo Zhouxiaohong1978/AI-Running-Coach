@@ -5,6 +5,7 @@ class VoiceTriggerEngine: ObservableObject {
     static let shared = VoiceTriggerEngine()
     private let voiceService = VoiceService.shared
     let scriptManager = VoiceScriptManager.shared  // 改为 public，方便 UI 访问
+    private let logger = DebugLogger.shared  // 日志记录器
     private var timer: Timer?
     private var isSpeaking = false
     @Published var currentMode: RunMode = .beginner
@@ -23,6 +24,9 @@ class VoiceTriggerEngine: ObservableObject {
         print("🎯 VoiceTriggerEngine.start() 被调用了！")
         print("🚀 开始跑步，模式: \(mode)")
         print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+        logger.log("🚀 开始跑步 - 模式: \(mode == .beginner ? "新手3公里" : "减肥燃脂")", category: "START")
+
         currentMode = mode
         scriptManager.reset()
         context = RunContext() // 重置上下文
@@ -38,6 +42,7 @@ class VoiceTriggerEngine: ObservableObject {
         print("⏰ 启动定时器...")
         startTimer()
         print("✅ VoiceTriggerEngine 启动完成！\n")
+        logger.log("✅ 触发引擎启动完成", category: "START")
     }
 
     func stop() {
@@ -64,10 +69,17 @@ class VoiceTriggerEngine: ObservableObject {
         if let d = distance {
             lastDistance = context.distance  // 记录旧距离
             context.distance = d
+            logger.log("📍 距离更新: \(String(format: "%.2f", d))km", category: "DATA")
         }
         if let c = calories { context.calories = c }
-        if let hr = heartRate { context.heartRate = hr }
-        if let t = duration { context.duration = t }
+        if let hr = heartRate {
+            context.heartRate = hr
+            logger.log("💓 心率更新: \(hr) BPM", category: "DATA")
+        }
+        if let t = duration {
+            context.duration = t
+            logger.log("⏱️ 时长更新: \(Int(t/60))分钟", category: "DATA")
+        }
         if context.duration > 1200 { context.fatigueLevel = "high" }
         else if context.duration > 600 { context.fatigueLevel = "medium" }
     }
@@ -186,6 +198,7 @@ class VoiceTriggerEngine: ObservableObject {
         let text = script.resolvedText(with: context)
 
         print("📢 准备播放: \(text.prefix(30))... (冷却: \(script.cooldown)秒)")
+        logger.log("🎯 触发语音: \(script.id) - \(text.prefix(50))...", category: "VOICE")
 
         Task { @MainActor in
             let success = await voiceService.speak(
@@ -196,8 +209,10 @@ class VoiceTriggerEngine: ObservableObject {
 
             if success {
                 print("✅ 语音播放成功")
+                self.logger.log("✅ 播放成功: \(script.id)", category: "VOICE")
             } else {
                 print("❌ 语音播放失败")
+                self.logger.log("❌ 播放失败: \(script.id)", category: "ERROR")
             }
 
             // 等待一小段时间，确保语音完全播放完

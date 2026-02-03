@@ -16,6 +16,7 @@ struct ActiveRunView: View {
     @StateObject private var aiManager = AIManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
+    private let logger = DebugLogger.shared  // 日志记录器
 
     @State private var isPaused = false
     @State private var showSummary = false
@@ -304,6 +305,7 @@ struct ActiveRunView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            logger.log("🏃 开始真实跑步", category: "START")
             locationManager.startTracking()
             lastFeedbackTime = Date()
 
@@ -314,6 +316,7 @@ struct ActiveRunView: View {
             // 延迟一点播报，确保视图完全加载
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 print("🏃 MVP 1.0 开始跑步，三位一体联动启动")
+                self.logger.log("🎯 准备播放开始语音", category: "VOICE")
                 // 播放开始语音（女声）
                 playStartVoice()
             }
@@ -392,6 +395,7 @@ struct ActiveRunView: View {
     /// 检查并触发语音（距离变化时调用）
     private func checkAndAnnounce(distance: Double) {
         let distanceKm = distance / 1000.0
+        logger.log("📍 距离更新: \(String(format: "%.3f", distanceKm))km", category: "DATA")
 
         // 1. 检查跑中距离语音（男声）
         checkDistanceVoice(distanceKm: distanceKm)
@@ -399,6 +403,7 @@ struct ActiveRunView: View {
         // 2. 检查完成语音（3km）
         if distanceKm >= 3.0 && !hasSpoken3km {
             hasSpoken3km = true
+            logger.log("🎉 到达3km，触发完成语音", category: "VOICE")
             playCompleteVoices()
         }
 
@@ -408,11 +413,15 @@ struct ActiveRunView: View {
 
     /// 检查距离里程碑语音
     private func checkDistanceVoice(distanceKm: Double) {
-        guard isVoiceEnabled else { return }
+        guard isVoiceEnabled else {
+            logger.log("⚠️ 语音已关闭，跳过检查", category: "WARN")
+            return
+        }
 
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
             // 播放语音
+            logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
             audioPlayerManager.play(voice.fileName, priority: voice.priority)
             showFeedbackBubble(voice.description)
             print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")

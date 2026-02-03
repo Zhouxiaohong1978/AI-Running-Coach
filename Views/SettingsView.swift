@@ -121,10 +121,20 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+
+                    NavigationLink(destination: DebugLogView()) {
+                        HStack {
+                            Image(systemName: "doc.text.magnifyingglass")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                            Text("运行日志")
+                            Spacer()
+                        }
+                    }
                 } header: {
                     Text("开发者选项")
                 } footer: {
-                    Text("测试 AI 语音教练系统和成就系统")
+                    Text("测试 AI 语音教练系统、成就系统和查看运行日志")
                 }
 
                 // 关于部分
