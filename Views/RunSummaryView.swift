@@ -13,6 +13,7 @@ struct RunSummaryView: View {
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 成就语音
+    @StateObject private var aiManager = AIManager.shared  // AI建议生成
     var runRecord: RunRecord?
 
     private let voiceMap = VoiceAssetMap.shared
@@ -23,6 +24,8 @@ struct RunSummaryView: View {
     )
     @State private var weeklyStats: [WeeklyRunStats] = []
     @State private var showAchievementSheet = false
+    @State private var aiSuggestion: String = ""
+    @State private var isLoadingAI: Bool = false
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -187,7 +190,20 @@ struct RunSummaryView: View {
                                 .foregroundColor(Color(red: 0.3, green: 0.5, blue: 0.1))
                         }
 
-                        Text("后半程配速保持得很好！你的耐力正在提升。下次可以尝试加入间歇冲刺来提高最大摄氧量。")
+                        if isLoadingAI {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("AI教练分析中...")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.gray)
+                            }
+                        } else if aiSuggestion.isEmpty {
+                            Text("暂无AI建议")
+                                .font(.system(size: 13))
+                                .foregroundColor(.gray)
+                        } else {
+                            Text(aiSuggestion)
                             .font(.system(size: 15))
                             .foregroundColor(.black)
                             .lineSpacing(6)
@@ -281,6 +297,7 @@ struct RunSummaryView: View {
         }
         .onAppear {
             calculateWeeklyStats()
+            generateAISuggestion()
         }
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSheetView()
@@ -358,6 +375,46 @@ struct RunSummaryView: View {
 
         audioPlayerManager.play(voice.fileName, priority: voice.priority, allowRepeat: true)
         print("🎙️ 播放成就语音: \(voice.fileName)")
+    }
+
+    /// 生成AI建议
+    private func generateAISuggestion() {
+        guard let record = runRecord else {
+            aiSuggestion = "无跑步数据"
+            return
+        }
+
+        // 如果距离太短，不调用AI
+        if record.distance < 100 {
+            aiSuggestion = "跑步距离太短，暂无建议"
+            return
+        }
+
+        isLoadingAI = true
+
+        Task {
+            do {
+                let suggestion = try await aiManager.getCoachFeedback(
+                    currentPace: record.pace,
+                    targetPace: nil,
+                    distance: record.distance,
+                    totalDistance: record.distance,
+                    duration: record.duration,
+                    heartRate: nil
+                )
+
+                await MainActor.run {
+                    aiSuggestion = suggestion
+                    isLoadingAI = false
+                }
+            } catch {
+                await MainActor.run {
+                    aiSuggestion = "AI建议生成失败：\(error.localizedDescription)"
+                    isLoadingAI = false
+                }
+                print("❌ AI建议生成失败: \(error)")
+            }
+        }
     }
 
     private func formatRunDate(_ date: Date) -> String {
