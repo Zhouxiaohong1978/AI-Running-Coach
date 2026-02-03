@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A16B363C8A7D23A6306F61 /* DebugLogger.swift */; };
+		4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827E775AD7E76C78ECE86370 /* DebugLogView.swift */; };
 		013E8DF120C6E48A11C0550B /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */; };
 		21AA9534577C9498A99CFB43 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B78260DAB77DEDF48D8765 /* ContentView.swift */; };
 		22BD2B8A7BD2B0444558525F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C65651F0929BD30431988091 /* SettingsView.swift */; };
@@ -51,6 +53,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		10A16B363C8A7D23A6306F61 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
+		827E775AD7E76C78ECE86370 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
 		08283168190FCE5DFD3E65E2 /* AIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIManager.swift; sourceTree = "<group>"; };
 		124707344CABB85DE155A5AC /* TrainingPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPlanView.swift; sourceTree = "<group>"; };
 		19618B5AC9B32D7DC89473B9 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
@@ -149,7 +153,8 @@
 				71F4408E09232A697F86A2C0 /* SignInWithAppleButton.swift */,
 				BB377A3912ACCB629159CE88 /* SupabaseTestView.swift */,
 				124707344CABB85DE155A5AC /* TrainingPlanView.swift */,
-			);
+			
+				827E775AD7E76C78ECE86370 /* DebugLogView.swift */,);
 			path = Views;
 			sourceTree = "<group>";
 		};
@@ -187,7 +192,8 @@
 				BB33333333333333333333BB /* VoiceScriptManager.swift */,
 				BB44444444444444444444BB /* VoiceTriggerEngine.swift */,
 				FF11111111111111111111FF /* AudioPlayerManager.swift */,
-			);
+			
+				10A16B363C8A7D23A6306F61 /* DebugLogger.swift */,);
 			path = Managers;
 			sourceTree = "<group>";
 		};
@@ -317,7 +323,9 @@
 				CC99999999999999999999CC /* AchievementSheetView.swift in Sources */,
 				CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */,
 				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
-			);
+			
+				5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */,
+				4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
