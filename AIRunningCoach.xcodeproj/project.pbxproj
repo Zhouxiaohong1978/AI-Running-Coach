@@ -38,6 +38,8 @@
 		AA11111111111111111111AA /* VoiceScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11111111111111111111BB /* VoiceScript.swift */; };
 		AA22222222222222222222AA /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22222222222222222222BB /* VoiceService.swift */; };
 		AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB33333333333333333333BB /* VoiceScriptManager.swift */; };
+		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
+		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
 		AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB44444444444444444444BB /* VoiceTriggerEngine.swift */; };
 		AA55555555555555555555AA /* RunningDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB55555555555555555555BB /* RunningDemoView.swift */; };
 		CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD66666666666666666666DD /* SimpleConditionCheck.swift */; };
@@ -81,6 +83,8 @@
 		BB11111111111111111111BB /* VoiceScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScript.swift; sourceTree = "<group>"; };
 		BB22222222222222222222BB /* VoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceService.swift; sourceTree = "<group>"; };
 		BB33333333333333333333BB /* VoiceScriptManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceScriptManager.swift; sourceTree = "<group>"; };
+		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
+		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
 		BB44444444444444444444BB /* VoiceTriggerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTriggerEngine.swift; sourceTree = "<group>"; };
 		BB55555555555555555555BB /* RunningDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningDemoView.swift; sourceTree = "<group>"; };
 		DD66666666666666666666DD /* SimpleConditionCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleConditionCheck.swift; sourceTree = "<group>"; };
@@ -159,6 +163,7 @@
 				62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */,
 				729CB00236199C7E5B34912F /* TrainingPlan.swift */,
 				BB11111111111111111111BB /* VoiceScript.swift */,
+				FF22222222222222222222FF /* VoiceAssetMap.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -176,6 +181,7 @@
 				BB22222222222222222222BB /* VoiceService.swift */,
 				BB33333333333333333333BB /* VoiceScriptManager.swift */,
 				BB44444444444444444444BB /* VoiceTriggerEngine.swift */,
+				FF11111111111111111111FF /* AudioPlayerManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -296,6 +302,8 @@
 				AA33333333333333333333AA /* VoiceScriptManager.swift in Sources */,
 				AA44444444444444444444AA /* VoiceTriggerEngine.swift in Sources */,
 				AA55555555555555555555AA /* RunningDemoView.swift in Sources */,
+				EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */,
+				EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */,
 				CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */,
 				CC77777777777777777777CC /* AchievementManager.swift in Sources */,
 				CC88888888888888888888CC /* Achievement.swift in Sources */,

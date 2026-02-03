@@ -14,6 +14,8 @@ struct ActiveRunView: View {
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var speechManager = SpeechManager.shared
     @StateObject private var aiManager = AIManager.shared
+    @StateObject private var achievementManager = AchievementManager.shared
+    @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
 
     @State private var isPaused = false
     @State private var showSummary = false
@@ -28,6 +30,19 @@ struct ActiveRunView: View {
     @State private var holdProgress: CGFloat = 0
     @State private var isHolding = false
     @State private var holdTimer: Timer?
+
+    // MVP 1.0: 智能语音系统
+    @State private var userGoal: TrainingGoal = .threeK  // 用户当前训练目标
+    @State private var hasSpokenStart = false
+    @State private var hasSpoken500m = false
+    @State private var hasSpoken1km = false
+    @State private var hasSpoken1_5km = false
+    @State private var hasSpoken2km = false
+    @State private var hasSpoken2_5km = false
+    @State private var hasSpoken3km = false
+    @State private var achievement1kmWarned = false  // 是否已提醒1km成就
+    @State private var achievement3kmWarned = false  // 是否已提醒3km成就
+    @State private var achievement300calWarned = false  // 是否已提醒300卡成就
 
     var body: some View {
         ZStack {
@@ -291,16 +306,20 @@ struct ActiveRunView: View {
             locationManager.startTracking()
             lastFeedbackTime = Date()
 
+            // 重置音频播放状态
+            audioPlayerManager.reset()
+            audioPlayerManager.isEnabled = isVoiceEnabled
+
             // 延迟一点播报，确保视图完全加载
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                speechManager.isEnabled = isVoiceEnabled
-                print("🏃 开始跑步，准备播报，isVoiceEnabled=\(isVoiceEnabled)")
-                speechManager.announceStart()
+                print("🏃 MVP 1.0 开始跑步，三位一体联动启动")
+                // 播放开始语音（女声）
+                playStartVoice()
             }
         }
         .onDisappear {
             locationManager.stopTracking()
-            speechManager.stopAll()
+            audioPlayerManager.stopAll()
         }
         .onChange(of: locationManager.distance) { newDistance in
             checkAndAnnounce(distance: newDistance)
@@ -326,11 +345,11 @@ struct ActiveRunView: View {
         isEnding = true
         locationManager.stopTracking()
 
-        // 播报结束语音
-        speechManager.announceFinish(
-            distance: locationManager.distance,
-            duration: locationManager.duration
-        )
+        // 检查是否提前结束（未到3km）
+        let distanceKm = locationManager.distance / 1000.0
+        if distanceKm < 3.0 {
+            playEarlyStopVoice()
+        }
 
         // 创建跑步记录
         let record = RunRecord(
@@ -357,119 +376,123 @@ struct ActiveRunView: View {
         }
     }
 
-    // MARK: - AI Coach Methods
+    // MARK: - MVP 1.0: 三位一体语音系统（训练计划 + 真实语音 + 成就系统）
 
-    /// 检查并播报里程和 AI 反馈
+    private let voiceMap = VoiceAssetMap.shared
+
+    /// 播放开始语音（女声：跑前_01）
+    private func playStartVoice() {
+        guard let startVoice = voiceMap.getStartVoice() else { return }
+        audioPlayerManager.play(startVoice.fileName, priority: startVoice.priority)
+        showFeedbackBubble(startVoice.description)
+        print("🎙️ 播放开始语音: \(startVoice.fileName)")
+    }
+
+    /// 检查并触发语音（距离变化时调用）
     private func checkAndAnnounce(distance: Double) {
-        let distanceMeters = Int(distance)
-        let current200m = distanceMeters / 200
+        let distanceKm = distance / 1000.0
 
-        // 每 200 米播报一次距离
-        if current200m > lastAnnouncedKm && current200m > 0 {
-            lastAnnouncedKm = current200m
+        // 1. 检查跑中距离语音（男声）
+        checkDistanceVoice(distanceKm: distanceKm)
 
-            // 播报距离（格式化为公里或米）
-            let distanceKm = distance / 1000.0
-            if distanceKm >= 1.0 {
-                // 大于等于 1km，播报公里数
-                speechManager.announceDistance(distanceKm)
-            } else {
-                // 小于 1km，播报米数
-                speechManager.speak("已跑\(distanceMeters)米", priority: .low)
-            }
+        // 2. 检查完成语音（3km）
+        if distanceKm >= 3.0 && !hasSpoken3km {
+            hasSpoken3km = true
+            playCompleteVoices()
         }
 
-        // AI 反馈触发：每 200m 触发一次，或每 3 分钟触发一次
-        let timeSinceLastFeedback = Date().timeIntervalSince(lastFeedbackTime)
-        let distanceMetersInt = Int(distance)
-        let lastFeedbackDistanceInt = Int(lastFeedbackDistance)
-        // 每 200m 触发（跨过 200m 边界）
-        let is200mMilestone = distanceMetersInt / 200 > lastFeedbackDistanceInt / 200 && distanceMetersInt >= 200
-        // 时间触发
-        let isTimeTrigger = timeSinceLastFeedback >= 180 && locationManager.duration > 60
-        let shouldTrigger = isTimeTrigger || (is200mMilestone && timeSinceLastFeedback > 15)
-
-        if shouldTrigger {
-            lastFeedbackTime = Date()
-            lastFeedbackDistance = distance
-            // 延迟一秒，让距离播报先完成
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.fetchAIFeedback()
-            }
-        }
+        // 3. 检查成就进度提醒（90%警告）
+        checkAchievementProgress(distanceKm: distanceKm)
     }
 
-    /// 获取 AI 教练反馈
-    private func fetchAIFeedback() {
+    /// 检查距离里程碑语音
+    private func checkDistanceVoice(distanceKm: Double) {
         guard isVoiceEnabled else { return }
-        guard locationManager.currentPace > 0 else { return }
 
-        Task {
-            do {
-                let feedback = try await aiManager.getCoachFeedback(
-                    currentPace: locationManager.currentPace,
-                    distance: locationManager.distance / 1000.0,
-                    duration: locationManager.duration
-                )
+        // 获取当前距离对应的语音
+        if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
+            // 播放语音
+            audioPlayerManager.play(voice.fileName, priority: voice.priority)
+            showFeedbackBubble(voice.description)
+            print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
+        }
+    }
 
-                await MainActor.run {
-                    currentFeedback = feedback
-                    speechManager.speak(feedback, priority: .high)
+    /// 播放完成语音（女声：跑后_01 → 跑后_02）
+    private func playCompleteVoices() {
+        let completeVoices = voiceMap.getCompleteVoices()
 
-                    // 显示反馈气泡
-                    withAnimation(.spring()) {
-                        showCoachFeedback = true
-                    }
-
-                    // 5秒后隐藏
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        withAnimation {
-                            showCoachFeedback = false
-                        }
-                    }
-                }
-            } catch {
-                print("❌ AI反馈获取失败: \(error.localizedDescription)")
-
-                // 使用后备反馈（即使 AI 失败也要给用户反馈）
-                await MainActor.run {
-                    let fallbackFeedback = getFallbackFeedback()
-                    currentFeedback = fallbackFeedback
-                    speechManager.speak(fallbackFeedback, priority: .high)
-
-                    // 显示反馈气泡
-                    withAnimation(.spring()) {
-                        showCoachFeedback = true
-                    }
-
-                    // 5秒后隐藏
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        withAnimation {
-                            showCoachFeedback = false
-                        }
-                    }
-                }
+        // 按顺序播放两条完成语音
+        for (index, voice) in completeVoices.enumerated() {
+            // 第二条语音延迟播放（等第一条播完）
+            let delay = index == 0 ? 0.0 : 3.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.audioPlayerManager.play(voice.fileName, priority: voice.priority)
+                self.showFeedbackBubble(voice.description)
+                print("🎙️ 播放完成语音: \(voice.fileName)")
             }
         }
     }
 
-    /// 获取后备反馈（AI 失败时使用）
-    private func getFallbackFeedback() -> String {
-        let fallbacks = [
-            "配速稳定，保持节奏，你做得很好！",
-            "继续坚持，你已经跑了这么远了！",
-            "呼吸均匀，保持这个状态！",
-            "很棒的表现，继续加油！",
-            "注意配速，不要太快也不要太慢。",
-            "保持节奏，稳定前进！",
-            "你的状态不错，继续保持！",
-            "专注呼吸，放松肩膀，跑得更轻松。"
-        ]
+    /// 成就系统联动检查（90%警告，使用TTS提醒）
+    private func checkAchievementProgress(distanceKm: Double) {
+        let calories = locationManager.calories
 
-        // 基于距离选择不同的反馈
-        let distanceKm = locationManager.distance / 1000.0
-        let index = Int(distanceKm) % fallbacks.count
-        return fallbacks[index]
+        // 1公里成就 - 90%提醒（0.9km）
+        if distanceKm >= 0.9 && distanceKm < 1.0 && !achievement1kmWarned {
+            achievement1kmWarned = true
+            let message = "再跑100米就解锁1公里成就了！"
+            speechManager.speak(message, priority: .high)
+            showFeedbackBubble("🏆 " + message)
+        }
+
+        // 3公里成就 - 90%提醒（2.7km）
+        // 注意：2.8km后停止提醒，让完成流程更纯净
+        if distanceKm >= 2.7 && distanceKm < 2.8 && !achievement3kmWarned {
+            achievement3kmWarned = true
+            let message = "还剩300米就能解锁3公里成就，冲啊！"
+            speechManager.speak(message, priority: .high)
+            showFeedbackBubble("🏆 " + message)
+        }
+
+        // 300卡成就 - 90%提醒（270卡）
+        if calories >= 270 && calories < 300 && !achievement300calWarned && distanceKm < 2.8 {
+            achievement300calWarned = true
+            let message = "再坚持一下就能解锁300卡成就！"
+            speechManager.speak(message, priority: .high)
+            showFeedbackBubble("🏆 " + message)
+        }
+    }
+
+    /// 显示教练反馈气泡
+    private func showFeedbackBubble(_ message: String) {
+        currentFeedback = message
+        withAnimation(.spring()) {
+            showCoachFeedback = true
+        }
+
+        // 5秒后隐藏
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            withAnimation {
+                showCoachFeedback = false
+            }
+        }
+    }
+
+    /// 播放应急语音（心率过高/状态不佳时调用）
+    func playEmergencyVoice() {
+        guard let voice = voiceMap.getEmergencyVoice() else { return }
+        audioPlayerManager.play(voice.fileName, priority: voice.priority)
+        showFeedbackBubble(voice.description)
+        print("🚨 播放应急语音: \(voice.fileName)")
+    }
+
+    /// 播放提前结束语音（用户提前停止时调用）
+    func playEarlyStopVoice() {
+        guard let voice = voiceMap.getEarlyStopVoice() else { return }
+        audioPlayerManager.play(voice.fileName, priority: voice.priority)
+        showFeedbackBubble(voice.description)
+        print("⏹️ 播放提前结束语音: \(voice.fileName)")
     }
 
     private func startHoldAnimation() {

@@ -12,7 +12,10 @@ struct RunSummaryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
+    @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 成就语音
     var runRecord: RunRecord?
+
+    private let voiceMap = VoiceAssetMap.shared
 
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
@@ -43,8 +46,9 @@ struct RunSummaryView: View {
                     // Map Header
                     ZStack(alignment: .topLeading) {
                         Map(coordinateRegion: $region)
-                            .frame(height: 250)
+                            .frame(height: 180)
 
+                        // 跑步完成标题（左上角）
                         VStack(alignment: .leading, spacing: 4) {
                             Text("跑步完成！")
                                 .font(.system(size: 28, weight: .black))
@@ -57,19 +61,78 @@ struct RunSummaryView: View {
                         .padding(20)
                     }
 
-                    // Achievement Banner（仅在有新成就时显示）
-                    if !achievementManager.recentlyUnlocked.isEmpty {
-                        VStack(spacing: 12) {
+                    // Achievement Banner（地图下方）
+                    VStack(spacing: 12) {
+                        if !achievementManager.recentlyUnlocked.isEmpty {
+                            // 有新成就：显示成就卡片（点击播放语音）
                             ForEach(achievementManager.recentlyUnlocked.prefix(3)) { achievement in
-                                AchievementBanner(achievement: achievement)
+                                Button(action: {
+                                    playAchievementVoice(achievement: achievement)
+                                }) {
+                                    AchievementBanner(achievement: achievement)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                        } else {
+                            // 没有新成就：显示鼓励横幅
+                            Button(action: {
+                                showAchievementSheet = true
+                            }) {
+                                HStack(spacing: 16) {
+                                    // 左侧奖杯（立体效果）
+                                    ZStack {
+                                        // 外圈光晕
+                                        Circle()
+                                            .fill(Color.yellow.opacity(0.3))
+                                            .frame(width: 68, height: 68)
+
+                                        // 内圈背景
+                                        Circle()
+                                            .fill(Color.yellow.opacity(0.5))
+                                            .frame(width: 60, height: 60)
+
+                                        // 奖杯图标
+                                        Text("🏆")
+                                            .font(.system(size: 36))
+                                    }
+
+                                    // 中间文字
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("暂无新成就")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .foregroundColor(.black)
+
+                                        Text("继续加油，再接再厉！")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.black.opacity(0.7))
+                                    }
+
+                                    Spacer()
+
+                                    // 右侧箭头
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.black.opacity(0.5))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.purple.opacity(0.85),
+                                            Color.purple.opacity(0.7)
+                                        ],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(12)
+                                .shadow(color: Color.purple.opacity(0.5), radius: 12, y: 6)
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, -30)
-                        .onTapGesture {
-                            showAchievementSheet = true
-                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, -40)
 
                     // Stats Grid
                     VStack(spacing: 16) {
@@ -167,45 +230,53 @@ struct RunSummaryView: View {
                     .padding(.top, 20)
 
                     Spacer()
-                        .frame(height: 120)
+                        .frame(height: 160)
                 }
             }
 
-            // Bottom Buttons
+            // Bottom Buttons（固定在底部）
             VStack {
                 Spacer()
 
-                HStack(spacing: 16) {
+                HStack(spacing: 12) {
                     Button(action: {
                         dismiss()
                     }) {
-                        HStack {
+                        HStack(spacing: 8) {
                             Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 18))
                             Text("关闭")
+                                .font(.system(size: 16, weight: .semibold))
                         }
-                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color(red: 0.5, green: 0.8, blue: 0.1))
-                        .cornerRadius(12)
+                        .background(Color.gray.opacity(0.7))
+                        .cornerRadius(16)
                     }
 
                     Button(action: {}) {
-                        HStack {
+                        HStack(spacing: 8) {
                             Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 18))
                             Text("分享")
+                                .font(.system(size: 16, weight: .semibold))
                         }
-                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color(red: 0.5, green: 0.8, blue: 0.1))
-                        .cornerRadius(12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(red: 0.5, green: 0.8, blue: 0.1), Color(red: 0.4, green: 0.7, blue: 0.2)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(16)
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 40)
+                .padding(.bottom, 10)
             }
         }
         .onAppear {
@@ -276,6 +347,17 @@ struct RunSummaryView: View {
         } else {
             return String(format: "%02d:%02d", minutes, seconds)
         }
+    }
+
+    /// 播放成就语音（用户点击成就徽章时）
+    private func playAchievementVoice(achievement: Achievement) {
+        guard let voice = voiceMap.getAchievementVoice(achievementName: achievement.title) else {
+            print("⚠️ 未找到成就语音: \(achievement.title)")
+            return
+        }
+
+        audioPlayerManager.play(voice.fileName, priority: voice.priority, allowRepeat: true)
+        print("🎙️ 播放成就语音: \(voice.fileName)")
     }
 
     private func formatRunDate(_ date: Date) -> String {
