@@ -250,7 +250,6 @@ final class AudioPlayerManager: NSObject, ObservableObject {
         // 调试：列出Bundle中的资源
         if let resourcePath = Bundle.main.resourcePath {
             print("📦 Bundle资源路径: \(resourcePath)")
-            let fm = FileManager.default
             if let voicePath = Bundle.main.path(forResource: nil, ofType: nil, inDirectory: "voice") {
                 print("📂 voice目录存在: \(voicePath)")
             } else {
