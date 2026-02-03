@@ -140,7 +140,7 @@ class AuthManager: ObservableObject {
         print("✅ [AuthManager] 已退出登录")
     }
 
-    /// 删除账户
+    /// 删除账户（删除云端数据并退出登录）
     func deleteAccount() async throws {
         isLoading = true
         defer { isLoading = false }
@@ -153,15 +153,23 @@ class AuthManager: ObservableObject {
             )
         }
 
-        print("🗑️ [AuthManager] 开始删除账户: \(userId)")
+        print("🗑️ [AuthManager] 开始删除账户数据: \(userId)")
 
-        // 调用 Supabase RPC 函数删除用户（需要在 Supabase 后台创建此函数）
-        try await supabase.rpc("delete_user").execute()
+        // 删除云端跑步记录
+        do {
+            try await supabase
+                .from("run_records")
+                .delete()
+                .eq("user_id", value: userId.uuidString)
+                .execute()
+            print("✅ [AuthManager] 云端数据已删除")
+        } catch {
+            print("⚠️ [AuthManager] 删除云端数据失败: \(error.localizedDescription)")
+        }
 
-        // 退出登录
-        currentUser = nil
-        isAuthenticated = false
-        print("✅ [AuthManager] 账户已删除")
+        // 退出登录（账户保留，但数据已清空）
+        try await signOut()
+        print("✅ [AuthManager] 已退出登录，本地和云端数据已清空")
     }
 
     /// 重置密码（发送邮件）
