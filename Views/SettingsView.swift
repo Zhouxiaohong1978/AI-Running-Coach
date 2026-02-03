@@ -103,25 +103,6 @@ struct SettingsView: View {
 
                 // 开发者选项
                 Section {
-                    NavigationLink(destination: RunningDemoView()) {
-                        HStack {
-                            Image(systemName: "waveform")
-                                .font(.system(size: 20))
-                            Text("AI语音教练演示")
-                            Spacer()
-                        }
-                    }
-
-                    NavigationLink(destination: AchievementTestView()) {
-                        HStack {
-                            Image(systemName: "trophy.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.orange)
-                            Text("成就系统测试")
-                            Spacer()
-                        }
-                    }
-
                     NavigationLink(destination: DebugLogView()) {
                         HStack {
                             Image(systemName: "doc.text.magnifyingglass")
@@ -134,7 +115,7 @@ struct SettingsView: View {
                 } header: {
                     Text("开发者选项")
                 } footer: {
-                    Text("测试 AI 语音教练系统、成就系统和查看运行日志")
+                    Text("查看跑步过程中的详细运行日志，用于调试")
                 }
 
                 // 关于部分
