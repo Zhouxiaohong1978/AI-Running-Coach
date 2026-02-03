@@ -188,12 +188,12 @@ struct HomeView: View {
     // MARK: - Helper Functions
 
     private func getUserName() -> String {
-        // 从用户数据中获取真实姓名
-        // 优先级：真实姓名 > 邮箱前缀 > 默认"跑友"
+        // 从用户数据中获取用户名
+        // 优先级：用户名 > 邮箱前缀 > 默认"跑友"
 
-        // 1. 从UserDefaults获取用户真实姓名（注册时填写）
-        if let realName = UserDefaults.standard.string(forKey: "user_real_name"), !realName.isEmpty {
-            return realName
+        // 1. 从UserDefaults获取用户名（注册时填写）
+        if let userName = UserDefaults.standard.string(forKey: "user_name"), !userName.isEmpty {
+            return userName
         }
 
         // 2. 使用邮箱前缀

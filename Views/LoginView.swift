@@ -12,7 +12,7 @@ struct LoginView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var email = ""
     @State private var password = ""
-    @State private var realName = ""  // 用户真实姓名（仅注册时使用）
+    @State private var userName = ""  // 用户名（仅注册时使用）
     @State private var selectedTab = 0  // 0: 登录, 1: 注册
     @State private var showPassword = false
     @State private var errorMessage: String?
@@ -72,16 +72,16 @@ struct LoginView: View {
 
                     // 输入表单
                     VStack(spacing: 16) {
-                        // 真实姓名输入（仅注册时显示）
+                        // 用户名输入（仅注册时显示）
                         if selectedTab == 1 {
                             HStack(spacing: 12) {
                                 Image(systemName: "person")
                                     .foregroundColor(.white.opacity(0.6))
                                     .frame(width: 20)
 
-                                TextField("", text: $realName)
-                                    .placeholder(when: realName.isEmpty) {
-                                        Text("真实姓名")
+                                TextField("", text: $userName)
+                                    .placeholder(when: userName.isEmpty) {
+                                        Text("用户名")
                                             .foregroundColor(.white.opacity(0.6))
                                     }
                                     .textContentType(.name)
@@ -170,7 +170,7 @@ struct LoginView: View {
                         .padding()
                         .background(Color.white)
                         .cornerRadius(12)
-                        .disabled(authManager.isLoading || email.isEmpty || password.isEmpty || (selectedTab == 1 && realName.isEmpty))
+                        .disabled(authManager.isLoading || email.isEmpty || password.isEmpty || (selectedTab == 1 && userName.isEmpty))
 
                         // 忘记密码（仅登录模式显示）
                         if selectedTab == 0 {
@@ -276,10 +276,10 @@ struct LoginView: View {
                 try await authManager.verifyOTP(email: verificationEmail, token: otpCode)
                 print("✅ [验证] OTP 验证成功")
 
-                // 保存真实姓名（如果填写了）
-                if !realName.isEmpty {
-                    UserDefaults.standard.set(realName, forKey: "user_real_name")
-                    print("✅ [注册] 已保存真实姓名: \(realName)")
+                // 保存用户名（如果填写了）
+                if !userName.isEmpty {
+                    UserDefaults.standard.set(userName, forKey: "user_name")
+                    print("✅ [注册] 已保存用户名: \(userName)")
                 }
 
                 showOTPVerification = false
