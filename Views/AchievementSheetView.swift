@@ -173,8 +173,9 @@ struct AchievementCard: View {
                     .fill(achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.2) : Color.gray.opacity(0.1))
                     .frame(width: 50, height: 50)
 
-                Text(achievement.icon)
+                Image(systemName: achievement.icon)
                     .font(.system(size: 24))
+                    .foregroundColor(achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1) : .gray)
                     .grayscale(achievement.isUnlocked ? 0 : 0.99)
             }
 

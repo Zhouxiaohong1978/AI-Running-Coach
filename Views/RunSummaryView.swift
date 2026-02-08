@@ -369,13 +369,18 @@ struct RunSummaryView: View {
 
     /// 播放成就语音（用户点击成就徽章时）
     private func playAchievementVoice(achievement: Achievement) {
-        guard let voice = voiceMap.getAchievementVoice(achievementName: achievement.title) else {
-            print("⚠️ 未找到成就语音: \(achievement.title)")
-            return
-        }
+        // 先清空TTS队列，确保播放的是用户点击的那条
+        SpeechManager.shared.stopAll()
 
-        audioPlayerManager.play(voice.fileName, priority: voice.priority, allowRepeat: true)
-        print("🎙️ 播放成就语音: \(voice.fileName)")
+        // 优先使用预录音频
+        if let voice = voiceMap.getAchievementVoice(achievementName: achievement.title) {
+            audioPlayerManager.play(voice.fileName, priority: voice.priority, allowRepeat: true)
+            print("🎙️ 播放成就语音: \(voice.fileName)")
+        } else {
+            // 无预录音频时，使用TTS朗读庆祝语
+            SpeechManager.shared.speak(achievement.celebrationMessage, priority: .high)
+            print("🎙️ TTS播放成就庆祝语: \(achievement.title)")
+        }
     }
 
     /// 生成AI建议
@@ -535,8 +540,9 @@ struct AchievementBanner: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(achievement.icon)
+            Image(systemName: achievement.icon)
                 .font(.system(size: 28))
+                .foregroundColor(.white)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("🏆 成就解锁！")

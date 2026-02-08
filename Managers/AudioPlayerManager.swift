@@ -89,18 +89,19 @@ final class AudioPlayerManager: NSObject, ObservableObject {
     ///   - fileName: 音频文件名（不含扩展名），例如 "跑前_01"
     ///   - priority: 优先级
     ///   - allowRepeat: 是否允许重复播放（默认false）
-    func play(_ fileName: String, priority: AudioPriority = .normal, allowRepeat: Bool = false) {
+    @discardableResult
+    func play(_ fileName: String, priority: AudioPriority = .normal, allowRepeat: Bool = false) -> Bool {
         guard isEnabled else {
             print("🔇 音频已禁用，跳过播放: \(fileName)")
             logger.log("🔇 音频已禁用，跳过: \(fileName)", category: "WARN")
-            return
+            return false
         }
 
         // 检查是否已播放过
         if !allowRepeat && playedAudios.contains(fileName) {
             print("⏭️ 音频已播放过，跳过: \(fileName)")
             logger.log("⏭️ 已播放过，跳过: \(fileName)", category: "WARN")
-            return
+            return false
         }
 
         print("🎵 添加到播放队列: \(fileName), priority: \(priority)")
@@ -118,6 +119,7 @@ final class AudioPlayerManager: NSObject, ObservableObject {
         }
 
         processQueue()
+        return true
     }
 
     /// 停止当前播放

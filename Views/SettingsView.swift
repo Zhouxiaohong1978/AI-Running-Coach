@@ -10,9 +10,11 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var dataManager = RunDataManager.shared
+    @StateObject private var achievementManager = AchievementManager.shared
     @State private var showLoginSheet = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountAlert = false
+    @State private var showResetAchievementAlert = false
 
     var body: some View {
         NavigationView {
@@ -123,6 +125,18 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+
+                    Button(action: {
+                        showResetAchievementAlert = true
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 20))
+                                .foregroundColor(.orange)
+                            Text("重置成就数据")
+                            Spacer()
+                        }
+                    }
                 } header: {
                     Text("开发者选项")
                 } footer: {
@@ -181,6 +195,18 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("退出后，您的跑步数据仍会保存在本地")
+            }
+            .alert("重置成就", isPresented: $showResetAchievementAlert) {
+                Button("取消", role: .cancel) {}
+                Button("重置", role: .destructive) {
+                    Task {
+                        achievementManager.resetAndRecalculate(allRecords: dataManager.runRecords)
+                        await achievementManager.clearCloudAchievements()
+                        await achievementManager.syncToCloud()
+                    }
+                }
+            } message: {
+                Text("将清除所有成就数据（包括测试数据），并根据真实跑步记录重新计算成就进度。")
             }
             .alert("删除账户", isPresented: $showDeleteAccountAlert) {
                 Button("取消", role: .cancel) {}

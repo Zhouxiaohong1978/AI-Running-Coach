@@ -5,7 +5,7 @@ class DebugLogger: ObservableObject {
     static let shared = DebugLogger()
 
     @Published var logs: [String] = []
-    private let maxLogs = 500 // 最多保留500条日志
+    private let maxLogs = 2000 // 最多保留2000条日志（1小时跑步约900条）
 
     private var fileURL: URL {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]

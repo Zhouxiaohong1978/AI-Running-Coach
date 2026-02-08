@@ -10,9 +10,17 @@ import { callBailian } from "../_shared/bailian.ts";
  *   avgPace?: number,       // 平均配速（分钟/公里）
  *   maxDistance?: number,   // 最长距离（公里）
  *   weeklyRuns: number,     // 每周跑步次数
- *   durationWeeks: number   // 计划周期（周）
+ *   durationWeeks: number,  // 计划周期（周）
+ *   currentPlan?: object,   // 用户修改后的当前计划（用于重新生成）
+ *   preferences?: object    // 用户偏好设置
  * }
  */
+
+interface TrainingPreferences {
+  weeklyFrequency?: number;    // 每周训练次数（3-5）
+  preferredDays?: number[];    // 偏好训练日（1-7，周一到周日）
+  intensityLevel?: string;     // 强度等级："easy" | "balanced" | "intense"
+}
 
 interface GeneratePlanRequest {
   goal: string;
@@ -20,6 +28,8 @@ interface GeneratePlanRequest {
   maxDistance?: number;
   weeklyRuns: number;
   durationWeeks: number;
+  currentPlan?: TrainingPlan;        // 用户修改后的计划
+  preferences?: TrainingPreferences;  // 用户偏好
 }
 
 interface DailyTask {
@@ -59,13 +69,19 @@ Deno.serve(async (req: Request) => {
   try {
     // 解析请求
     const body: GeneratePlanRequest = await req.json();
-    const { goal, avgPace, maxDistance, weeklyRuns, durationWeeks } = body;
+    const { goal, avgPace, maxDistance, weeklyRuns, durationWeeks, currentPlan, preferences } = body;
 
     console.log(`📋 收到训练计划生成请求: ${goal}, ${durationWeeks}周`);
+    if (currentPlan) {
+      console.log(`🔄 重新生成模式 - 参考用户修改的计划`);
+    }
+    if (preferences) {
+      console.log(`⚙️  用户偏好: 每周${preferences.weeklyFrequency || weeklyRuns}次, 强度${preferences.intensityLevel || '默认'}`);
+    }
 
     // 构建 prompt
     const userDataContext = buildUserContext(avgPace, maxDistance, weeklyRuns);
-    const prompt = buildPrompt(goal, durationWeeks, userDataContext);
+    const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan);
 
     // 调用阿里云百炼生成计划
     const aiResponse = await callBailian(
@@ -157,20 +173,56 @@ function buildUserContext(
 function buildPrompt(
   goal: string,
   durationWeeks: number,
-  userContext: string
+  userContext: string,
+  preferences?: TrainingPreferences,
+  currentPlan?: TrainingPlan
 ): string {
-  return `请为用户生成一个 ${durationWeeks} 周的跑步训练计划。
+  let prompt = `请为用户生成一个 ${durationWeeks} 周的跑步训练计划。
 
 **用户目标**：${goal}
 
 **用户当前水平**：
-${userContext}
+${userContext}`;
 
-**要求**：
+  // 添加用户偏好说明
+  if (preferences) {
+    prompt += `\n\n**用户偏好**：`;
+
+    if (preferences.weeklyFrequency) {
+      prompt += `\n- 每周训练 ${preferences.weeklyFrequency} 次`;
+    }
+
+    if (preferences.preferredDays && preferences.preferredDays.length > 0) {
+      const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      const days = preferences.preferredDays.map(d => dayNames[d - 1]).join('、');
+      prompt += `\n- 偏好训练日：${days}`;
+    }
+
+    if (preferences.intensityLevel === 'easy') {
+      prompt += `\n- 强度偏好：以轻松跑为主，减少高强度训练（间歇跑）`;
+    } else if (preferences.intensityLevel === 'intense') {
+      prompt += `\n- 强度偏好：追求突破，可以增加节奏跑和间歇跑`;
+    } else {
+      prompt += `\n- 强度偏好：平衡各种训练类型`;
+    }
+  }
+
+  // 参考用户之前的修改
+  if (currentPlan) {
+    prompt += `\n\n**重要提示**：`;
+    prompt += `\n用户对之前生成的计划进行了调整，请在重新生成时：`;
+    prompt += `\n1. 参考用户的修改意图（如调整了某些天的训练安排）`;
+    prompt += `\n2. 保持计划的科学性和递进性`;
+    prompt += `\n3. 尽量满足用户体现的偏好`;
+  }
+
+  prompt += `\n\n**要求**：
 1. 根据用户目标和当前水平，制定科学的渐进式训练计划
 2. 每周3-5次训练，包含不同类型的训练：轻松跑、节奏跑、间歇跑、长距离跑、休息日
 3. 难度递增合理，避免运动损伤
-4. 包含每周训练主题和具体任务
+4. 包含每周训练主题和具体任务`;
+
+  return prompt + `
 
 **请严格按照以下 JSON 格式返回**（只返回 JSON，不要其他文字）：
 

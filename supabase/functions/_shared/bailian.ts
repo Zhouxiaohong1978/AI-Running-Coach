@@ -10,8 +10,15 @@ export interface BailianMessage {
 
 export interface BailianResponse {
   output: {
-    text: string;
-    finish_reason: string;
+    text?: string;
+    finish_reason?: string;
+    choices?: Array<{
+      finish_reason: string;
+      message: {
+        role: string;
+        content: string;
+      };
+    }>;
   };
   usage: {
     input_tokens: number;
@@ -37,8 +44,8 @@ export async function callBailian(
     throw new Error('DASHSCOPE_API_KEY not configured');
   }
 
-  // 阿里云百炼使用 DashScope API
-  const response = await fetch('https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+  // 阿里云百炼使用 DashScope API（国际版）
+  const response = await fetch('https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -65,9 +72,14 @@ export async function callBailian(
 
   const data: BailianResponse = await response.json();
 
-  if (!data.output || !data.output.text) {
+  // 兼容两种返回格式：text格式和message格式
+  const text = data.output?.text
+    || data.output?.choices?.[0]?.message?.content;
+
+  if (!text) {
+    console.error('百炼返回数据:', JSON.stringify(data));
     throw new Error('阿里云百炼返回格式错误');
   }
 
-  return data.output.text;
+  return text;
 }

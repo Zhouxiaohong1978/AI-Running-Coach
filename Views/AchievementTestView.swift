@@ -208,8 +208,9 @@ struct AchievementTestView: View {
 
             ForEach(achievementManager.recentlyUnlocked.prefix(5)) { achievement in
                 HStack(spacing: 12) {
-                    Text(achievement.icon)
+                    Image(systemName: achievement.icon)
                         .font(.system(size: 32))
+                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(achievement.title)

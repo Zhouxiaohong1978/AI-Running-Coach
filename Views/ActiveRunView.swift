@@ -387,8 +387,9 @@ struct ActiveRunView: View {
     /// 播放开始语音（女声：跑前_01）
     private func playStartVoice() {
         guard let startVoice = voiceMap.getStartVoice() else { return }
-        audioPlayerManager.play(startVoice.fileName, priority: startVoice.priority)
-        showFeedbackBubble(startVoice.description)
+        if audioPlayerManager.play(startVoice.fileName, priority: startVoice.priority) {
+            showFeedbackBubble(startVoice.description)
+        }
         print("🎙️ 播放开始语音: \(startVoice.fileName)")
     }
 
@@ -420,10 +421,10 @@ struct ActiveRunView: View {
 
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
-            // 播放语音
             logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
-            audioPlayerManager.play(voice.fileName, priority: voice.priority)
-            showFeedbackBubble(voice.description)
+            if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+                showFeedbackBubble(voice.description)
+            }
             print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
         }
     }
@@ -437,8 +438,9 @@ struct ActiveRunView: View {
             // 第二条语音延迟播放（等第一条播完）
             let delay = index == 0 ? 0.0 : 3.0
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                self.audioPlayerManager.play(voice.fileName, priority: voice.priority)
-                self.showFeedbackBubble(voice.description)
+                if self.audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+                    self.showFeedbackBubble(voice.description)
+                }
                 print("🎙️ 播放完成语音: \(voice.fileName)")
             }
         }
@@ -470,16 +472,18 @@ struct ActiveRunView: View {
     /// 播放应急语音（心率过高/状态不佳时调用）
     func playEmergencyVoice() {
         guard let voice = voiceMap.getEmergencyVoice() else { return }
-        audioPlayerManager.play(voice.fileName, priority: voice.priority)
-        showFeedbackBubble(voice.description)
+        if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+            showFeedbackBubble(voice.description)
+        }
         print("🚨 播放应急语音: \(voice.fileName)")
     }
 
     /// 播放提前结束语音（用户提前停止时调用）
     func playEarlyStopVoice() {
         guard let voice = voiceMap.getEarlyStopVoice() else { return }
-        audioPlayerManager.play(voice.fileName, priority: voice.priority)
-        showFeedbackBubble(voice.description)
+        if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+            showFeedbackBubble(voice.description)
+        }
         print("⏹️ 播放提前结束语音: \(voice.fileName)")
     }
 

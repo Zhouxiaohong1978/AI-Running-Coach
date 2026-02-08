@@ -52,6 +52,12 @@ class AchievementManager: ObservableObject {
 
     /// 检查并更新成就（从RunRecord触发）
     func checkAchievements(from runRecord: RunRecord, allRecords: [RunRecord]) {
+        // 最小有效距离：100米以下的记录不触发任何成就
+        guard runRecord.distance >= 100 else {
+            print("⚠️ 跑步距离不足100米，跳过成就检查")
+            return
+        }
+
         var newlyUnlocked: [Achievement] = []
 
         // 1. 检查距离成就（单次距离）
@@ -106,15 +112,18 @@ class AchievementManager: ObservableObject {
         }
 
         // 5. 检查配速成就（最快配速，值越小越好）
-        for index in achievements.indices where achievements[index].category == .pace {
-            let currentPace = runRecord.pace * 60 // 转换为秒/公里
-            if currentPace < achievements[index].currentValue {
-                achievements[index].currentValue = currentPace
-            }
+        // 配速为0表示无效数据（距离为0或时间为0），跳过检查
+        if runRecord.pace > 0 {
+            for index in achievements.indices where achievements[index].category == .pace {
+                let currentPace = runRecord.pace * 60 // 转换为秒/公里
+                if currentPace < achievements[index].currentValue {
+                    achievements[index].currentValue = currentPace
+                }
 
-            if !achievements[index].isUnlocked && achievements[index].currentValue <= achievements[index].targetValue {
-                unlockAchievement(at: index)
-                newlyUnlocked.append(achievements[index])
+                if !achievements[index].isUnlocked && achievements[index].currentValue <= achievements[index].targetValue {
+                    unlockAchievement(at: index)
+                    newlyUnlocked.append(achievements[index])
+                }
             }
         }
 
@@ -226,6 +235,39 @@ class AchievementManager: ObservableObject {
             // 本地不存储分享次数，仅在云端记录
             // TODO: 同步到Supabase
             print("📤 成就分享: \(achievements[index].title)")
+        }
+    }
+
+    // MARK: - Reset & Recalculate
+
+    /// 重置所有成就并根据真实跑步记录重新计算
+    func resetAndRecalculate(allRecords: [RunRecord]) {
+        // 1. 重置为初始状态
+        achievements = Achievement.allAchievements
+        recentlyUnlocked.removeAll()
+
+        // 2. 用每条真实记录重新计算
+        for record in allRecords {
+            checkAchievements(from: record, allRecords: allRecords)
+        }
+
+        saveAchievements()
+        print("🔄 成就已重置并根据 \(allRecords.count) 条真实记录重新计算")
+    }
+
+    /// 清理云端成就数据
+    func clearCloudAchievements() async {
+        guard let userId = AuthManager.shared.currentUserId else { return }
+
+        do {
+            try await supabase
+                .from("user_achievements")
+                .delete()
+                .eq("user_id", value: userId.uuidString)
+                .execute()
+            print("✅ 云端成就数据已清除")
+        } catch {
+            print("❌ 清除云端成就失败: \(error.localizedDescription)")
         }
     }
 

@@ -33,8 +33,8 @@ class LocationManager: NSObject, ObservableObject {
 
     // GPS 过滤参数
     private let minHorizontalAccuracy: Double = 50.0  // 最小精度要求（米），放宽以确保初始定位
-    private let minMovementDistance: Double = 8.0     // 最小移动距离（米），小于此值视为漂移
-    private let minSpeed: Double = 0.8                // 最小速度（米/秒），低于此值可能是静止（正常步行约1.2m/s）
+    private let minMovementDistance: Double = 3.0     // 最小移动距离（米），小于此值视为漂移（distanceFilter=5，真实跑步delta常在5-8m）
+    private let minSpeed: Double = 0.5                // 最小速度（米/秒），低于此值可能是静止（慢跑约1.5m/s）
 
     override init() {
         super.init()

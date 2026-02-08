@@ -32,6 +32,13 @@ enum AIManagerError: LocalizedError {
 
 // MARK: - Request/Response Models
 
+/// 训练偏好设置
+struct TrainingPreferences: Codable {
+    let weeklyFrequency: Int           // 每周训练次数（3-5）
+    let preferredDays: [Int]           // 偏好训练日（1-7，周一到周日）
+    let intensityLevel: String         // 强度等级："easy" | "balanced" | "intense"
+}
+
 /// 训练计划生成请求
 struct GeneratePlanRequest: Codable {
     let goal: String
@@ -39,7 +46,8 @@ struct GeneratePlanRequest: Codable {
     let maxDistance: Double?
     let weeklyRuns: Int
     let durationWeeks: Int
-    let currentPlan: TrainingPlanData?  // 用户修改后的当前计划，用于重新生成时参考
+    let currentPlan: TrainingPlanData?     // 用户修改后的当前计划，用于重新生成时参考
+    let preferences: TrainingPreferences?  // 用户偏好设置
 }
 
 /// 训练计划生成响应
@@ -143,12 +151,14 @@ final class AIManager: ObservableObject {
     ///   - runHistory: 用户历史跑步记录
     ///   - durationWeeks: 计划周期（周）
     ///   - currentPlan: 用户已修改的当前计划（重新生成时传入）
+    ///   - preferences: 用户偏好设置（训练频率、偏好日期、强度等级）
     /// - Returns: 生成的训练计划数据
     func generateTrainingPlan(
         goal: String,
         runHistory: [RunRecord],
         durationWeeks: Int = 8,
-        currentPlan: TrainingPlanData? = nil
+        currentPlan: TrainingPlanData? = nil,
+        preferences: TrainingPreferences? = nil
     ) async throws -> TrainingPlanData {
         guard AuthManager.shared.currentUser != nil else {
             throw AIManagerError.notAuthenticated
@@ -165,6 +175,10 @@ final class AIManager: ObservableObject {
         print("🤖 开始生成训练计划: \(goal), 是否有修改参考: \(currentPlan != nil)")
         print("   平均配速: \(avgPace ?? 0), 最长距离: \(maxDistance ?? 0)km, 每周跑步: \(weeklyRuns)次")
 
+        if let pref = preferences {
+            print("   用户偏好: 每周\(pref.weeklyFrequency)次, 偏好日期: \(pref.preferredDays), 强度: \(pref.intensityLevel)")
+        }
+
         // 构建请求
         let request = GeneratePlanRequest(
             goal: goal,
@@ -172,7 +186,8 @@ final class AIManager: ObservableObject {
             maxDistance: maxDistance,
             weeklyRuns: weeklyRuns,
             durationWeeks: durationWeeks,
-            currentPlan: currentPlan
+            currentPlan: currentPlan,
+            preferences: preferences
         )
 
         do {
