@@ -15,6 +15,7 @@ enum AIManagerError: LocalizedError {
     case networkError(String)
     case invalidResponse
     case aiGenerationFailed(String)
+    case subscriptionRequired
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +27,8 @@ enum AIManagerError: LocalizedError {
             return "AI响应格式错误"
         case .aiGenerationFailed(let message):
             return "AI生成失败: \(message)"
+        case .subscriptionRequired:
+            return "需要升级 Pro 会员"
         }
     }
 }
@@ -86,6 +89,7 @@ struct TrainingPlanData: Codable {
     let difficulty: String
     var weeklyPlans: [WeekPlanData]  // 改为 var 以支持编辑
     var tips: [String]  // 改为 var 以支持编辑
+    var preferences: TrainingPreferences?  // 保留用户偏好，重新生成时复用
 }
 
 /// 周计划数据
@@ -164,6 +168,10 @@ final class AIManager: ObservableObject {
             throw AIManagerError.notAuthenticated
         }
 
+        guard SubscriptionManager.shared.canGeneratePlan() else {
+            throw AIManagerError.subscriptionRequired
+        }
+
         isGeneratingPlan = true
         defer { isGeneratingPlan = false }
 
@@ -205,8 +213,15 @@ final class AIManager: ObservableObject {
                 throw AIManagerError.aiGenerationFailed(errorMsg)
             }
 
-            print("✅ 训练计划生成成功: \(plan.durationWeeks)周计划")
-            return plan
+            // 将用户偏好附加到计划中，以便重新生成时复用
+            var planWithPreferences = plan
+            planWithPreferences.preferences = preferences
+
+            // 生成成功，增加免费配额计数
+            SubscriptionManager.shared.incrementPlanCount()
+
+            print("✅ 训练计划生成成功: \(planWithPreferences.durationWeeks)周计划")
+            return planWithPreferences
 
         } catch let error as AIManagerError {
             throw error

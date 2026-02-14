@@ -10,8 +10,10 @@ import SwiftUI
 struct AchievementSheetView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var achievementManager = AchievementManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var expandedCategories: Set<AchievementCategory> = Set(AchievementCategory.allCases)
     @State private var showShareSheet = false
+    @State private var showPaywall = false
     @State private var selectedAchievement: Achievement?
 
     var body: some View {
@@ -54,6 +56,9 @@ struct AchievementSheetView: View {
             }
             .sheet(item: $selectedAchievement) { achievement in
                 AchievementShareView(achievement: achievement)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
         }
     }
@@ -146,9 +151,13 @@ struct AchievementSheetView: View {
             if expandedCategories.contains(category) {
                 VStack(spacing: 12) {
                     ForEach(achievements) { achievement in
-                        AchievementCard(achievement: achievement) {
-                            selectedAchievement = achievement
-                        }
+                        let isLocked = !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievement.id)
+                        AchievementCard(
+                            achievement: achievement,
+                            onShare: { selectedAchievement = achievement },
+                            isProLocked: isLocked,
+                            onProTap: { showPaywall = true }
+                        )
                     }
                 }
             }
@@ -164,34 +173,58 @@ struct AchievementSheetView: View {
 struct AchievementCard: View {
     let achievement: Achievement
     let onShare: () -> Void
+    var isProLocked: Bool = false
+    var onProTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             // 图标
             ZStack {
                 Circle()
-                    .fill(achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.2) : Color.gray.opacity(0.1))
+                    .fill(isProLocked ? Color.orange.opacity(0.1) : (achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.2) : Color.gray.opacity(0.1)))
                     .frame(width: 50, height: 50)
 
-                Image(systemName: achievement.icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1) : .gray)
-                    .grayscale(achievement.isUnlocked ? 0 : 0.99)
+                if isProLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.orange)
+                } else {
+                    Image(systemName: achievement.icon)
+                        .font(.system(size: 24))
+                        .foregroundColor(achievement.isUnlocked ? Color(red: 0.5, green: 0.8, blue: 0.1) : .gray)
+                        .grayscale(achievement.isUnlocked ? 0 : 0.99)
+                }
             }
 
             // 信息
             VStack(alignment: .leading, spacing: 4) {
-                Text(achievement.title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(achievement.isUnlocked ? .primary : .secondary)
+                HStack(spacing: 6) {
+                    Text(achievement.title)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isProLocked ? .secondary : (achievement.isUnlocked ? .primary : .secondary))
+
+                    if isProLocked {
+                        Text("Pro")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.orange)
+                            .cornerRadius(4)
+                    }
+                }
 
                 Text(achievement.description)
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
 
-                // 进度条
-                if !achievement.isUnlocked {
+                if isProLocked {
+                    Text("升级 Pro 解锁")
+                        .font(.system(size: 11))
+                        .foregroundColor(.orange)
+                } else if !achievement.isUnlocked {
+                    // 进度条
                     VStack(alignment: .leading, spacing: 4) {
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
@@ -220,7 +253,7 @@ struct AchievementCard: View {
             Spacer()
 
             // 分享按钮（仅已解锁成就可分享）
-            if achievement.isUnlocked {
+            if achievement.isUnlocked && !isProLocked {
                 Button {
                     onShare()
                 } label: {
@@ -237,6 +270,12 @@ struct AchievementCard: View {
         .background(Color(UIColor.secondarySystemGroupedBackground))
         .cornerRadius(12)
         .padding(.horizontal, 16)
+        .opacity(isProLocked ? 0.7 : 1.0)
+        .onTapGesture {
+            if isProLocked {
+                onProTap?()
+            }
+        }
     }
 
     private func formatDate(_ date: Date) -> String {

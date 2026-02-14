@@ -11,10 +11,13 @@ struct SettingsView: View {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var showLoginSheet = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountAlert = false
     @State private var showResetAchievementAlert = false
+    @State private var showPaywall = false
+    @State private var isRestoringPurchase = false
 
     var body: some View {
         NavigationView {
@@ -78,8 +81,77 @@ struct SettingsView: View {
                     Text("账户")
                 }
 
-                // 数据同步部分
-                if authManager.isAuthenticated {
+                // 订阅管理部分
+                Section {
+                    if subscriptionManager.isPro {
+                        HStack {
+                            HStack(spacing: 6) {
+                                Image(systemName: "crown.fill")
+                                    .foregroundColor(.orange)
+                                Text("Pro 会员")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.orange)
+                            }
+                            Spacer()
+                        }
+
+                        Button {
+                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                UIApplication.shared.open(url)
+                            }
+                        } label: {
+                            HStack {
+                                Text("管理订阅")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    } else {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "crown.fill")
+                                    .foregroundColor(.orange)
+                                Text("升级 Pro")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.orange)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Button {
+                            isRestoringPurchase = true
+                            Task {
+                                do {
+                                    try await subscriptionManager.restore()
+                                } catch {
+                                    print("❌ 恢复购买失败: \(error.localizedDescription)")
+                                }
+                                isRestoringPurchase = false
+                            }
+                        } label: {
+                            HStack {
+                                Text("恢复购买")
+                                Spacer()
+                                if isRestoringPurchase {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .disabled(isRestoringPurchase)
+                    }
+                } header: {
+                    Text("订阅")
+                }
+
+                // 数据同步部分（仅 Pro 用户）
+                if authManager.isAuthenticated && subscriptionManager.isPro {
                     Section {
                         HStack {
                             Text("云端同步")
@@ -179,6 +251,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showLoginSheet) {
                 LoginView()
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .onChange(of: authManager.isAuthenticated) { isAuthenticated in
                 // 登录成功后自动关闭登录页面

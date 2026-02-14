@@ -100,6 +100,7 @@ class RunDataManager: ObservableObject {
 
     /// 同步单条记录到云端
     private func syncToCloud(_ record: RunRecord) async {
+        guard SubscriptionManager.shared.isPro else { return }
         guard let userId = authManager.currentUserId else { return }
 
         do {
@@ -157,6 +158,10 @@ class RunDataManager: ObservableObject {
 
     /// 同步所有未同步的记录到云端
     func syncAllToCloud() async {
+        guard SubscriptionManager.shared.isPro else {
+            print("⚠️ 免费用户，跳过云同步")
+            return
+        }
         guard authManager.isAuthenticated else {
             print("⚠️ User not authenticated, skipping cloud sync")
             return
@@ -176,6 +181,10 @@ class RunDataManager: ObservableObject {
 
     /// 从云端拉取所有记录
     func fetchFromCloud() async {
+        guard SubscriptionManager.shared.isPro else {
+            print("⚠️ 免费用户，跳过云拉取")
+            return
+        }
         guard authManager.isAuthenticated,
               let userId = authManager.currentUserId else {
             print("⚠️ User not authenticated, skipping cloud fetch")

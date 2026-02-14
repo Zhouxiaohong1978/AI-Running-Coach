@@ -6,15 +6,22 @@
 //
 
 import SwiftUI
+import RevenueCat
 
 @main
 struct AI跑步教练App: App {
     @StateObject private var authManager = AuthManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
+
+    init() {
+        SubscriptionManager.shared.configure()
+    }
 
     var body: some Scene {
         WindowGroup {
             if authManager.isAuthenticated {
                 HomeView()
+                    .environmentObject(subscriptionManager)
             } else {
                 LoginView()
             }

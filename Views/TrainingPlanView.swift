@@ -10,9 +10,11 @@ import SwiftUI
 struct TrainingPlanView: View {
     @StateObject private var aiManager = AIManager.shared
     @StateObject private var dataManager = RunDataManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var currentPlan: TrainingPlanData?
     @State private var showGoalSelection = false
+    @State private var showPaywall = false
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedWeek: Int = 1
@@ -68,6 +70,9 @@ struct TrainingPlanView: View {
                 if let task = selectedTask?.task, let weekNumber = selectedTask?.weekNumber {
                     quickActionButtons(for: task, weekNumber: weekNumber)
                 }
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .alert("错误", isPresented: .constant(errorMessage != nil)) {
                 Button("确定") { errorMessage = nil }
@@ -214,13 +219,19 @@ struct TrainingPlanView: View {
                     goal: plan.goal,
                     runHistory: dataManager.runRecords,
                     durationWeeks: plan.durationWeeks,
-                    currentPlan: plan  // 传入用户修改后的计划作为参考
+                    currentPlan: plan,  // 传入用户修改后的计划作为参考
+                    preferences: plan.preferences  // 复用保存的用户偏好
                 )
 
                 await MainActor.run {
                     currentPlan = newPlan
                     savePlan(newPlan)
                     isRegenerating = false
+                }
+            } catch AIManagerError.subscriptionRequired {
+                await MainActor.run {
+                    isRegenerating = false
+                    showPaywall = true
                 }
             } catch {
                 await MainActor.run {
@@ -260,16 +271,26 @@ struct TrainingPlanView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
-            Button(action: { showGoalSelection = true }) {
+            Button(action: {
+                if subscriptionManager.canGeneratePlan() {
+                    showGoalSelection = true
+                } else {
+                    showPaywall = true
+                }
+            }) {
                 HStack {
-                    Image(systemName: "sparkles")
-                    Text("创建训练计划")
+                    if !subscriptionManager.canGeneratePlan() {
+                        Image(systemName: "lock.fill")
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text(subscriptionManager.canGeneratePlan() ? "创建训练计划" : "升级 Pro 解锁无限计划")
                 }
                 .font(.headline)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.blue)
+                .background(subscriptionManager.canGeneratePlan() ? Color.blue : Color.orange)
                 .cornerRadius(12)
             }
             .padding(.horizontal, 40)
@@ -316,22 +337,34 @@ struct TrainingPlanView: View {
 
                 HStack(spacing: 12) {
                     // 重新生成计划按钮
-                    Button(action: { regeneratePlan() }) {
+                    Button(action: {
+                        if subscriptionManager.canGeneratePlan() {
+                            regeneratePlan()
+                        } else {
+                            showPaywall = true
+                        }
+                    }) {
                         HStack {
-                            Image(systemName: "sparkles")
-                            Text("重新生成计划")
+                            Image(systemName: subscriptionManager.canGeneratePlan() ? "sparkles" : "lock.fill")
+                            Text(subscriptionManager.canGeneratePlan() ? "重新生成计划" : "升级 Pro")
                         }
                         .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color(red: 0.5, green: 0.8, blue: 0.1))
+                        .background(subscriptionManager.canGeneratePlan() ? Color(red: 0.5, green: 0.8, blue: 0.1) : Color.orange)
                         .cornerRadius(10)
                     }
 
                     // 更换目标按钮
-                    Button(action: { showGoalSelection = true }) {
+                    Button(action: {
+                        if subscriptionManager.canGeneratePlan() {
+                            showGoalSelection = true
+                        } else {
+                            showPaywall = true
+                        }
+                    }) {
                         HStack {
                             Image(systemName: "arrow.clockwise")
                             Text("更换目标")

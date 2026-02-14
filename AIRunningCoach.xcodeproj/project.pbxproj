@@ -51,6 +51,9 @@
 		E54ECD75E3E6F871ADD559FB /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35628295DD86A50D091E306 /* GoalSelectionView.swift */; };
 		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
 		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
+		9012345678AB34CDEF561234 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF56789012345678CD901234 /* PaywallView.swift */; };
+		CD34EF5678901234AB567890 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56789012345678 /* SubscriptionManager.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +102,8 @@
 		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
 		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
+		AB12CD34EF56789012345678 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		EF56789012345678CD901234 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -111,6 +116,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2525C11168DF3524F4011068 /* Supabase in Frameworks */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,6 +163,7 @@
 				BB377A3912ACCB629159CE88 /* SupabaseTestView.swift */,
 				124707344CABB85DE155A5AC /* TrainingPlanView.swift */,
 				827E775AD7E76C78ECE86370 /* DebugLogView.swift */,
+				EF56789012345678CD901234 /* PaywallView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -196,6 +203,7 @@
 				BB44444444444444444444BB /* VoiceTriggerEngine.swift */,
 				FF11111111111111111111FF /* AudioPlayerManager.swift */,
 				10A16B363C8A7D23A6306F61 /* DebugLogger.swift */,
+				AB12CD34EF56789012345678 /* SubscriptionManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -230,6 +238,7 @@
 			name = AIRunningCoach;
 			packageProductDependencies = (
 				B2BCBDD4E07AAE7482390283 /* Supabase */,
+				A1B2C3D4E5F6A7B8C9D0E1F3 /* RevenueCat */,
 			);
 			productName = AIRunningCoach;
 			productReference = FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */;
@@ -262,6 +271,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CCFF14416EC8272FC0F3C2B2 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				2B02E8FD2F406CE6006314C3 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			projectDirPath = "";
 			projectRoot = "";
@@ -329,6 +339,8 @@
 				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
 				5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */,
 				4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */,
+				CD34EF5678901234AB567890 /* SubscriptionManager.swift in Sources */,
+				9012345678AB34CDEF561234 /* PaywallView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -549,6 +561,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		2B02E8FD2F406CE6006314C3 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.59.0;
+			};
+		};
 		CCFF14416EC8272FC0F3C2B2 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
@@ -564,6 +584,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CCFF14416EC8272FC0F3C2B2 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		A1B2C3D4E5F6A7B8C9D0E1F3 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2B02E8FD2F406CE6006314C3 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

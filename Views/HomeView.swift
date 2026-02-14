@@ -9,9 +9,12 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var selectedTab = 0
+    @State private var showPaywall = false
+    @State private var hasShownAutoPaywall = false
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var weatherManager = WeatherManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var locationManager = LocationManager()
 
     var body: some View {
@@ -80,12 +83,24 @@ struct HomeView: View {
                                 }
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(getUserName())
-                                        .font(.system(size: 24, weight: .heavy))
-                                        .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))  // 绿色，更突出
+                                    HStack(spacing: 8) {
+                                        Text(getUserName())
+                                            .font(.system(size: 24, weight: .heavy))
+                                            .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+
+                                        if subscriptionManager.isPro {
+                                            Text("Pro")
+                                                .font(.system(size: 11, weight: .bold))
+                                                .foregroundColor(.white)
+                                                .padding(.horizontal, 8)
+                                                .padding(.vertical, 3)
+                                                .background(Color(red: 0.5, green: 0.8, blue: 0.1))
+                                                .cornerRadius(6)
+                                        }
+                                    }
                                     Text("准备好今天的跑步了吗？")
                                         .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.7))  // 浅灰色，次要信息
+                                        .foregroundColor(.white.opacity(0.7))
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -154,7 +169,17 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
             .onAppear {
+                // 检查是否应该弹出 PaywallView（第3次跑步后，仅一次）
+                if !hasShownAutoPaywall && subscriptionManager.shouldShowPaywallAfterRun(runCount: dataManager.runRecords.count) {
+                    hasShownAutoPaywall = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        showPaywall = true
+                    }
+                }
                 // 获取天气（位置已在 LocationManager init 中自动请求）
                 print("🏠 [HomeView] onAppear - lastLocation: \(locationManager.lastLocation?.coordinate.latitude ?? 0), \(locationManager.lastLocation?.coordinate.longitude ?? 0)")
                 Task {

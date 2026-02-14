@@ -58,10 +58,15 @@ class AchievementManager: ObservableObject {
             return
         }
 
+        let subscriptionManager = SubscriptionManager.shared
         var newlyUnlocked: [Achievement] = []
 
         // 1. 检查距离成就（单次距离）
         for index in achievements.indices where achievements[index].category == .distance {
+            // 非免费成就在非 Pro 时跳过解锁
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) {
+                continue
+            }
             if !achievements[index].isUnlocked {
                 achievements[index].currentValue = runRecord.distance
                 if achievements[index].currentValue >= achievements[index].targetValue {
@@ -74,6 +79,7 @@ class AchievementManager: ObservableObject {
         // 2. 检查时长成就（累计时长）
         let totalDuration = allRecords.reduce(0) { $0 + $1.duration }
         for index in achievements.indices where achievements[index].category == .duration {
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
             achievements[index].currentValue = totalDuration
             if !achievements[index].isUnlocked && achievements[index].currentValue >= achievements[index].targetValue {
                 unlockAchievement(at: index)
@@ -84,6 +90,7 @@ class AchievementManager: ObservableObject {
         // 3. 检查频率成就（连续天数）
         let consecutiveDays = calculateConsecutiveDays(from: allRecords)
         for index in achievements.indices where achievements[index].category == .frequency {
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
             achievements[index].currentValue = Double(consecutiveDays)
             if !achievements[index].isUnlocked && achievements[index].currentValue >= achievements[index].targetValue {
                 unlockAchievement(at: index)
@@ -94,6 +101,7 @@ class AchievementManager: ObservableObject {
         // 4. 检查燃脂成就（单次 + 累计卡路里）
         let totalCalories = allRecords.reduce(0) { $0 + $1.calories }
         for index in achievements.indices where achievements[index].category == .calories {
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
             let achievementId = achievements[index].id
 
             // 单次燃脂成就
@@ -115,6 +123,7 @@ class AchievementManager: ObservableObject {
         // 配速为0表示无效数据（距离为0或时间为0），跳过检查
         if runRecord.pace > 0 {
             for index in achievements.indices where achievements[index].category == .pace {
+                if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
                 let currentPace = runRecord.pace * 60 // 转换为秒/公里
                 if currentPace < achievements[index].currentValue {
                     achievements[index].currentValue = currentPace
@@ -129,6 +138,7 @@ class AchievementManager: ObservableObject {
 
         // 6. 检查特殊成就（晨跑、夜跑、雨天）
         for index in achievements.indices where achievements[index].category == .special {
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
             let achievementId = achievements[index].id
 
             if achievementId.contains("morning") {
@@ -156,6 +166,7 @@ class AchievementManager: ObservableObject {
         // 7. 检查里程碑成就（累计距离）
         let totalDistance = allRecords.reduce(0) { $0 + $1.distance }
         for index in achievements.indices where achievements[index].category == .milestone {
+            if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
             achievements[index].currentValue = totalDistance
             if !achievements[index].isUnlocked && achievements[index].currentValue >= achievements[index].targetValue {
                 unlockAchievement(at: index)
@@ -275,6 +286,10 @@ class AchievementManager: ObservableObject {
 
     /// 同步成就到云端
     func syncToCloud() async {
+        guard SubscriptionManager.shared.isPro else {
+            print("⚠️ 免费用户，跳过成就云同步")
+            return
+        }
         guard let userId = AuthManager.shared.currentUserId else {
             print("⚠️ 用户未登录，跳过成就云同步")
             return
@@ -329,6 +344,10 @@ class AchievementManager: ObservableObject {
 
     /// 从云端拉取成就
     func fetchFromCloud() async {
+        guard SubscriptionManager.shared.isPro else {
+            print("⚠️ 免费用户，跳过成就云拉取")
+            return
+        }
         guard let userId = AuthManager.shared.currentUserId else {
             print("⚠️ 用户未登录，跳过成就云拉取")
             return

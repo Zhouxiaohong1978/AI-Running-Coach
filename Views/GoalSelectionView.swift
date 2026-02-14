@@ -11,11 +11,13 @@ struct GoalSelectionView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var aiManager = AIManager.shared
     @StateObject private var dataManager = RunDataManager.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
 
     @State private var selectedGoal: TrainingGoal?
     @State private var customWeeks: Int = 8
     @State private var isGenerating = false
     @State private var errorMessage: String?
+    @State private var showPaywall = false
 
     // 用户偏好设置
     @State private var weeklyFrequency: Int = 3
@@ -60,6 +62,9 @@ struct GoalSelectionView: View {
                 Button("确定") { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
             .disabled(isGenerating)
             .overlay {
@@ -378,6 +383,11 @@ struct GoalSelectionView: View {
                 await MainActor.run {
                     isGenerating = false
                     onPlanGenerated(plan)
+                }
+            } catch AIManagerError.subscriptionRequired {
+                await MainActor.run {
+                    isGenerating = false
+                    showPaywall = true
                 }
             } catch {
                 await MainActor.run {

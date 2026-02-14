@@ -16,6 +16,7 @@ struct ActiveRunView: View {
     @StateObject private var aiManager = AIManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     private let logger = DebugLogger.shared  // 日志记录器
 
     @State private var isPaused = false
@@ -44,6 +45,7 @@ struct ActiveRunView: View {
     @State private var achievement1kmWarned = false  // 是否已提醒1km成就
     @State private var achievement3kmWarned = false  // 是否已提醒3km成就
     @State private var achievement300calWarned = false  // 是否已提醒300卡成就
+    @State private var showUpgradeHint = false  // 免费用户反馈用完时的升级提示
 
     var body: some View {
         ZStack {
@@ -132,6 +134,24 @@ struct ActiveRunView: View {
                     .shadow(radius: 5)
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .padding(.top, 10)
+                }
+
+                // 免费用户升级提示
+                if showUpgradeHint {
+                    HStack(spacing: 6) {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.orange)
+                        Text("升级 Pro 获取无限教练反馈")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.9))
+                    .cornerRadius(16)
+                    .transition(.opacity)
+                    .padding(.top, 4)
                 }
 
                 Spacer()
@@ -309,9 +329,10 @@ struct ActiveRunView: View {
             locationManager.startTracking()
             lastFeedbackTime = Date()
 
-            // 重置音频播放状态
+            // 重置音频播放状态和免费反馈计数
             audioPlayerManager.reset()
             audioPlayerManager.isEnabled = isVoiceEnabled
+            subscriptionManager.resetRunFeedbackCount()
 
             // 延迟一点播报，确保视图完全加载
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -419,8 +440,22 @@ struct ActiveRunView: View {
             return
         }
 
+        // 免费用户检查反馈次数限制
+        if !subscriptionManager.canGetFeedback() {
+            // 显示升级提示（仅一次）
+            if !showUpgradeHint {
+                withAnimation {
+                    showUpgradeHint = true
+                }
+            }
+            return
+        }
+
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
+            // 计入反馈次数
+            subscriptionManager.incrementFeedbackCount()
+
             logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
             if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
                 showFeedbackBubble(voice.description)
