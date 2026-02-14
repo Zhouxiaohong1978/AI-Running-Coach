@@ -36,7 +36,8 @@ export interface BailianResponse {
 export async function callBailian(
   messages: BailianMessage[],
   model: string = 'qwen-plus',
-  temperature: number = 0.7
+  temperature: number = 0.7,
+  maxTokens: number = 2000
 ): Promise<string> {
   const apiKey = Deno.env.get('DASHSCOPE_API_KEY');
 
@@ -58,7 +59,7 @@ export async function callBailian(
       },
       parameters: {
         temperature,
-        max_tokens: 2000,
+        max_tokens: maxTokens,
         result_format: 'message',
       },
     }),

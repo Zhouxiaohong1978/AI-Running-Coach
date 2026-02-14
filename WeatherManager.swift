@@ -1,68 +1,31 @@
 // WeatherManager.swift
 import Foundation
 import CoreLocation
+import WeatherKit
 
 @MainActor
 class WeatherManager: ObservableObject {
     static let shared = WeatherManager()
 
-    @Published var currentWeather: WeatherInfo? = .default  // 默认晴天 24°C
+    @Published var currentWeather: WeatherInfo? = .default
     @Published var isLoading = false
 
-    // OpenWeatherMap API Key
-    private let apiKey = "b7305666b739b24b9d516f93114e7a96"
-    private let baseURL = "https://api.openweathermap.org/data/2.5/weather"
+    private let service = WeatherService.shared
 
     private init() {}
 
-    // 获取天气信息（使用 OpenWeatherMap API）
     func fetchWeather(for location: CLLocation) async {
-        guard apiKey != "YOUR_API_KEY_HERE" else {
-            print("⚠️ [WeatherManager] 请先配置 OpenWeatherMap API Key")
-            return
-        }
-
         isLoading = true
 
         do {
-            // 构建 URL
-            var components = URLComponents(string: baseURL)!
-            components.queryItems = [
-                URLQueryItem(name: "lat", value: "\(location.coordinate.latitude)"),
-                URLQueryItem(name: "lon", value: "\(location.coordinate.longitude)"),
-                URLQueryItem(name: "appid", value: apiKey),
-                URLQueryItem(name: "units", value: "metric"),  // 摄氏度
-                URLQueryItem(name: "lang", value: "zh_cn")      // 中文
-            ]
+            let weather = try await service.weather(for: location)
+            let current = weather.currentWeather
 
-            guard let url = components.url else {
-                throw URLError(.badURL)
-            }
-
-            // 发送请求
-            print("🌐 [WeatherManager] 请求URL: \(url.absoluteString)")
-            let (data, httpResponse) = try await URLSession.shared.data(from: url)
-
-            // 打印响应状态
-            if let httpResponse = httpResponse as? HTTPURLResponse {
-                print("📡 [WeatherManager] HTTP状态码: \(httpResponse.statusCode)")
-            }
-
-            // 打印原始响应
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("📄 [WeatherManager] 原始响应: \(jsonString)")
-            }
-
-            // 解析响应
-            let response = try JSONDecoder().decode(OpenWeatherResponse.self, from: data)
-
-            // 转换为 WeatherInfo
             let weatherInfo = WeatherInfo(
-                conditionCode: response.weather.first?.id ?? 800,
-                conditionDescription: response.weather.first?.description ?? "晴天",
-                temperature: response.main.temp,
-                humidity: response.main.humidity / 100.0,
-                windSpeed: response.wind.speed
+                condition: current.condition,
+                temperature: current.temperature.converted(to: .celsius).value,
+                humidity: current.humidity,
+                windSpeed: current.wind.speed.converted(to: .metersPerSecond).value
             )
 
             self.currentWeather = weatherInfo
@@ -71,77 +34,44 @@ class WeatherManager: ObservableObject {
             print("✅ [WeatherManager] 获取天气成功: \(weatherInfo.conditionText), \(Int(weatherInfo.temperature))°C")
         } catch {
             print("❌ [WeatherManager] 获取天气失败: \(error.localizedDescription)")
-            // 保持默认天气数据
             self.isLoading = false
         }
-    }
-}
-
-// MARK: - OpenWeatherMap API Models
-
-struct OpenWeatherResponse: Codable {
-    let weather: [WeatherCondition]
-    let main: MainInfo
-    let wind: WindInfo
-
-    struct WeatherCondition: Codable {
-        let id: Int
-        let main: String
-        let description: String
-    }
-
-    struct MainInfo: Codable {
-        let temp: Double
-        let humidity: Double
-    }
-
-    struct WindInfo: Codable {
-        let speed: Double
     }
 }
 
 // MARK: - Weather Models
 
 struct WeatherInfo {
-    let conditionCode: Int               // OpenWeatherMap 天气代码
-    let conditionDescription: String     // 天气描述
-    let temperature: Double              // 温度（摄氏度）
-    let humidity: Double                 // 湿度（0-1）
-    let windSpeed: Double                // 风速（m/s）
+    let condition: WeatherCondition
+    let temperature: Double
+    let humidity: Double
+    let windSpeed: Double
 
     var emoji: String {
-        // OpenWeatherMap 天气代码映射
-        // https://openweathermap.org/weather-conditions
-        switch conditionCode {
-        case 200..<300:  // 雷雨
-            return "⛈️"
-        case 300..<400:  // 毛毛雨
-            return "🌧️"
-        case 500..<600:  // 雨
-            return "🌧️"
-        case 600..<700:  // 雪
+        switch condition {
+        case .blizzard, .heavySnow:
+            return "🌨️"
+        case .blowingSnow, .snow, .flurries, .sleet, .freezingRain, .wintryMix:
             return "❄️"
-        case 701:        // 雾
-            return "🌫️"
-        case 711:        // 烟雾
-            return "🌫️"
-        case 721:        // 霾
-            return "🌫️"
-        case 731, 751, 761:  // 沙尘
-            return "🌫️"
-        case 741:        // 大雾
-            return "🌫️"
-        case 771:        // 狂风
-            return "💨"
-        case 781:        // 龙卷风
+        case .thunderstorms, .strongStorms, .isolatedThunderstorms, .scatteredThunderstorms:
+            return "⛈️"
+        case .rain, .heavyRain, .freezingDrizzle:
+            return "🌧️"
+        case .drizzle, .sunShowers:
+            return "🌦️"
+        case .hurricane, .tropicalStorm:
             return "🌪️"
-        case 800:        // 晴天
+        case .windy, .breezy:
+            return "💨"
+        case .haze, .foggy, .smoky, .blowingDust:
+            return "🌫️"
+        case .clear, .hot:
             return "☀️"
-        case 801:        // 少云
+        case .mostlyClear:
             return "🌤️"
-        case 802:        // 局部多云
+        case .partlyCloudy:
             return "⛅"
-        case 803, 804:   // 多云、阴天
+        case .mostlyCloudy, .cloudy:
             return "☁️"
         default:
             return "🌤️"
@@ -149,7 +79,28 @@ struct WeatherInfo {
     }
 
     var conditionText: String {
-        return conditionDescription
+        switch condition {
+        case .clear: return "晴天"
+        case .mostlyClear: return "大部晴朗"
+        case .partlyCloudy: return "局部多云"
+        case .mostlyCloudy: return "大部多云"
+        case .cloudy: return "阴天"
+        case .rain, .heavyRain: return "雨"
+        case .drizzle, .freezingDrizzle: return "小雨"
+        case .snow, .heavySnow, .flurries: return "雪"
+        case .sleet, .freezingRain, .wintryMix: return "雨夹雪"
+        case .thunderstorms, .strongStorms, .isolatedThunderstorms, .scatteredThunderstorms: return "雷雨"
+        case .foggy: return "雾"
+        case .haze: return "霾"
+        case .windy, .breezy: return "大风"
+        case .hot: return "高温"
+        case .blizzard, .blowingSnow: return "暴风雪"
+        case .hurricane, .tropicalStorm: return "台风"
+        case .smoky: return "烟雾"
+        case .blowingDust: return "扬尘"
+        case .sunShowers: return "太阳雨"
+        default: return "晴天"
+        }
     }
 
     var displayText: String {
@@ -158,8 +109,7 @@ struct WeatherInfo {
 
     static var `default`: WeatherInfo {
         WeatherInfo(
-            conditionCode: 800,
-            conditionDescription: "晴天",
+            condition: .clear,
             temperature: 24,
             humidity: 0.65,
             windSpeed: 3.0

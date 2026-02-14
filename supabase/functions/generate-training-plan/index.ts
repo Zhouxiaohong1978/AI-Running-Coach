@@ -83,6 +83,9 @@ Deno.serve(async (req: Request) => {
     const userDataContext = buildUserContext(avgPace, maxDistance, weeklyRuns);
     const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan);
 
+    // 根据计划周数动态计算 max_tokens（每周约 350 tokens + 基础 500）
+    const maxTokens = durationWeeks * 350 + 500;
+
     // 调用阿里云百炼生成计划
     const aiResponse = await callBailian(
       [
@@ -95,8 +98,9 @@ Deno.serve(async (req: Request) => {
           content: prompt
         }
       ],
-      "qwen-plus",
-      0.7
+      "qwen-turbo",
+      0.7,
+      maxTokens
     );
 
     // 解析 AI 返回的 JSON
@@ -207,20 +211,56 @@ ${userContext}`;
     }
   }
 
-  // 参考用户之前的修改
-  if (currentPlan) {
-    prompt += `\n\n**重要提示**：`;
-    prompt += `\n用户对之前生成的计划进行了调整，请在重新生成时：`;
-    prompt += `\n1. 参考用户的修改意图（如调整了某些天的训练安排）`;
-    prompt += `\n2. 保持计划的科学性和递进性`;
-    prompt += `\n3. 尽量满足用户体现的偏好`;
+  // 序列化用户修改后的计划，让 AI 严格保留用户修改
+  if (currentPlan && currentPlan.weeklyPlans && currentPlan.weeklyPlans.length > 0) {
+    const typeNames: Record<string, string> = {
+      easy_run: '轻松跑', tempo_run: '节奏跑', interval: '间歇跑',
+      long_run: '长距离跑', cross_training: '交叉训练', rest: '休息'
+    };
+    const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+    prompt += `\n\n**【必须严格遵守】用户已确认的计划安排**：`;
+    prompt += `\n用户手动调整了以下计划，这些是用户的明确意愿，你必须100%保留：`;
+
+    // 展示第1周的完整7天安排（包括休息日），作为每周模板
+    const week1 = currentPlan.weeklyPlans[0];
+    const allDays = new Set(week1.dailyTasks.map(t => t.dayOfWeek));
+
+    prompt += `\n\n第1周模板（每周固定安排）：`;
+    for (let d = 1; d <= 7; d++) {
+      const day = dayNames[d - 1];
+      const task = week1.dailyTasks.find(t => t.dayOfWeek === d);
+      if (task && task.type !== 'rest') {
+        const typeName = typeNames[task.type] || task.type;
+        const dist = task.targetDistance ? `${task.targetDistance}km` : '';
+        prompt += `\n  ${day}: ${typeName} ${dist}（训练日 - 必须保留）`;
+      } else {
+        prompt += `\n  ${day}: 休息（休息日 - 必须保留）`;
+      }
+    }
+
+    // 简要展示后续几周的递进情况
+    if (currentPlan.weeklyPlans.length > 1) {
+      prompt += `\n\n后续周次递进参考：`;
+      for (const week of currentPlan.weeklyPlans.slice(1, 4)) {
+        const trainTasks = week.dailyTasks.filter(t => t.type !== 'rest');
+        const distances = trainTasks.map(t => `${t.targetDistance || '?'}km`).join('、');
+        prompt += `\n  第${week.weekNumber}周：${distances}`;
+      }
+    }
+
+    prompt += `\n\n**严格要求**：`;
+    prompt += `\n- 每周哪些天训练、哪些天休息，必须和第1周模板完全一致`;
+    prompt += `\n- 第1周的训练距离必须和上面完全一致，不得修改`;
+    prompt += `\n- 后续周次在保持相同训练日/休息日安排的前提下，可以适当递增距离`;
+    prompt += `\n- 你只能优化：训练类型（如轻松跑→节奏跑）、配速建议、训练描述`;
   }
 
   prompt += `\n\n**要求**：
 1. 根据用户目标和当前水平，制定科学的渐进式训练计划
-2. 每周3-5次训练，包含不同类型的训练：轻松跑、节奏跑、间歇跑、长距离跑、休息日
-3. 难度递增合理，避免运动损伤
-4. 包含每周训练主题和具体任务`;
+2. 难度递增合理，避免运动损伤
+3. 包含每周训练主题和具体任务
+4. 训练日/休息日安排必须严格遵循用户设定`;
 
   return prompt + `
 
