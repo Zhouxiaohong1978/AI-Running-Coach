@@ -71,14 +71,32 @@ struct CoachFeedbackRequest: Codable {
     let heartRate: Int?
     let coachStyle: String?
     let kmSplits: [Double]?
+    let trainingType: String?
+    let goalName: String?
+}
+
+/// 反馈三段结构
+struct FeedbackParagraphs: Codable {
+    let summary: String
+    let analysis: String
+    let suggestion: String
 }
 
 /// 教练反馈响应
 struct CoachFeedbackResponse: Codable {
     let success: Bool
     let feedback: String?
+    let paragraphs: FeedbackParagraphs?
+    let scene: String?
     let error: String?
     let timestamp: String?
+}
+
+/// 教练反馈结果（供 UI 使用）
+struct CoachFeedbackResult {
+    let feedback: String
+    let paragraphs: FeedbackParagraphs?
+    let scene: String?
 }
 
 // MARK: - Training Plan Data Models
@@ -250,8 +268,10 @@ final class AIManager: ObservableObject {
         totalDistance: Double? = nil,
         duration: TimeInterval,
         heartRate: Int? = nil,
-        kmSplits: [Double]? = nil
-    ) async throws -> String {
+        kmSplits: [Double]? = nil,
+        trainingType: String? = nil,
+        goalName: String? = nil
+    ) async throws -> CoachFeedbackResult {
         guard AuthManager.shared.currentUser != nil else {
             throw AIManagerError.notAuthenticated
         }
@@ -272,7 +292,9 @@ final class AIManager: ObservableObject {
             duration: duration,
             heartRate: heartRate,
             coachStyle: coachStyle.rawValue,
-            kmSplits: kmSplits
+            kmSplits: kmSplits,
+            trainingType: trainingType,
+            goalName: goalName
         )
 
         do {
@@ -291,7 +313,11 @@ final class AIManager: ObservableObject {
 
             lastFeedback = feedback
             SubscriptionManager.shared.incrementFeedbackCount()
-            return feedback
+            return CoachFeedbackResult(
+                feedback: feedback,
+                paragraphs: response.paragraphs,
+                scene: response.scene
+            )
 
         } catch let error as AIManagerError {
             throw error

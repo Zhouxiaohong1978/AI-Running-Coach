@@ -269,7 +269,7 @@ struct HomeView: View {
         let now = Date()
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "M月d日（EEE）"
+        formatter.dateFormat = "M/d(EEE)"
         return formatter.string(from: now)
     }
 

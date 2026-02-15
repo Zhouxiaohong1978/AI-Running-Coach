@@ -25,6 +25,8 @@ struct RunSummaryView: View {
     @State private var showAchievementSheet = false
     @State private var aiSuggestion: String = ""
     @State private var isLoadingAI: Bool = false
+    @State private var aiParagraphs: FeedbackParagraphs? = nil
+    @State private var aiScene: String? = nil
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -184,9 +186,21 @@ struct RunSummaryView: View {
                                 .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
                                 .frame(width: 8, height: 8)
 
-                            Text("AI教练建议")
+                            Text("AI教练分析")
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundColor(Color(red: 0.3, green: 0.5, blue: 0.1))
+
+                            Spacer()
+
+                            if let scene = aiScene {
+                                Text(scene)
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(sceneColor(scene))
+                                    .cornerRadius(8)
+                            }
                         }
 
                         if isLoadingAI {
@@ -197,11 +211,51 @@ struct RunSummaryView: View {
                                     .font(.system(size: 13))
                                     .foregroundColor(.gray)
                             }
+                        } else if let p = aiParagraphs {
+                            // 三段式展示
+                            VStack(alignment: .leading, spacing: 10) {
+                                // P1 表现总结
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "chart.bar.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.blue)
+                                        .frame(width: 20)
+                                    Text(p.summary)
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundColor(.black)
+                                        .lineSpacing(4)
+                                }
+
+                                // P2 原因分析
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.orange)
+                                        .frame(width: 20)
+                                    Text(p.analysis)
+                                        .font(.system(size: 14))
+                                        .foregroundColor(.black.opacity(0.8))
+                                        .lineSpacing(4)
+                                }
+
+                                // P3 下次建议
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "lightbulb.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(Color(red: 0.2, green: 0.7, blue: 0.2))
+                                        .frame(width: 20)
+                                    Text(p.suggestion)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(Color(red: 0.15, green: 0.55, blue: 0.15))
+                                        .lineSpacing(4)
+                                }
+                            }
                         } else if aiSuggestion.isEmpty {
                             Text("暂无AI建议")
                                 .font(.system(size: 13))
                                 .foregroundColor(.gray)
                         } else {
+                            // Fallback: 原始文本
                             Text(aiSuggestion)
                                 .font(.system(size: 15))
                                 .foregroundColor(.black)
@@ -365,18 +419,26 @@ struct RunSummaryView: View {
 
         Task {
             do {
-                let suggestion = try await aiManager.getCoachFeedback(
+                // 加载训练计划上下文
+                let (trainingType, targetPace) = loadTodayTask()
+                let goalName = loadGoalName()
+
+                let result = try await aiManager.getCoachFeedback(
                     currentPace: record.pace,
-                    targetPace: nil,
+                    targetPace: targetPace,
                     distance: record.distance,
                     totalDistance: record.distance,
                     duration: record.duration,
                     heartRate: nil,
-                    kmSplits: record.kmSplits
+                    kmSplits: record.kmSplits,
+                    trainingType: trainingType,
+                    goalName: goalName
                 )
 
                 await MainActor.run {
-                    aiSuggestion = suggestion
+                    aiSuggestion = result.feedback
+                    aiParagraphs = result.paragraphs
+                    aiScene = result.scene
                     isLoadingAI = false
                 }
             } catch {
@@ -386,6 +448,78 @@ struct RunSummaryView: View {
                 }
                 print("❌ AI建议生成失败: \(error)")
             }
+        }
+    }
+
+    /// 加载今日训练任务的类型和目标配速
+    private func loadTodayTask() -> (trainingType: String?, targetPace: Double?) {
+        let defaults = UserDefaults.standard
+
+        guard let data = defaults.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
+            return (nil, nil)
+        }
+
+        // 计算当前是第几周
+        var weekNumber = 1
+        if let startDate = defaults.object(forKey: "training_plan_start_date") as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+            weekNumber = max(1, days / 7 + 1)
+        }
+
+        let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
+        guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else {
+            return (nil, nil)
+        }
+
+        // 今天是周几（1=周一 ... 7=周日）
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let dow = weekday == 1 ? 7 : weekday - 1
+
+        guard let task = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == dow }) else {
+            return (nil, nil)
+        }
+
+        let targetPace = parseTargetPace(task.targetPace)
+        return (task.type, targetPace)
+    }
+
+    /// 加载训练目标名称
+    private func loadGoalName() -> String? {
+        let defaults = UserDefaults.standard
+        guard let data = defaults.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
+            return nil
+        }
+        return plan.goal
+    }
+
+    /// 解析配速字符串（如 "7'00""）为分钟数（如 7.0）
+    private func parseTargetPace(_ paceString: String?) -> Double? {
+        guard let str = paceString else { return nil }
+        // 匹配 "7'00"" 或 "6'30"" 格式
+        let pattern = #"(\d+)'(\d+)"?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: str, range: NSRange(str.startIndex..., in: str)),
+              let minRange = Range(match.range(at: 1), in: str),
+              let secRange = Range(match.range(at: 2), in: str),
+              let minutes = Double(str[minRange]),
+              let seconds = Double(str[secRange]) else {
+            return nil
+        }
+        return minutes + seconds / 60.0
+    }
+
+    /// 场景标签颜色
+    private func sceneColor(_ scene: String) -> Color {
+        switch scene {
+        case "稳定达标": return .green
+        case "前快后崩": return .red
+        case "波动大": return .orange
+        case "全程偏快风险高": return .blue
+        case "全程偏慢但稳定": return .purple
+        case "恢复跑": return .gray
+        default: return .gray
         }
     }
 

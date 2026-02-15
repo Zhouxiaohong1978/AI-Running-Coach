@@ -2,18 +2,11 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { callBailian } from "../_shared/bailian.ts";
 
 /**
- * AI 教练实时反馈 Edge Function
+ * AI 教练反馈 Edge Function
  *
- * 请求格式：
- * {
- *   currentPace: number,    // 当前配速（分钟/公里）
- *   targetPace?: number,    // 目标配速（可选）
- *   distance: number,       // 已跑距离（公里）
- *   totalDistance?: number, // 总目标距离（可选）
- *   duration: number,       // 已跑时长（秒）
- *   heartRate?: number,     // 心率（可选）
- *   coachStyle?: string     // 教练风格：encouraging/strict/calm
- * }
+ * 支持两种模式：
+ * 1. 实时反馈（跑步中）：简短语音播报
+ * 2. 跑后分析（有 kmSplits）：结构化事实 + 场景分类 + 三段式输出
  */
 
 interface CoachFeedbackRequest {
@@ -25,7 +18,205 @@ interface CoachFeedbackRequest {
   heartRate?: number;
   coachStyle?: string;
   kmSplits?: number[];
+  trainingType?: string;
+  goalName?: string;
 }
+
+// MARK: - 结构化事实
+
+interface StructuredFacts {
+  avgPace: number;           // 平均配速（秒/公里）
+  bestKm: number;            // 最快公里编号
+  worstKm: number;           // 最慢公里编号
+  bestKmPace: number;        // 最快配速（秒）
+  worstKmPace: number;       // 最慢配速（秒）
+  paceVariability: number;   // 配速波动（max-min，秒）
+  paceStdDev: number;        // 配速标准差（秒）
+  positiveSplit: boolean;    // 后半程掉速（阈值3%）
+  complianceRate: number;    // 达标率（±15秒内的公里占比，0-1）
+  firstHalfAvg: number;      // 前半程平均配速（秒）
+  secondHalfAvg: number;     // 后半程平均配速（秒）
+  totalKm: number;           // 总公里数
+  hrZoneSummary?: string;    // 心率区间摘要（预留）
+}
+
+type Scene =
+  | "恢复跑"
+  | "前快后崩"
+  | "波动大"
+  | "全程偏快风险高"
+  | "全程偏慢但稳定"
+  | "稳定达标";
+
+interface FeedbackParagraphs {
+  summary: string;
+  analysis: string;
+  suggestion: string;
+}
+
+function computeFacts(body: CoachFeedbackRequest): StructuredFacts {
+  const splits = body.kmSplits!;
+  const n = splits.length;
+
+  const avg = splits.reduce((a, b) => a + b, 0) / n;
+  const fastest = Math.min(...splits);
+  const slowest = Math.max(...splits);
+  const bestKm = splits.indexOf(fastest) + 1;
+  const worstKm = splits.indexOf(slowest) + 1;
+
+  // 标准差
+  const variance = splits.reduce((sum, s) => sum + (s - avg) ** 2, 0) / n;
+  const stdDev = Math.sqrt(variance);
+
+  // 前后半程
+  const mid = Math.floor(n / 2);
+  const firstHalfAvg = splits.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+  const secondHalfSlice = splits.slice(mid);
+  const secondHalfAvg = secondHalfSlice.reduce((a, b) => a + b, 0) / secondHalfSlice.length;
+
+  // 后半程掉速：后半程比前半程慢 >3%
+  const positiveSplit = secondHalfAvg > firstHalfAvg * 1.03;
+
+  // 达标率：在目标配速 ±15秒 内的公里占比
+  let complianceRate = 0;
+  if (body.targetPace && body.targetPace > 0) {
+    const targetSec = body.targetPace * 60; // targetPace 是分钟/公里，转为秒
+    const compliantKms = splits.filter(s => Math.abs(s - targetSec) <= 15).length;
+    complianceRate = compliantKms / n;
+  }
+
+  return {
+    avgPace: avg,
+    bestKm,
+    worstKm,
+    bestKmPace: fastest,
+    worstKmPace: slowest,
+    paceVariability: slowest - fastest,
+    paceStdDev: stdDev,
+    positiveSplit,
+    complianceRate,
+    firstHalfAvg,
+    secondHalfAvg,
+    totalKm: n,
+  };
+}
+
+function classifyScene(facts: StructuredFacts, body: CoachFeedbackRequest): Scene {
+  const { positiveSplit, secondHalfAvg, firstHalfAvg, paceStdDev, avgPace, complianceRate } = facts;
+
+  // 恢复跑：trainingType 为 easy_run/rest 或无 targetPace
+  if (
+    body.trainingType === "easy_run" ||
+    body.trainingType === "rest" ||
+    !body.targetPace
+  ) {
+    return "恢复跑";
+  }
+
+  const targetSec = body.targetPace * 60;
+
+  // 前快后崩：positiveSplit 且后半程比前半程慢 >5%
+  if (positiveSplit && secondHalfAvg > firstHalfAvg * 1.05) {
+    return "前快后崩";
+  }
+
+  // 配速变异率
+  const cv = (paceStdDev / avgPace) * 100;
+
+  // 波动大：变异率 ≥12%
+  if (cv >= 12) {
+    return "波动大";
+  }
+
+  // 全程偏快风险高：均速快于目标 >8% 且稳定
+  if (avgPace < targetSec * 0.92 && cv < 12) {
+    return "全程偏快风险高";
+  }
+
+  // 全程偏慢但稳定：均速慢于目标 >8% 且稳定
+  if (avgPace > targetSec * 1.08 && cv < 12) {
+    return "全程偏慢但稳定";
+  }
+
+  // 稳定达标：稳定且达标率 ≥70%
+  if (complianceRate >= 0.7) {
+    return "稳定达标";
+  }
+
+  // 默认：按达标率判断
+  return complianceRate >= 0.5 ? "稳定达标" : "波动大";
+}
+
+function formatPaceSec(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}'${s.toString().padStart(2, "0")}"`;
+}
+
+function buildPostRunPrompt(
+  facts: StructuredFacts,
+  scene: Scene,
+  body: CoachFeedbackRequest
+): string {
+  const lines: string[] = [];
+  lines.push(`[场景] ${scene}`);
+  lines.push(`[总距离] ${facts.totalKm}公里`);
+  lines.push(`[均速] ${formatPaceSec(facts.avgPace)}/km`);
+  lines.push(`[最快] 第${facts.bestKm}公里 ${formatPaceSec(facts.bestKmPace)}`);
+  lines.push(`[最慢] 第${facts.worstKm}公里 ${formatPaceSec(facts.worstKmPace)}`);
+  lines.push(`[波动] ${Math.round(facts.paceVariability)}秒 (标准差${Math.round(facts.paceStdDev)}秒)`);
+  lines.push(`[前半程均速] ${formatPaceSec(facts.firstHalfAvg)}`);
+  lines.push(`[后半程均速] ${formatPaceSec(facts.secondHalfAvg)}`);
+  lines.push(`[掉速] ${facts.positiveSplit ? "是" : "否"}`);
+
+  if (body.targetPace) {
+    lines.push(`[目标配速] ${formatPaceSec(body.targetPace * 60)}/km`);
+    lines.push(`[达标率] ${Math.round(facts.complianceRate * 100)}%`);
+  }
+
+  if (body.goalName) {
+    lines.push(`[训练目标] ${body.goalName}`);
+  }
+
+  const factsBlock = lines.join("\n");
+
+  const style = body.coachStyle || "encouraging";
+  const styleName = style === "encouraging" ? "鼓励型" : style === "strict" ? "严格型" : "温和型";
+
+  return `以下是系统已计算好的跑步数据事实，请基于这些事实写三段文案。
+
+${factsBlock}
+
+严格按以下格式输出，每段前用标记：
+【P1】本次表现总结（15-25字，一句话点评配速节奏）
+【P2】原因分析（20-40字，基于数据分析原因）
+【P3】下次建议（20-40字，以"下次建议："开头，含具体数字如配速X'XX"、距离Xkm）
+
+语气：${styleName}，口语化，不要用列表格式。
+只输出【P1】【P2】【P3】三段，不要输出其他内容。`;
+}
+
+function parseParagraphs(text: string): FeedbackParagraphs | null {
+  const p1Match = text.match(/【P1】([\s\S]*?)(?=【P2】|$)/);
+  const p2Match = text.match(/【P2】([\s\S]*?)(?=【P3】|$)/);
+  const p3Match = text.match(/【P3】([\s\S]*?)$/);
+
+  if (!p1Match || !p2Match || !p3Match) {
+    return null;
+  }
+
+  const summary = p1Match[1].trim();
+  const analysis = p2Match[1].trim();
+  const suggestion = p3Match[1].trim();
+
+  if (!summary || !analysis || !suggestion) {
+    return null;
+  }
+
+  return { summary, analysis, suggestion };
+}
+
+// MARK: - Main Handler
 
 Deno.serve(async (req: Request) => {
   // CORS 处理
@@ -40,53 +231,64 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // 解析请求
     const body: CoachFeedbackRequest = await req.json();
-    const {
-      currentPace,
-      targetPace,
-      distance,
-      totalDistance,
-      duration,
-      heartRate,
-      coachStyle = "encouraging"
-    } = body;
-
-    console.log(`🏃 收到教练反馈请求: 距离=${distance}km, 配速=${currentPace}min/km`);
-
-    // 构建运动数据描述
-    const statsDescription = buildStatsDescription(body);
-
-    // 构建 prompt
+    const { coachStyle = "encouraging" } = body;
     const hasKmSplits = !!(body.kmSplits && body.kmSplits.length > 0);
-    const prompt = buildFeedbackPrompt(statsDescription, coachStyle, hasKmSplits);
+
+    console.log(`🏃 收到教练反馈请求: 距离=${body.distance}km, 配速=${body.currentPace}min/km, 分段=${hasKmSplits}`);
+
+    let prompt: string;
+    let facts: StructuredFacts | null = null;
+    let scene: Scene | null = null;
+
+    if (hasKmSplits) {
+      // 跑后分析模式：结构化事实 + 场景分类
+      facts = computeFacts(body);
+      scene = classifyScene(facts, body);
+      prompt = buildPostRunPrompt(facts, scene, body);
+      console.log(`📊 场景分类: ${scene}, 达标率: ${Math.round(facts.complianceRate * 100)}%`);
+    } else {
+      // 实时反馈模式
+      const statsDescription = buildStatsDescription(body);
+      prompt = buildRealtimePrompt(statsDescription, coachStyle);
+    }
 
     // 调用阿里云百炼生成反馈
+    const systemPrompt = getSystemPrompt(coachStyle, hasKmSplits);
     const feedback = await callBailian(
       [
-        {
-          role: "system",
-          content: getSystemPrompt(coachStyle)
-        },
-        {
-          role: "user",
-          content: prompt
-        }
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt },
       ],
       "qwen-plus",
-      0.8  // 稍高的温度，让反馈更自然
+      0.7
     );
 
-    // 清理反馈（移除多余符号）
-    const cleanFeedback = cleanFeedbackText(feedback);
+    // 处理响应
+    let cleanFeedback: string;
+    let paragraphs: FeedbackParagraphs | null = null;
 
-    console.log(`✅ 教练反馈生成成功: ${cleanFeedback.substring(0, 30)}...`);
+    if (hasKmSplits) {
+      // 跑后模式：尝试解析三段
+      paragraphs = parseParagraphs(feedback);
+      if (paragraphs) {
+        cleanFeedback = `${paragraphs.summary}\n${paragraphs.analysis}\n${paragraphs.suggestion}`;
+      } else {
+        // 解析失败，用清理后的原文
+        cleanFeedback = cleanFeedbackText(feedback, true);
+      }
+    } else {
+      cleanFeedback = cleanFeedbackText(feedback, false);
+    }
 
-    // 返回结果
+    console.log(`✅ 教练反馈生成成功: ${cleanFeedback.substring(0, 50)}...`);
+
     return new Response(
       JSON.stringify({
         success: true,
         feedback: cleanFeedback,
+        paragraphs: paragraphs,
+        scene: scene,
         timestamp: new Date().toISOString(),
       }),
       {
@@ -99,13 +301,14 @@ Deno.serve(async (req: Request) => {
   } catch (error) {
     console.error("❌ 教练反馈生成失败:", error);
 
-    // 返回后备反馈
     const fallbackFeedback = getFallbackFeedback();
 
     return new Response(
       JSON.stringify({
-        success: true,  // 即使失败也返回成功，使用后备反馈
+        success: true,
         feedback: fallbackFeedback,
+        paragraphs: null,
+        scene: null,
         timestamp: new Date().toISOString(),
       }),
       {
@@ -118,21 +321,29 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-/**
- * 获取系统提示词（根据教练风格）
- */
-function getSystemPrompt(style: string): string {
-  const basePrompt = "你是一位专业的跑步教练，正在通过语音为用户提供实时跑步指导。";
+// MARK: - System Prompt
 
-  const stylePrompts = {
+function getSystemPrompt(style: string, isPostRun: boolean): string {
+  const stylePrompts: Record<string, string> = {
     encouraging: "你的风格是鼓励型，热情、积极，善于激励用户，用正面的语言帮助用户坚持下去。",
     strict: "你的风格是严格型，专业、直接，注重科学训练，会指出问题并给出明确建议。",
-    calm: "你的风格是温和型，平和、耐心，像朋友一样陪伴用户，给予温暖的支持。"
+    calm: "你的风格是温和型，平和、耐心，像朋友一样陪伴用户，给予温暖的支持。",
   };
 
-  const styleDesc = stylePrompts[style as keyof typeof stylePrompts] || stylePrompts.encouraging;
+  const styleDesc = stylePrompts[style] || stylePrompts.encouraging;
 
-  return `${basePrompt}${styleDesc}
+  if (isPostRun) {
+    return `你是一位专业的跑步教练，正在为用户提供跑后分析。${styleDesc}
+
+**重要要求**：
+1. 系统已经计算好了所有数据事实，你只需基于这些事实写文案
+2. 严格按照【P1】【P2】【P3】格式输出
+3. 不要自己计算数据，直接引用系统提供的数据
+4. 口语化，自然流畅，有感染力
+5. 建议必须包含具体数字`;
+  }
+
+  return `你是一位专业的跑步教练，正在通过语音为用户提供实时跑步指导。${styleDesc}
 
 **重要要求**：
 1. 反馈要简短（15-25个字），适合语音播报
@@ -142,13 +353,11 @@ function getSystemPrompt(style: string): string {
 5. 语气自然，有感染力`;
 }
 
-/**
- * 构建运动数据描述
- */
+// MARK: - 实时反馈（保留原逻辑）
+
 function buildStatsDescription(data: CoachFeedbackRequest): string {
   const parts: string[] = [];
 
-  // 配速信息
   const paceMin = Math.floor(data.currentPace);
   const paceSec = Math.floor((data.currentPace - paceMin) * 60);
   parts.push(`当前配速: ${paceMin}分${paceSec}秒/公里`);
@@ -158,7 +367,6 @@ function buildStatsDescription(data: CoachFeedbackRequest): string {
     const targetSec = Math.floor((data.targetPace - targetMin) * 60);
     parts.push(`目标配速: ${targetMin}分${targetSec}秒/公里`);
 
-    // 配速对比
     const paceGap = data.currentPace - data.targetPace;
     if (Math.abs(paceGap) > 0.5) {
       parts.push(paceGap > 0 ? "当前偏慢" : "当前偏快");
@@ -167,27 +375,20 @@ function buildStatsDescription(data: CoachFeedbackRequest): string {
     }
   }
 
-  // 距离信息
   parts.push(`已跑距离: ${data.distance.toFixed(2)}公里`);
   if (data.totalDistance) {
     const remaining = data.totalDistance - data.distance;
     parts.push(`剩余距离: ${remaining.toFixed(2)}公里`);
-
-    // 进度百分比
     const progress = (data.distance / data.totalDistance * 100).toFixed(0);
     parts.push(`完成进度: ${progress}%`);
   }
 
-  // 时长信息
   const mins = Math.floor(data.duration / 60);
   const secs = Math.floor(data.duration % 60);
   parts.push(`已跑时间: ${mins}分${secs}秒`);
 
-  // 心率信息
   if (data.heartRate) {
     parts.push(`心率: ${data.heartRate}bpm`);
-
-    // 心率区间判断（简单判断）
     if (data.heartRate > 170) {
       parts.push("心率偏高");
     } else if (data.heartRate > 150) {
@@ -199,94 +400,37 @@ function buildStatsDescription(data: CoachFeedbackRequest): string {
     }
   }
 
-  // 每公里分段配速
-  if (data.kmSplits && data.kmSplits.length > 0) {
-    parts.push("\n每公里分段配速:");
-    data.kmSplits.forEach((splitSec, i) => {
-      const min = Math.floor(splitSec / 60);
-      const sec = Math.floor(splitSec % 60);
-      parts.push(`  第${i + 1}公里: ${min}分${sec.toString().padStart(2, '0')}秒`);
-    });
-
-    // 计算分段分析
-    const avg = data.kmSplits.reduce((a, b) => a + b, 0) / data.kmSplits.length;
-    const fastest = Math.min(...data.kmSplits);
-    const slowest = Math.max(...data.kmSplits);
-    const fastestKm = data.kmSplits.indexOf(fastest) + 1;
-    const slowestKm = data.kmSplits.indexOf(slowest) + 1;
-    const variation = ((slowest - fastest) / avg * 100).toFixed(1);
-
-    parts.push(`分段分析: 最快第${fastestKm}公里, 最慢第${slowestKm}公里, 配速波动${variation}%`);
-
-    // 判断是否有后半程掉速
-    if (data.kmSplits.length >= 2) {
-      const mid = Math.floor(data.kmSplits.length / 2);
-      const firstHalf = data.kmSplits.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
-      const secondHalf = data.kmSplits.slice(mid).reduce((a, b) => a + b, 0) / (data.kmSplits.length - mid);
-      if (secondHalf > firstHalf * 1.05) {
-        parts.push("趋势: 后半程掉速");
-      } else if (firstHalf > secondHalf * 1.05) {
-        parts.push("趋势: 负分段（越跑越快）");
-      } else {
-        parts.push("趋势: 配速均匀");
-      }
-    }
-  }
-
   return parts.join("\n");
 }
 
-/**
- * 构建反馈提示词
- */
-function buildFeedbackPrompt(statsDescription: string, style: string, hasKmSplits: boolean): string {
-  if (hasKmSplits) {
-    // 跑后总结模式：更详细的分析
-    return `用户刚完成一次跑步，数据如下：
-
-${statsDescription}
-
-请根据以上数据（特别是每公里分段配速），给用户一段跑后总结建议（50-80个字）。
-
-要求：
-1. 先肯定表现，再分析配速节奏（是否均匀、哪段掉速、是否负分段等）
-2. 给出1-2条具体改进建议（如前期压配速、加强后半程耐力等）
-3. 语气要符合${style === 'encouraging' ? '鼓励型' : style === 'strict' ? '严格型' : '温和型'}风格
-4. 口语化，不要用列表格式，用自然段落`;
-  }
-
+function buildRealtimePrompt(statsDescription: string, style: string): string {
+  const styleName = style === "encouraging" ? "鼓励型" : style === "strict" ? "严格型" : "温和型";
   return `用户正在跑步，当前状态如下：
 
 ${statsDescription}
 
 请根据以上数据，给用户一句简短的实时反馈（15-25个字）。
 
-**反馈示例**：
-- 鼓励型："配速很稳定，保持住，你可以的！"
-- 严格型："心率过高，放慢速度，控制呼吸。"
-- 温和型："跑得不错，慢慢来，享受过程。"
-
 注意：
 1. 只返回一句话，不要多余解释
-2. 语气要符合${style === 'encouraging' ? '鼓励型' : style === 'strict' ? '严格型' : '温和型'}风格
+2. 语气要符合${styleName}风格
 3. 口语化，自然流畅`;
 }
 
-/**
- * 清理反馈文本
- */
-function cleanFeedbackText(text: string): string {
-  return text
+// MARK: - Helpers
+
+function cleanFeedbackText(text: string, preserveNewlines: boolean): string {
+  let cleaned = text
     .trim()
-    .replace(/^["']|["']$/g, '')  // 移除首尾引号
-    .replace(/\n+/g, ' ')          // 换行变空格
-    .replace(/\s+/g, ' ')          // 多个空格变一个
-    .substring(0, 300);             // 限制长度
+    .replace(/^["']|["']$/g, "");
+
+  if (!preserveNewlines) {
+    cleaned = cleaned.replace(/\n+/g, " ").replace(/\s+/g, " ");
+  }
+
+  return cleaned.substring(0, 500);
 }
 
-/**
- * 获取后备反馈（AI 失败时使用）
- */
 function getFallbackFeedback(): string {
   const fallbacks = [
     "配速稳定，保持节奏，你做得很好！",
@@ -296,9 +440,8 @@ function getFallbackFeedback(): string {
     "注意配速，不要太快也不要太慢。",
     "保持节奏，稳定前进！",
     "你的状态不错，继续保持！",
-    "专注呼吸，放松肩膀，跑得更轻松。"
+    "专注呼吸，放松肩膀，跑得更轻松。",
   ];
 
-  // 随机返回一个
   return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
