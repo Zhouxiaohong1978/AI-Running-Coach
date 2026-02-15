@@ -129,6 +129,16 @@ struct TrainingPlanView: View {
         if let data = try? JSONEncoder().encode(plan) {
             UserDefaults.standard.set(data, forKey: planStorageKey)
         }
+        // 首次保存时记录计划开始日期（本周一）
+        if UserDefaults.standard.object(forKey: "training_plan_start_date") == nil {
+            var cal = Calendar.current
+            cal.firstWeekday = 2
+            var comp = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+            comp.weekday = 2
+            if let monday = cal.date(from: comp) {
+                UserDefaults.standard.set(monday, forKey: "training_plan_start_date")
+            }
+        }
     }
 
     /// 更新任务

@@ -22,6 +22,8 @@ class AchievementManager: ObservableObject {
 
     private let userDefaults = UserDefaults.standard
     private let achievementsKey = "user_achievements"
+    private let achievementsVersionKey = "achievements_version"
+    private let currentAchievementsVersion = 2
 
     // MARK: - Initialization
 
@@ -33,12 +35,33 @@ class AchievementManager: ObservableObject {
 
     /// 加载成就数据
     func loadAchievements() {
+        let savedVersion = userDefaults.integer(forKey: achievementsVersionKey)
+
         if let data = userDefaults.data(forKey: achievementsKey),
            let decoded = try? JSONDecoder().decode([Achievement].self, from: data) {
-            achievements = decoded
+            if savedVersion == currentAchievementsVersion {
+                // 版本匹配，直接使用缓存
+                achievements = decoded
+            } else {
+                // 版本不匹配，从最新定义重建，但保留用户进度
+                let oldMap = Dictionary(uniqueKeysWithValues: decoded.map { ($0.id, $0) })
+                achievements = Achievement.allAchievements.map { fresh in
+                    var a = fresh
+                    if let old = oldMap[fresh.id] {
+                        a.currentValue = old.currentValue
+                        a.isUnlocked = old.isUnlocked
+                        a.unlockedAt = old.unlockedAt
+                    }
+                    return a
+                }
+                userDefaults.set(currentAchievementsVersion, forKey: achievementsVersionKey)
+                saveAchievements()
+                print("🔄 成就定义已更新至版本 \(currentAchievementsVersion)，用户进度已保留")
+            }
         } else {
             // 首次启动，初始化预定义成就
             achievements = Achievement.allAchievements
+            userDefaults.set(currentAchievementsVersion, forKey: achievementsVersionKey)
             saveAchievements()
         }
     }

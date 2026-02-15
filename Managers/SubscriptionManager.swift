@@ -41,13 +41,14 @@ final class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Free Achievement IDs
 
     static let freeAchievementIDs: Set<String> = [
-        "distance_1km",
+        "distance_3km",
         "distance_5km",
-        "distance_10km",
+        "duration_5hours",
         "frequency_3days",
         "frequency_7days",
         "calories_300",
         "calories_500",
+        "pace_7min",
         "pace_6min",
         "special_morning_5times",
         "milestone_100km"

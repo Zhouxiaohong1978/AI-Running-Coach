@@ -60,6 +60,10 @@ struct Achievement: Identifiable, Codable {
     // 计算属性：进度百分比
     var progress: Double {
         guard targetValue > 0 else { return 0 }
+        if category == .pace {
+            guard currentValue > 0, currentValue < 999 else { return 0 }
+            return min(targetValue / currentValue, 1.0)
+        }
         return min(currentValue / targetValue, 1.0)
     }
 
@@ -79,9 +83,13 @@ struct Achievement: Identifiable, Codable {
         case .calories:
             return String(format: "%.0f/%.0f 卡", currentValue, targetValue)
         case .pace:
-            let currentPace = Int(currentValue / 60)
             let targetPace = Int(targetValue / 60)
-            return "\(currentPace)'\(Int(currentValue.truncatingRemainder(dividingBy: 60)))\" / \(targetPace)'00\""
+            if currentValue >= 999 {
+                return "-- / \(targetPace)'00\""
+            }
+            let currentPace = Int(currentValue / 60)
+            let currentSec = Int(currentValue.truncatingRemainder(dividingBy: 60))
+            return String(format: "%d'%02d\" / %d'00\"", currentPace, currentSec, targetPace)
         case .special:
             return String(format: "%.0f/%.0f 次", currentValue, targetValue)
         case .milestone:
@@ -96,15 +104,15 @@ extension Achievement {
     static let allAchievements: [Achievement] = [
         // ===== 1. 距离成就（单次距离）=====
         Achievement(
-            id: "distance_1km",
+            id: "distance_3km",
             category: .distance,
-            title: "起步阶段",
-            description: "完成1公里跑步",
+            title: "初露锋芒",
+            description: "完成3公里跑步",
             icon: "figure.walk",
-            targetValue: 1000,
+            targetValue: 3000,
             currentValue: 0,
             isUnlocked: false,
-            celebrationMessage: "恭喜你！解锁成就【起步阶段】！完成1公里跑步，每一步都是进步的开始！"
+            celebrationMessage: "恭喜解锁初露锋芒成就！正式成为3公里跑者啦！"
         ),
         Achievement(
             id: "distance_5km",
@@ -201,13 +209,13 @@ extension Achievement {
         Achievement(
             id: "frequency_3days",
             category: .frequency,
-            title: "初露锋芒",
+            title: "三日连跑",
             description: "连续跑步3天",
             icon: "flame",
             targetValue: 3,
             currentValue: 0,
             isUnlocked: false,
-            celebrationMessage: "恭喜你！解锁成就【初露锋芒】！连续跑步3天，习惯的种子已经发芽！"
+            celebrationMessage: "恭喜你！解锁成就【三日连跑】！连续跑步3天，习惯的种子已经发芽！"
         ),
         Achievement(
             id: "frequency_7days",
@@ -258,13 +266,13 @@ extension Achievement {
         Achievement(
             id: "calories_500",
             category: .calories,
-            title: "燃脂达人",
+            title: "脂肪杀手",
             description: "单次跑步燃烧500卡",
             icon: "flame.fill",
             targetValue: 500,
             currentValue: 0,
             isUnlocked: false,
-            celebrationMessage: "太棒了！解锁成就【燃脂达人】！单次燃烧500卡，相当于慢跑一个小时，你的努力正在让身体变得更健康！"
+            celebrationMessage: "解锁脂肪杀手！单次燃脂500大卡，脂肪瑟瑟发抖。"
         ),
         Achievement(
             id: "calories_1000",
@@ -276,6 +284,28 @@ extension Achievement {
             currentValue: 0,
             isUnlocked: false,
             celebrationMessage: "不可思议！解锁成就【燃脂狂魔】！单次燃烧1000卡，这是超高强度训练，你的毅力令人震撼！"
+        ),
+        Achievement(
+            id: "calories_total_5k",
+            category: .calories,
+            title: "代谢达人",
+            description: "累计燃烧5,000卡",
+            icon: "flame.circle",
+            targetValue: 5000,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "解锁代谢达人！连续燃脂跑，身体变成高效燃脂机。"
+        ),
+        Achievement(
+            id: "calories_total_7700",
+            category: .calories,
+            title: "斤斤计较",
+            description: "累计燃烧7,700卡（约减1公斤脂肪）",
+            icon: "scalemass.fill",
+            targetValue: 7700,
+            currentValue: 0,
+            isUnlocked: false,
+            celebrationMessage: "解锁斤斤计较！减重1公斤，历史性突破！"
         ),
         Achievement(
             id: "calories_total_10k",
@@ -312,6 +342,17 @@ extension Achievement {
         ),
 
         // ===== 5. 配速成就（最快配速）=====
+        Achievement(
+            id: "pace_7min",
+            category: .pace,
+            title: "节奏大师",
+            description: "配速低于7分钟/公里",
+            icon: "metronome",
+            targetValue: 7 * 60,
+            currentValue: 999,
+            isUnlocked: false,
+            celebrationMessage: "解锁节奏大师！跑步超稳，节奏感拉满。"
+        ),
         Achievement(
             id: "pace_6min",
             category: .pace,

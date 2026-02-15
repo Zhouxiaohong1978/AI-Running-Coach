@@ -7,6 +7,23 @@
 
 import SwiftUI
 
+// MARK: - Color Tokens
+
+private extension Color {
+    static let greenPrimary = Color(red: 0.49, green: 0.84, blue: 0.11)  // #7CD61D
+    static let bgDark = Color(red: 0.02, green: 0.02, blue: 0.02)       // #050505
+    static let textSecondary = Color(red: 0.65, green: 0.66, blue: 0.68) // #A7A8AD
+    static let textSecondary2 = Color(red: 0.64, green: 0.64, blue: 0.65) // #A3A3A7
+    static let cardBg = Color(red: 0.96, green: 0.96, blue: 0.96)       // #F4F4F6
+    static let textPrimary = Color(red: 0.07, green: 0.07, blue: 0.07)  // #121212
+    static let trackBg = Color(red: 0.85, green: 0.85, blue: 0.87)      // #D9D9DE
+    static let tabBg = Color(red: 0.98, green: 0.98, blue: 0.99)        // #FBFBFC
+    static let tabLine = Color(red: 0.91, green: 0.91, blue: 0.93)      // #E8E8EC
+    static let tabInactive = Color(red: 0.60, green: 0.61, blue: 0.64)  // #9A9CA3
+    static let ringOuter = Color(red: 0.06, green: 0.13, blue: 0.04)    // #102109
+    static let ringMiddle = Color(red: 0.18, green: 0.31, blue: 0.05)   // #2E4F0C
+}
+
 struct HomeView: View {
     @State private var selectedTab = 0
     @State private var showPaywall = false
@@ -54,8 +71,13 @@ struct HomeView: View {
                     }
                 }
                 .padding(.vertical, 8)
-                .background(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 8, y: -2)
+                .background(Color.tabBg)
+                .overlay(
+                    Rectangle()
+                        .fill(Color.tabLine)
+                        .frame(height: 1),
+                    alignment: .top
+                )
             }
         }
     }
@@ -65,43 +87,49 @@ struct HomeView: View {
     private var homeContent: some View {
         NavigationView {
             ZStack {
-                Color(UIColor.systemGroupedBackground)
+                Color.bgDark
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Main Content
                     ScrollView {
-                        VStack(spacing: 24) {
+                        VStack(spacing: 0) {
                             // Weather and Greeting
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 HStack(spacing: 6) {
+                                    Text(todayDateText)
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.textSecondary2)
                                     Text(getWeatherEmoji())
-                                        .font(.title3)
+                                        .font(.system(size: 18))
                                     Text(getWeatherText())
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.textSecondary2)
                                 }
 
-                                VStack(alignment: .leading, spacing: 4) {
-                                    HStack(spacing: 8) {
-                                        Text(getUserName())
-                                            .font(.system(size: 24, weight: .heavy))
-                                            .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+                                HStack(spacing: 8) {
+                                    Text(getUserName())
+                                        .font(.system(size: 40, weight: .bold))
+                                        .foregroundColor(.greenPrimary)
 
-                                        if subscriptionManager.isPro {
-                                            Text("Pro")
-                                                .font(.system(size: 11, weight: .bold))
-                                                .foregroundColor(.white)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 3)
-                                                .background(Color(red: 0.5, green: 0.8, blue: 0.1))
-                                                .cornerRadius(6)
-                                        }
+                                    if subscriptionManager.isPro {
+                                        Text("Pro")
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(Color.greenPrimary)
+                                            .cornerRadius(6)
                                     }
-                                    Text("准备好今天的跑步了吗？")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.7))
                                 }
+                                .padding(.top, 14)
+
+                                Text(todayGreeting)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(.textSecondary)
+                                    .frame(maxWidth: 320, alignment: .leading)
+                                    .lineSpacing(4)
+                                    .padding(.top, 10)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 24)
@@ -110,39 +138,41 @@ struct HomeView: View {
                             // 开始 Run Button
                             NavigationLink(destination: ActiveRunView()) {
                                 ZStack {
-                                    // Outer glow rings
+                                    // Outer ring
                                     Circle()
-                                        .fill(Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.1))
-                                        .frame(width: 240, height: 240)
+                                        .fill(Color.ringOuter)
+                                        .frame(width: 230, height: 230)
 
+                                    // Middle ring
                                     Circle()
-                                        .fill(Color(red: 0.5, green: 0.8, blue: 0.1).opacity(0.15))
-                                        .frame(width: 200, height: 200)
+                                        .fill(Color.ringMiddle)
+                                        .frame(width: 196, height: 196)
 
                                     // Main button
                                     ZStack {
                                         Circle()
-                                            .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
-                                            .frame(width: 160, height: 160)
+                                            .fill(Color.greenPrimary)
+                                            .frame(width: 166, height: 166)
 
-                                        VStack(spacing: 8) {
+                                        VStack(spacing: 10) {
                                             Image(systemName: "play.fill")
-                                                .font(.system(size: 32))
+                                                .font(.system(size: 34))
                                                 .foregroundColor(.white)
 
                                             Text("开始跑步")
-                                                .font(.system(size: 16, weight: .bold))
+                                                .font(.system(size: 20, weight: .bold))
                                                 .foregroundColor(.white)
                                         }
                                     }
                                 }
                             }
-                            .padding(.vertical, 20)
+                            .padding(.top, 16)
+                            .padding(.bottom, 20)
 
                             // 每周目标 Card
                             WeeklyGoalCard(dataManager: dataManager)
                                 .padding(.horizontal, 24)
-                                .padding(.bottom, 20)
+                                .padding(.bottom, 80)
                         }
                     }
                 }
@@ -155,8 +185,8 @@ struct HomeView: View {
                         Button(action: {}) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.black)
-                                    .frame(width: 48, height: 48)
+                                    .fill(Color.bgDark)
+                                    .frame(width: 54, height: 54)
 
                                 Text("?")
                                     .font(.system(size: 24, weight: .semibold))
@@ -235,12 +265,69 @@ struct HomeView: View {
         return "跑友"
     }
 
+    private var todayDateText: String {
+        let now = Date()
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.dateFormat = "M月d日（EEE）"
+        return formatter.string(from: now)
+    }
+
     private func getWeatherEmoji() -> String {
         return weatherManager.currentWeather?.emoji ?? "☀️"
     }
 
     private func getWeatherText() -> String {
         return weatherManager.currentWeather?.displayText ?? "获取天气中..."
+    }
+
+    // MARK: - 今日招呼语
+
+    private var todayGreeting: String {
+        let defaults = UserDefaults.standard
+
+        // 1. 读取训练计划
+        guard let data = defaults.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
+            return "准备好今天的跑步了吗？"
+        }
+
+        // 2. 计算当前是第几周
+        var weekNumber = 1
+        if let startDate = defaults.object(forKey: "training_plan_start_date") as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+            weekNumber = max(1, days / 7 + 1)
+        }
+
+        // 3. 超出范围用最后一周
+        let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
+        guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else {
+            return "准备好今天的跑步了吗？"
+        }
+
+        // 4. 获取今天是周几（1=周一 ... 7=周日）
+        let weekday = Calendar.current.component(.weekday, from: Date()) // 1=周日
+        let dow = weekday == 1 ? 7 : weekday - 1
+
+        // 5. 查找今天的任务
+        guard let task = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == dow }),
+              task.type != "rest" else {
+            // 休息日
+            let restMessages = [
+                "今天是休息日，做做拉伸放松一下吧",
+                "好好休息，明天继续加油！",
+                "休息也是训练的一部分，放松身心吧"
+            ]
+            return restMessages[Calendar.current.component(.day, from: Date()) % restMessages.count]
+        }
+
+        // 6. 有训练任务
+        let typeName = TaskType(rawValue: task.type)?.displayName ?? task.type
+        if let distance = task.targetDistance, distance > 0 {
+            return "今天的目标是\(typeName)\(String(format: "%.1f", distance))公里，\n准备好就点击开始吧！"
+        } else {
+            return "今天的计划是\(typeName)，准备好就开始吧！"
+        }
     }
 }
 
@@ -251,7 +338,8 @@ struct WeeklyGoalCard: View {
 
     private var weeklyStats: (current: Double, goal: Double, progress: Double, message: String) {
         // 获取本周的开始和结束日期（周一到周日）
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // 确保一周从周一开始
         let now = Date()
 
         // 获取本周周一
@@ -269,8 +357,8 @@ struct WeeklyGoalCard: View {
 
         let currentKm = weeklyDistance / 1000.0
 
-        // 周目标（公里），TODO: 从训练计划获取
-        let goalKm = 20.0
+        // 从训练计划获取本周目标
+        let goalKm = Self.weeklyGoalFromPlan(weekStart: startOfWeek)
 
         // 计算进度
         let progress = min(currentKm / goalKm, 1.0)
@@ -291,7 +379,8 @@ struct WeeklyGoalCard: View {
     }
 
     private var weekDateRange: String {
-        let calendar = Calendar.current
+        var calendar = Calendar.current
+        calendar.firstWeekday = 2 // 确保一周从周一开始
         let now = Date()
 
         // 获取本周周一
@@ -311,54 +400,80 @@ struct WeeklyGoalCard: View {
     var body: some View {
         let stats = weeklyStats
 
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("每周目标")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.black)
-                    Text(weekDateRange)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.black)  // 改为黑色
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            // Title and date
+            Text("每周目标")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.textPrimary)
 
-                Spacer()
+            Text(weekDateRange)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(Color(red: 0.13, green: 0.13, blue: 0.15)) // #202226
+                .padding(.top, 6)
 
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 20))
-                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
-            }
-
-            HStack(alignment: .lastTextBaseline, spacing: 8) {
+            // Distance values
+            HStack(alignment: .lastTextBaseline, spacing: 6) {
                 Text(String(format: "%.1f", stats.current))
-                    .font(.system(size: 48, weight: .bold))
-                    .foregroundColor(.black)
-                Text("/ \(Int(stats.goal)) km")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.black)  // 改为黑色
+                    .font(.system(size: 50, weight: .heavy))
+                    .foregroundColor(.textPrimary)
+                Text("/ \(String(format: "%.1f", stats.goal)) km")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.textPrimary)
             }
+            .padding(.top, 10)
 
             // Progress bar
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.gray.opacity(0.2))
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color.trackBg)
                         .frame(height: 8)
 
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color.greenPrimary)
                         .frame(width: geometry.size.width * stats.progress, height: 8)
                 }
             }
             .frame(height: 8)
+            .padding(.top, 12)
 
+            // Message
             Text(stats.message)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.black)  // 改为黑色
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(Color(red: 0.12, green: 0.12, blue: 0.13)) // #1E1E22
+                .padding(.top, 10)
         }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(16)
+        .padding(22)
+        .background(Color.cardBg)
+        .cornerRadius(22)
+    }
+
+    // MARK: - 从训练计划获取本周目标距离(公里)
+
+    private static func weeklyGoalFromPlan(weekStart: Date) -> Double {
+        let defaults = UserDefaults.standard
+        // 读取训练计划
+        guard let data = defaults.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
+            return 20.0 // 无计划时默认20km
+        }
+
+        // 计算当前是第几周
+        var weekNumber = 1
+        if let startDate = defaults.object(forKey: "training_plan_start_date") as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: weekStart).day ?? 0
+            weekNumber = max(1, days / 7 + 1)
+        }
+
+        // 找到对应周计划，超出范围用最后一周
+        let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
+        guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else {
+            return 20.0
+        }
+
+        // 汇总该周所有任务的目标距离(km)
+        let totalKm = weekPlan.dailyTasks.reduce(0.0) { $0 + ($1.targetDistance ?? 0) }
+        return totalKm > 0 ? totalKm : 20.0
     }
 }
 
@@ -372,14 +487,14 @@ struct TabBarItem: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: 6) {
                 Image(systemName: icon)
                     .font(.system(size: 24))
-                    .foregroundColor(isSelected ? Color(red: 0.5, green: 0.8, blue: 0.1) : .gray)
+                    .foregroundColor(isSelected ? .greenPrimary : .tabInactive)
 
                 Text(label)
                     .font(.system(size: 12))
-                    .foregroundColor(isSelected ? Color(red: 0.5, green: 0.8, blue: 0.1) : .gray)
+                    .foregroundColor(isSelected ? .greenPrimary : .tabInactive)
             }
             .frame(maxWidth: .infinity)
         }
