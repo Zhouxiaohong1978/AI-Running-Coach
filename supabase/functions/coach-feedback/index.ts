@@ -24,6 +24,7 @@ interface CoachFeedbackRequest {
   duration: number;
   heartRate?: number;
   coachStyle?: string;
+  kmSplits?: number[];
 }
 
 Deno.serve(async (req: Request) => {
@@ -57,7 +58,8 @@ Deno.serve(async (req: Request) => {
     const statsDescription = buildStatsDescription(body);
 
     // 构建 prompt
-    const prompt = buildFeedbackPrompt(statsDescription, coachStyle);
+    const hasKmSplits = !!(body.kmSplits && body.kmSplits.length > 0);
+    const prompt = buildFeedbackPrompt(statsDescription, coachStyle, hasKmSplits);
 
     // 调用阿里云百炼生成反馈
     const feedback = await callBailian(
@@ -197,13 +199,62 @@ function buildStatsDescription(data: CoachFeedbackRequest): string {
     }
   }
 
+  // 每公里分段配速
+  if (data.kmSplits && data.kmSplits.length > 0) {
+    parts.push("\n每公里分段配速:");
+    data.kmSplits.forEach((splitSec, i) => {
+      const min = Math.floor(splitSec / 60);
+      const sec = Math.floor(splitSec % 60);
+      parts.push(`  第${i + 1}公里: ${min}分${sec.toString().padStart(2, '0')}秒`);
+    });
+
+    // 计算分段分析
+    const avg = data.kmSplits.reduce((a, b) => a + b, 0) / data.kmSplits.length;
+    const fastest = Math.min(...data.kmSplits);
+    const slowest = Math.max(...data.kmSplits);
+    const fastestKm = data.kmSplits.indexOf(fastest) + 1;
+    const slowestKm = data.kmSplits.indexOf(slowest) + 1;
+    const variation = ((slowest - fastest) / avg * 100).toFixed(1);
+
+    parts.push(`分段分析: 最快第${fastestKm}公里, 最慢第${slowestKm}公里, 配速波动${variation}%`);
+
+    // 判断是否有后半程掉速
+    if (data.kmSplits.length >= 2) {
+      const mid = Math.floor(data.kmSplits.length / 2);
+      const firstHalf = data.kmSplits.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+      const secondHalf = data.kmSplits.slice(mid).reduce((a, b) => a + b, 0) / (data.kmSplits.length - mid);
+      if (secondHalf > firstHalf * 1.05) {
+        parts.push("趋势: 后半程掉速");
+      } else if (firstHalf > secondHalf * 1.05) {
+        parts.push("趋势: 负分段（越跑越快）");
+      } else {
+        parts.push("趋势: 配速均匀");
+      }
+    }
+  }
+
   return parts.join("\n");
 }
 
 /**
  * 构建反馈提示词
  */
-function buildFeedbackPrompt(statsDescription: string, style: string): string {
+function buildFeedbackPrompt(statsDescription: string, style: string, hasKmSplits: boolean): string {
+  if (hasKmSplits) {
+    // 跑后总结模式：更详细的分析
+    return `用户刚完成一次跑步，数据如下：
+
+${statsDescription}
+
+请根据以上数据（特别是每公里分段配速），给用户一段跑后总结建议（50-80个字）。
+
+要求：
+1. 先肯定表现，再分析配速节奏（是否均匀、哪段掉速、是否负分段等）
+2. 给出1-2条具体改进建议（如前期压配速、加强后半程耐力等）
+3. 语气要符合${style === 'encouraging' ? '鼓励型' : style === 'strict' ? '严格型' : '温和型'}风格
+4. 口语化，不要用列表格式，用自然段落`;
+  }
+
   return `用户正在跑步，当前状态如下：
 
 ${statsDescription}
@@ -230,7 +281,7 @@ function cleanFeedbackText(text: string): string {
     .replace(/^["']|["']$/g, '')  // 移除首尾引号
     .replace(/\n+/g, ' ')          // 换行变空格
     .replace(/\s+/g, ' ')          // 多个空格变一个
-    .substring(0, 100);             // 限制长度
+    .substring(0, 300);             // 限制长度
 }
 
 /**

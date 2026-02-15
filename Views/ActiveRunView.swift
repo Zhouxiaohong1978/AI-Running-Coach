@@ -384,7 +384,8 @@ struct ActiveRunView: View {
             calories: locationManager.calories,
             startTime: Date().addingTimeInterval(-locationManager.duration),
             endTime: Date(),
-            routeCoordinates: locationManager.routeCoordinates.map { Coordinate(from: $0) }
+            routeCoordinates: locationManager.routeCoordinates.map { Coordinate(from: $0) },
+            kmSplits: locationManager.kmSplits.isEmpty ? nil : locationManager.kmSplits
         )
 
         savedRecord = record

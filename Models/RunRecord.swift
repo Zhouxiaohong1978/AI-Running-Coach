@@ -29,6 +29,9 @@ struct RunRecord: Identifiable, Codable {
     var averageSpeed: Double? // 平均速度（米/秒）
     var maxSpeed: Double? // 最大速度（米/秒）
 
+    // 每公里分段数据
+    var kmSplits: [Double]? // 每公里用时（秒）
+
     // 元数据
     var createdAt: Date
     var updatedAt: Date
@@ -46,6 +49,7 @@ struct RunRecord: Identifiable, Codable {
         routeCoordinates: [Coordinate],
         averageSpeed: Double? = nil,
         maxSpeed: Double? = nil,
+        kmSplits: [Double]? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         syncedToCloud: Bool = false
@@ -61,6 +65,7 @@ struct RunRecord: Identifiable, Codable {
         self.routeCoordinates = routeCoordinates
         self.averageSpeed = averageSpeed
         self.maxSpeed = maxSpeed
+        self.kmSplits = kmSplits
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.syncedToCloud = syncedToCloud

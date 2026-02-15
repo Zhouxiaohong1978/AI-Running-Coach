@@ -22,7 +22,6 @@ struct RunSummaryView: View {
         center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
         span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
     )
-    @State private var weeklyStats: [WeeklyRunStats] = []
     @State private var showAchievementSheet = false
     @State private var aiSuggestion: String = ""
     @State private var isLoadingAI: Bool = false
@@ -216,28 +215,36 @@ struct RunSummaryView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
 
-                    // 每周跑步里程柱状图
+                    // 每公里配速柱状图
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("每周跑步里程")
+                        Text("每公里配速")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.black)
 
-                        if weeklyStats.isEmpty {
-                            Text("暂无数据")
+                        if let splits = runRecord?.kmSplits, !splits.isEmpty {
+                            let avgPace = splits.reduce(0, +) / Double(splits.count)
+                            let maxPace = splits.max() ?? 1
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(alignment: .bottom, spacing: 12) {
+                                    ForEach(Array(splits.enumerated()), id: \.offset) { index, pace in
+                                        PaceBar(
+                                            pace: pace,
+                                            kmLabel: "第\(index + 1)公里",
+                                            maxPace: maxPace,
+                                            avgPace: avgPace
+                                        )
+                                    }
+                                }
+                                .padding(.horizontal, 4)
+                            }
+                            .frame(height: 220)
+                        } else {
+                            Text("暂无分段数据")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.vertical, 40)
-                        } else {
-                            HStack(alignment: .bottom, spacing: 12) {
-                                ForEach(Array(weeklyStats.enumerated()), id: \.offset) { index, stat in
-                                    WeekBar(
-                                        distance: stat.totalDistance,
-                                        weekLabel: ["第一周", "第二周", "第三周", "第四周", "第五周"][index]
-                                    )
-                                }
-                            }
-                            .frame(height: 220)
                         }
                     }
                     .padding(20)
@@ -297,53 +304,11 @@ struct RunSummaryView: View {
             }
         }
         .onAppear {
-            calculateWeeklyStats()
             generateAISuggestion()
         }
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSheetView()
         }
-    }
-
-    // MARK: - Weekly Stats Calculation
-
-    /// 计算每周跑步统计
-    private func calculateWeeklyStats() {
-        let calendar = Calendar.current
-        let now = Date()
-
-        // 获取所有跑步记录
-        let allRecords = dataManager.runRecords
-
-        // 按周分组
-        var weeklyData: [Int: Double] = [:]
-
-        for record in allRecords {
-            let weekOfYear = calendar.component(.weekOfYear, from: record.startTime)
-            let year = calendar.component(.year, from: record.startTime)
-            let weekKey = year * 100 + weekOfYear  // 组合年份和周数作为key
-
-            weeklyData[weekKey, default: 0] += record.distance
-        }
-
-        // 获取当前周数
-        let currentWeek = calendar.component(.weekOfYear, from: now)
-        let currentYear = calendar.component(.year, from: now)
-
-        // 生成最近5周的数据（包括当前周）
-        var stats: [WeeklyRunStats] = []
-        for i in 0..<5 {
-            let targetWeek = currentWeek - (4 - i)
-            let weekKey = currentYear * 100 + targetWeek
-
-            let totalDistance = weeklyData[weekKey] ?? 0
-            stats.append(WeeklyRunStats(
-                weekNumber: targetWeek,
-                totalDistance: totalDistance / 1000.0  // 转换为公里
-            ))
-        }
-
-        weeklyStats = stats
     }
 
     // MARK: - Formatting
@@ -406,7 +371,8 @@ struct RunSummaryView: View {
                     distance: record.distance,
                     totalDistance: record.distance,
                     duration: record.duration,
-                    heartRate: nil
+                    heartRate: nil,
+                    kmSplits: record.kmSplits
                 )
 
                 await MainActor.run {
@@ -490,46 +456,51 @@ struct StatCard: View {
     }
 }
 
-// MARK: - Weekly Stats
+// MARK: - Pace Bar (每公里配速柱状图)
 
-/// 每周跑步统计
-struct WeeklyRunStats {
-    let weekNumber: Int
-    let totalDistance: Double  // 公里
-}
-
-// MARK: - Week Bar (绿色柱状图)
-
-struct WeekBar: View {
-    let distance: Double  // 公里
-    let weekLabel: String
+struct PaceBar: View {
+    let pace: Double // 秒/公里
+    let kmLabel: String
+    let maxPace: Double // 最慢配速，用于归一化高度
+    let avgPace: Double // 平均配速，用于颜色判断
 
     private var barHeight: CGFloat {
-        // 根据距离计算柱高，最大20km对应180pt
-        let maxDistance: Double = 20.0
-        let maxHeight: CGFloat = 180.0
-        let height = CGFloat(min(distance / maxDistance, 1.0)) * maxHeight
-        return max(height, 20)  // 最小高度20pt
+        let maxHeight: CGFloat = 160.0
+        let minHeight: CGFloat = 30.0
+        guard maxPace > 0 else { return minHeight }
+        let ratio = CGFloat(pace / maxPace)
+        return max(ratio * maxHeight, minHeight)
+    }
+
+    private var barColor: Color {
+        pace <= avgPace
+            ? Color(red: 0.3, green: 0.8, blue: 0.3) // 绿色=快
+            : Color.orange // 橙色=慢
+    }
+
+    private var paceText: String {
+        let minutes = Int(pace) / 60
+        let seconds = Int(pace) % 60
+        return "\(minutes)'\(String(format: "%02d", seconds))\""
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            // 柱状图上方显示距离（绿色，带单位）
-            Text(String(format: "%.1f公里", distance))
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
+        VStack(spacing: 6) {
+            Text(paceText)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(barColor)
 
-            // 绿色柱状图
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(red: 0.5, green: 0.8, blue: 0.1))
-                .frame(height: barHeight)
+            RoundedRectangle(cornerRadius: 6)
+                .fill(barColor)
+                .frame(width: 36, height: barHeight)
 
-            // 周标签（紫色）
-            Text(weekLabel)
-                .font(.system(size: 12))
-                .foregroundColor(.purple)
+            Text(kmLabel)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
-        .frame(maxWidth: .infinity)
+        .frame(width: 52)
     }
 }
 

@@ -70,6 +70,7 @@ struct CoachFeedbackRequest: Codable {
     let duration: Double
     let heartRate: Int?
     let coachStyle: String?
+    let kmSplits: [Double]?
 }
 
 /// 教练反馈响应
@@ -248,10 +249,15 @@ final class AIManager: ObservableObject {
         distance: Double,
         totalDistance: Double? = nil,
         duration: TimeInterval,
-        heartRate: Int? = nil
+        heartRate: Int? = nil,
+        kmSplits: [Double]? = nil
     ) async throws -> String {
         guard AuthManager.shared.currentUser != nil else {
             throw AIManagerError.notAuthenticated
+        }
+
+        guard SubscriptionManager.shared.canGetFeedback() else {
+            throw AIManagerError.subscriptionRequired
         }
 
         isGeneratingFeedback = true
@@ -265,7 +271,8 @@ final class AIManager: ObservableObject {
             totalDistance: totalDistance,
             duration: duration,
             heartRate: heartRate,
-            coachStyle: coachStyle.rawValue
+            coachStyle: coachStyle.rawValue,
+            kmSplits: kmSplits
         )
 
         do {
@@ -283,6 +290,7 @@ final class AIManager: ObservableObject {
             }
 
             lastFeedback = feedback
+            SubscriptionManager.shared.incrementFeedbackCount()
             return feedback
 
         } catch let error as AIManagerError {

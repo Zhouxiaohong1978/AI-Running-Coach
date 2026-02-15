@@ -26,10 +26,13 @@ class LocationManager: NSObject, ObservableObject {
     @Published var duration: TimeInterval = 0
     @Published var calories: Double = 0
     @Published var lastLocation: CLLocation?  // 暴露给外部使用（如获取天气）
+    @Published var kmSplits: [Double] = [] // 每公里用时（秒）
 
     private var startTime: Date?
     private var isTracking = false
     private var timer: Timer?
+    private var lastKmDistance: Double = 0 // 上一个km边界的累计距离
+    private var lastKmTime: Date? // 上一个km边界的时间
 
     // GPS 过滤参数
     private let minHorizontalAccuracy: Double = 50.0  // 最小精度要求（米），放宽以确保初始定位
@@ -57,6 +60,9 @@ class LocationManager: NSObject, ObservableObject {
         calories = 0
         routeCoordinates.removeAll()
         lastLocation = nil
+        kmSplits = []
+        lastKmDistance = 0
+        lastKmTime = Date()
 
         locationManager.startUpdatingLocation()
 
@@ -90,6 +96,15 @@ class LocationManager: NSObject, ObservableObject {
     }
 
     func stopTracking() {
+        // 处理最后不足1km的段落（≥200m时按比例推算）
+        let remainingDistance = distance - lastKmDistance
+        if remainingDistance >= 200, let kmStart = lastKmTime {
+            let elapsedTime = Date().timeIntervalSince(kmStart)
+            // 按比例推算完整1km配速
+            let estimatedKmTime = elapsedTime * (1000.0 / remainingDistance)
+            kmSplits.append(estimatedKmTime)
+        }
+
         isTracking = false
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
@@ -157,6 +172,15 @@ extension LocationManager: CLLocationManagerDelegate {
                     pathUpdateVersion += 1
                     calculatePace()
                     lastLocation = location
+
+                    // 检查是否跨过了 km 边界
+                    let nextKmBoundary = lastKmDistance + 1000.0
+                    if distance >= nextKmBoundary, let kmStart = lastKmTime {
+                        let splitTime = location.timestamp.timeIntervalSince(kmStart)
+                        kmSplits.append(splitTime)
+                        lastKmDistance = nextKmBoundary
+                        lastKmTime = location.timestamp
+                    }
                     print("✅ 有效移动: 距离=\(String(format: "%.1f", delta))米, 速度=\(String(format: "%.1f", speed))米/秒")
                     logger.log("✅ GPS更新: +\(String(format: "%.1f", delta))米, 总距离=\(String(format: "%.0f", distance))米", category: "DATA")
                 } else {
