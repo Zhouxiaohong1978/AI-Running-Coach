@@ -144,7 +144,7 @@ class AchievementManager: ObservableObject {
 
         // 5. 检查配速成就（最快配速，值越小越好）
         // 配速为0表示无效数据（距离为0或时间为0），跳过检查
-        if runRecord.pace > 0 {
+        if runRecord.pace > 0 && runRecord.distance >= 1000 {
             for index in achievements.indices where achievements[index].category == .pace {
                 if !subscriptionManager.isPro && !subscriptionManager.isAchievementFree(achievements[index].id) { continue }
                 let currentPace = runRecord.pace * 60 // 转换为秒/公里

@@ -154,7 +154,8 @@ class VoiceAssetMap {
 
         return voices.first { voice in
             if case .onDistance(let targetDistance) = voice.triggerType {
-                return abs(distance - targetDistance) < 0.05  // 50米容差
+                let delta = distance - targetDistance
+                return delta >= 0 && delta < 0.05  // 到达后50米内触发（单向）
             }
             return false
         }

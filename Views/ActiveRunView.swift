@@ -454,14 +454,12 @@ struct ActiveRunView: View {
 
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
-            // 计入反馈次数
-            subscriptionManager.incrementFeedbackCount()
-
             logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
             if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+                subscriptionManager.incrementFeedbackCount()  // 只有播放成功才计数
                 showFeedbackBubble(voice.description)
+                print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
             }
-            print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
         }
     }
 
