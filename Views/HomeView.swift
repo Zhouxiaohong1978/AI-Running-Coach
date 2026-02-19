@@ -243,21 +243,20 @@ struct HomeView: View {
 
     private func getUserName() -> String {
         // 从用户数据中获取用户名
-        // 优先级：用户名 > 邮箱前缀 > 默认"跑友"
+        // 优先级：Supabase user_metadata > UserDefaults > 默认"跑友"
 
-        // 1. 从UserDefaults获取用户名（注册时填写）
-        if let userName = UserDefaults.standard.string(forKey: "user_name"), !userName.isEmpty {
-            print("🏠 [HomeView] 读取到用户名: \(userName)")
+        // 1. 从Supabase user_metadata获取用户名（云端存储，重装App后仍可恢复）
+        if let userName = authManager.currentUserName, !userName.isEmpty {
+            // 同步到本地缓存
+            UserDefaults.standard.set(userName, forKey: "user_name")
+            print("🏠 [HomeView] 从云端读取用户名: \(userName)")
             return userName
         }
 
-        // 2. 使用邮箱前缀
-        if let email = authManager.currentUser?.email {
-            let username = email.components(separatedBy: "@").first ?? ""
-            if !username.isEmpty {
-                print("🏠 [HomeView] 使用邮箱前缀: \(username)")
-                return username
-            }
+        // 2. 从UserDefaults获取用户名（本地缓存）
+        if let userName = UserDefaults.standard.string(forKey: "user_name"), !userName.isEmpty {
+            print("🏠 [HomeView] 从本地缓存读取用户名: \(userName)")
+            return userName
         }
 
         // 3. 默认显示"跑友"

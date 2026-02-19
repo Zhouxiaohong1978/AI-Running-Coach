@@ -246,6 +246,31 @@ class AuthManager: ObservableObject {
         print("✅ [AuthManager] 密码更新成功")
     }
 
+    /// 更新用户名（存储到user_metadata）
+    func updateUserName(_ userName: String) async throws {
+        print("👤 [AuthManager] 更新用户名: \(userName)")
+        try await supabase.auth.update(user: UserAttributes(data: ["user_name": .string(userName)]))
+
+        // 更新本地currentUser（触发重新渲染）
+        if let session = try? await supabase.auth.session {
+            currentUser = session.user
+        }
+
+        print("✅ [AuthManager] 用户名已保存到云端")
+    }
+
+    /// 获取用户名（从user_metadata读取）
+    var currentUserName: String? {
+        guard let userMetadata = currentUser?.userMetadata else { return nil }
+
+        // 从user_metadata中读取user_name
+        if case let .string(userName) = userMetadata["user_name"] {
+            return userName
+        }
+
+        return nil
+    }
+
     /// Apple ID 登录
     func signInWithApple(idToken: String, nonce: String) async throws {
         isLoading = true

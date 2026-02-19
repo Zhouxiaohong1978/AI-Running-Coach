@@ -276,9 +276,10 @@ struct LoginView: View {
                 try await authManager.verifyOTP(email: verificationEmail, token: otpCode)
                 print("✅ [验证] OTP 验证成功")
 
-                // 保存用户名（如果填写了）
+                // 保存用户名到Supabase和本地（如果填写了）
                 if !userName.isEmpty {
-                    UserDefaults.standard.set(userName, forKey: "user_name")
+                    try await authManager.updateUserName(userName)
+                    UserDefaults.standard.set(userName, forKey: "user_name")  // 同时保存到本地作为缓存
                     print("✅ [注册] 已保存用户名: \(userName)")
                 }
 
