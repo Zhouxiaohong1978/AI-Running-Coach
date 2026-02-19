@@ -616,12 +616,12 @@ struct TrainingPlanView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                 Spacer()
-                Text(difficultyText(plan.difficulty))
+                Text("进行中")
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(difficultyColor(plan.difficulty).opacity(0.2))
-                    .foregroundColor(difficultyColor(plan.difficulty))
+                    .background(Color.green.opacity(0.15))
+                    .foregroundColor(.green)
                     .cornerRadius(8)
             }
 
