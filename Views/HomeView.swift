@@ -28,6 +28,7 @@ struct HomeView: View {
     @State private var selectedTab = 0
     @State private var showPaywall = false
     @State private var hasShownAutoPaywall = false
+    @State private var hasTrainingPlan = false
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var weatherManager = WeatherManager.shared
@@ -135,8 +136,11 @@ struct HomeView: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 20)
 
-                            // 开始 Run Button
-                            NavigationLink(destination: ActiveRunView()) {
+                            // 开始 Run Button（新用户引导：无训练计划时跳转到创建计划页面）
+                            NavigationLink(destination: hasTrainingPlan ? AnyView(ActiveRunView()) : AnyView(GoalSelectionView(onPlanGenerated: { _ in
+                                // 计划生成后，更新状态（检测会在下次 onAppear 时自动进行）
+                                hasTrainingPlan = true
+                            }))) {
                                 ZStack {
                                     // Outer ring
                                     Circle()
@@ -155,11 +159,11 @@ struct HomeView: View {
                                             .frame(width: 166, height: 166)
 
                                         VStack(spacing: 10) {
-                                            Image(systemName: "play.fill")
+                                            Image(systemName: hasTrainingPlan ? "play.fill" : "target")
                                                 .font(.system(size: 34))
                                                 .foregroundColor(.white)
 
-                                            Text("开始跑步")
+                                            Text(hasTrainingPlan ? "开始跑步" : "创建计划")
                                                 .font(.system(size: 20, weight: .bold))
                                                 .foregroundColor(.white)
                                         }
@@ -203,6 +207,16 @@ struct HomeView: View {
                 PaywallView()
             }
             .onAppear {
+                // 检查是否存在训练计划
+                if let data = UserDefaults.standard.data(forKey: "saved_training_plan"),
+                   let _ = try? JSONDecoder().decode(TrainingPlanData.self, from: data) {
+                    hasTrainingPlan = true
+                    print("✅ [HomeView] 检测到训练计划")
+                } else {
+                    hasTrainingPlan = false
+                    print("⚠️ [HomeView] 未检测到训练计划，将引导用户创建")
+                }
+
                 // 检查是否应该弹出 PaywallView（第3次跑步后，仅一次）
                 if !hasShownAutoPaywall && subscriptionManager.shouldShowPaywallAfterRun(runCount: dataManager.runRecords.count) {
                     hasShownAutoPaywall = true
