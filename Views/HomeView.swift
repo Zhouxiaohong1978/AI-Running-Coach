@@ -159,11 +159,11 @@ struct HomeView: View {
                                             .frame(width: 166, height: 166)
 
                                         VStack(spacing: 10) {
-                                            Image(systemName: hasTrainingPlan ? "play.fill" : "target")
+                                            Image(systemName: "play.fill")
                                                 .font(.system(size: 34))
                                                 .foregroundColor(.white)
 
-                                            Text(hasTrainingPlan ? "开始跑步" : "创建计划")
+                                            Text("开始跑步")
                                                 .font(.system(size: 20, weight: .bold))
                                                 .foregroundColor(.white)
                                         }

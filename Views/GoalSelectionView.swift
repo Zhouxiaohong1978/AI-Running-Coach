@@ -47,6 +47,7 @@ struct GoalSelectionView: View {
                     // 生成按钮
                     if selectedGoal != nil {
                         generateButton
+                            .padding(.bottom, 80)  // 为Tab栏留出空间，避免遮挡
                     }
                 }
                 .padding()
