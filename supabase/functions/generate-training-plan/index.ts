@@ -83,8 +83,8 @@ Deno.serve(async (req: Request) => {
     const userDataContext = buildUserContext(avgPace, maxDistance, weeklyRuns);
     const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan);
 
-    // 根据计划周数动态计算 max_tokens（每周约 350 tokens + 基础 500）
-    const maxTokens = durationWeeks * 350 + 500;
+    // 根据计划周数动态计算 max_tokens（每周约 200 tokens + 基础 400，保持简洁）
+    const maxTokens = Math.min(durationWeeks * 200 + 400, 2000);
 
     // 调用阿里云百炼生成计划
     const aiResponse = await callBailian(
@@ -256,68 +256,29 @@ ${userContext}`;
     prompt += `\n- 你只能优化：训练类型（如轻松跑→节奏跑）、配速建议、训练描述`;
   }
 
-  prompt += `\n\n**要求**：
-1. 根据用户目标和当前水平，制定科学的渐进式训练计划
-2. 难度递增合理，避免运动损伤
-3. 包含每周训练主题和具体任务
-4. 训练日/休息日安排必须严格遵循用户设定`;
+  prompt += `\n\n科学渐进，难度递增合理`;
 
   return prompt + `
 
-**请严格按照以下 JSON 格式返回**（只返回 JSON，不要其他文字）：
-
+只返回JSON：
 \`\`\`json
 {
   "goal": "${goal}",
   "durationWeeks": ${durationWeeks},
-  "difficulty": "beginner|intermediate|advanced",
+  "difficulty": "beginner/intermediate/advanced",
   "weeklyPlans": [
     {
       "weekNumber": 1,
-      "theme": "适应期 - 建立跑步习惯",
+      "theme": "适应期",
       "dailyTasks": [
-        {
-          "dayOfWeek": 1,
-          "type": "easy_run",
-          "targetDistance": 3.0,
-          "targetPace": "6'30\\"",
-          "description": "轻松跑3公里，配速不要求，重点是完成"
-        },
-        {
-          "dayOfWeek": 3,
-          "type": "easy_run",
-          "targetDistance": 3.5,
-          "targetPace": "6'30\\"",
-          "description": "轻松跑3.5公里"
-        },
-        {
-          "dayOfWeek": 6,
-          "type": "long_run",
-          "targetDistance": 4.0,
-          "targetPace": "7'00\\"",
-          "description": "周末长跑4公里，慢慢跑"
-        }
+        {"dayOfWeek": 1, "type": "easy_run", "targetDistance": 3, "targetPace": "6'30\\"", "description": "轻松跑3km"}
       ]
     }
   ],
-  "tips": [
-    "每次跑步前做5-10分钟热身",
-    "跑后拉伸很重要，预防受伤",
-    "感觉疲劳时要休息，不要硬撑",
-    "保持70-80%最大心率的强度"
-  ]
+  "tips": ["跑前热身", "跑后拉伸"]
 }
 \`\`\`
-
-**任务类型说明**：
-- easy_run: 轻松跑（恢复性训练）
-- tempo_run: 节奏跑（提高乳酸阈值）
-- interval: 间歇跑（提高速度）
-- long_run: 长距离跑（提高耐力）
-- rest: 休息日
-- cross_training: 交叉训练（游泳、骑行等）
-
-**星期编号**：1=周一, 2=周二, ..., 7=周日`;
+类型: easy_run/tempo_run/interval/long_run/rest`;
 }
 
 /**

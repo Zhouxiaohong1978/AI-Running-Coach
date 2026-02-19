@@ -45,42 +45,56 @@ export async function callBailian(
     throw new Error('DASHSCOPE_API_KEY not configured');
   }
 
-  // 阿里云百炼使用 DashScope API（国际版）
-  const response = await fetch('https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      input: {
-        messages,
+  // 创建超时控制器（5秒超时）
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    // 阿里云百炼使用 DashScope API（国际版）
+    const response = await fetch('https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/text-generation/generation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
       },
-      parameters: {
-        temperature,
-        max_tokens: maxTokens,
-        result_format: 'message',
-      },
-    }),
-  });
+      body: JSON.stringify({
+        model,
+        input: {
+          messages,
+        },
+        parameters: {
+          temperature,
+          max_tokens: maxTokens,
+          result_format: 'message',
+        },
+      }),
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('阿里云百炼 API 错误:', error);
-    throw new Error(`阿里云百炼 API 失败: ${response.status} ${error}`);
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('阿里云百炼 API 错误:', error);
+      throw new Error(`阿里云百炼 API 失败: ${response.status} ${error}`);
+    }
+
+    const data: BailianResponse = await response.json();
+
+    // 兼容两种返回格式：text格式和message格式
+    const text = data.output?.text
+      || data.output?.choices?.[0]?.message?.content;
+
+    if (!text) {
+      console.error('百炼返回数据:', JSON.stringify(data));
+      throw new Error('阿里云百炼返回格式错误');
+    }
+
+    return text;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('API请求超时（5秒），请稍后重试');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const data: BailianResponse = await response.json();
-
-  // 兼容两种返回格式：text格式和message格式
-  const text = data.output?.text
-    || data.output?.choices?.[0]?.message?.content;
-
-  if (!text) {
-    console.error('百炼返回数据:', JSON.stringify(data));
-    throw new Error('阿里云百炼返回格式错误');
-  }
-
-  return text;
 }
