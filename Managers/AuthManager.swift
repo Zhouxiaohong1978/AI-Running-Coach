@@ -155,12 +155,25 @@ class AuthManager: ObservableObject {
 
         print("🗑️ [AuthManager] 开始删除账户...")
 
+        // 确保session有效
+        do {
+            let session = try await supabase.auth.session
+            print("✅ [AuthManager] Session有效，access_token前缀: \(session.accessToken.prefix(20))...")
+        } catch {
+            print("❌ [AuthManager] Session无效: \(error.localizedDescription)")
+            throw NSError(
+                domain: "AuthManager",
+                code: -6,
+                userInfo: [NSLocalizedDescriptionKey: "会话已过期，请重新登录"]
+            )
+        }
+
         // 调用 Edge Function 删除账户（包括 auth.users 和所有业务数据）
         do {
             let _: DeleteAccountResponse = try await supabase.functions
                 .invoke(
                     "delete-account",
-                    options: FunctionInvokeOptions(body: ["action": "delete"])
+                    options: FunctionInvokeOptions(body: Data()) // 使用空请求体，与EarthLord一致
                 )
 
             print("✅ [AuthManager] 账户已完全删除（包括认证记录）")

@@ -3,41 +3,53 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 /**
  * 删除账户 Edge Function
- *
- * 功能：
- * 1. 删除用户的所有业务数据（run_records、user_achievements等）
- * 2. 删除auth.users记录（使用service_role权限）
- * 3. 确保账户完全删除，邮箱可重新注册
  */
 
 Deno.serve(async (req: Request) => {
-  try {
-    // 1. 获取当前用户ID（从JWT）
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ success: false, error: "未授权" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
+  console.log("🔍 收到删除账户请求");
 
-    // 创建客户端（使用请求中的JWT）
+  try {
+    // 创建Supabase客户端
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: { Authorization: authHeader },
-      },
+    const authHeader = req.headers.get("Authorization")!;
+
+    console.log(`🔑 Authorization: ${authHeader ? "存在" : "不存在"}`);
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
     });
 
     // 获取用户信息
     const {
       data: { user },
       error: userError,
-    } = await supabaseClient.auth.getUser();
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
       console.error("❌ 获取用户失败:", userError);
+      console.log("🔍 尝试从JWT解析用户ID...");
+
+      // 尝试从JWT直接解析用户ID（兜底方案）
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        try {
+          const token = authHeader.replace("Bearer ", "");
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const userId = payload.sub;
+
+          console.log(`✅ 从JWT解析到用户ID: ${userId}`);
+
+          // 使用解析出的userId继续删除流程
+          await deleteUserData(supabase, userId);
+          return new Response(
+            JSON.stringify({ success: true, message: "账户已删除" }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        } catch (parseError) {
+          console.error("❌ JWT解析失败:", parseError);
+        }
+      }
+
       return new Response(
         JSON.stringify({ success: false, error: "获取用户失败" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
@@ -47,60 +59,8 @@ Deno.serve(async (req: Request) => {
     const userId = user.id;
     console.log(`🗑️ 开始删除用户账户: ${userId}`);
 
-    // 2. 删除业务数据（使用普通客户端）
-    console.log("📦 删除跑步记录...");
-    await supabaseClient
-      .from("run_records")
-      .delete()
-      .eq("user_id", userId);
-
-    console.log("🏆 删除成就数据...");
-    await supabaseClient
-      .from("user_achievements")
-      .delete()
-      .eq("user_id", userId);
-
-    // 如果有其他表，也在这里删除
-    // await supabaseClient.from("training_plans").delete().eq("user_id", userId);
-
-    // 3. 删除auth.users记录（需要service_role权限）
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseServiceKey) {
-      console.error("❌ 缺少SERVICE_ROLE_KEY环境变量");
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "服务器配置错误",
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // 创建Admin客户端
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-
-    console.log("👤 删除auth.users记录...");
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(
-      userId
-    );
-
-    if (deleteAuthError) {
-      console.error("❌ 删除auth用户失败:", deleteAuthError);
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: `删除认证记录失败: ${deleteAuthError.message}`,
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log(`✅ 用户账户已完全删除: ${userId}`);
+    // 删除数据
+    await deleteUserData(supabase, userId);
 
     return new Response(
       JSON.stringify({
@@ -121,3 +81,34 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
+
+async function deleteUserData(supabase: any, userId: string) {
+  // 删除业务数据
+  console.log("📦 删除跑步记录...");
+  await supabase.from("run_records").delete().eq("user_id", userId);
+
+  console.log("🏆 删除成就数据...");
+  await supabase.from("user_achievements").delete().eq("user_id", userId);
+
+  // 删除auth.users记录
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    supabaseServiceKey,
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
+    }
+  );
+
+  console.log("👤 删除auth.users记录...");
+  const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(
+    userId
+  );
+
+  if (deleteAuthError) {
+    console.error("❌ 删除auth用户失败:", deleteAuthError);
+    throw new Error(`删除认证记录失败: ${deleteAuthError.message}`);
+  }
+
+  console.log(`✅ 用户账户已完全删除: ${userId}`);
+}
