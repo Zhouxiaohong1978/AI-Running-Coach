@@ -34,8 +34,8 @@ class LocationManager: NSObject, ObservableObject {
     private var lastKmDistance: Double = 0 // 上一个km边界的累计距离
     private var lastKmTime: Date? // 上一个km边界的时间
 
-    // GPS 过滤参数
-    private let minHorizontalAccuracy: Double = 50.0  // 最小精度要求（米），放宽以确保初始定位
+    // GPS 过滤参数（复用 EarthLord 标准）
+    private let minHorizontalAccuracy: Double = 10.0  // 最小精度要求（米），过滤低质量GPS点
     private let minMovementDistance: Double = 3.0     // 最小移动距离（米），小于此值视为漂移（distanceFilter=5，真实跑步delta常在5-8m）
     private let minSpeed: Double = 0.5                // 最小速度（米/秒），低于此值可能是静止（慢跑约1.5m/s）
 
