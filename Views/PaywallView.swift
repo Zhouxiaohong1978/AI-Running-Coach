@@ -68,6 +68,15 @@ struct PaywallView: View {
                 // 默认选择年订阅
                 if let offering = subscriptionManager.currentOffering {
                     selectedPackage = offering.annual ?? offering.monthly
+                } else {
+                    // Offering 未加载，主动重新拉取
+                    subscriptionManager.refreshOfferings()
+                }
+            }
+            .onChange(of: subscriptionManager.currentOffering) { offering in
+                // Offering 加载完成后自动选中年订阅
+                if selectedPackage == nil, let offering = offering {
+                    selectedPackage = offering.annual ?? offering.monthly
                 }
             }
         }
@@ -150,8 +159,9 @@ struct PaywallView: View {
 
             Divider()
 
+            comparisonRow("跑步次数", free: "每月3次", pro: "无限制")
             comparisonRow("AI 训练计划", free: "每月1次", pro: "无限制")
-            comparisonRow("AI 教练反馈", free: "每次3条", pro: "无限制")
+            comparisonRow("AI 教练反馈", free: "每次跑步3条", pro: "无限制")
             comparisonRow("语音播报", free: "基础", pro: "完整")
             comparisonRow("云端同步", free: "—", pro: "✓")
             comparisonRow("成就系统", free: "10个", pro: "全部")

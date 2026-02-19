@@ -137,8 +137,17 @@ struct HomeView: View {
                             .padding(.top, 20)
 
                             // 开始 Run Button（新用户引导：无训练计划时跳转到创建计划页面）
-                            NavigationLink(destination: hasTrainingPlan ? AnyView(ActiveRunView()) : AnyView(GoalSelectionView(onPlanGenerated: { _ in
-                                // 计划生成后，更新状态（检测会在下次 onAppear 时自动进行）
+                            NavigationLink(destination: hasTrainingPlan ? AnyView(ActiveRunView()) : AnyView(GoalSelectionView(onPlanGenerated: { plan in
+                                // 保存计划到 UserDefaults，起始日期固定为本周一
+                                if let encoded = try? JSONEncoder().encode(plan) {
+                                    UserDefaults.standard.set(encoded, forKey: "saved_training_plan")
+                                    var cal = Calendar.current
+                                    cal.firstWeekday = 2
+                                    var comp = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+                                    comp.weekday = 2
+                                    let monday = cal.date(from: comp) ?? Date()
+                                    UserDefaults.standard.set(monday, forKey: "training_plan_start_date")
+                                }
                                 hasTrainingPlan = true
                             }))) {
                                 ZStack {
@@ -171,7 +180,23 @@ struct HomeView: View {
                                 }
                             }
                             .padding(.top, 16)
-                            .padding(.bottom, 20)
+
+                            // 免费用户剩余次数提示
+                            if !subscriptionManager.isPro {
+                                let runsUsed = dataManager.runRecords.count
+                                let runsLeft = max(0, 3 - runsUsed)
+                                if runsLeft > 0 {
+                                    Text("免费体验剩余 \(runsLeft) 次")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.textSecondary)
+                                } else {
+                                    Text("免费次数已用完，升级 Pro 继续跑步")
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundColor(.orange)
+                                }
+                            }
+
+                            Spacer().frame(height: 20)
 
                             // 每周目标 Card
                             WeeklyGoalCard(dataManager: dataManager)

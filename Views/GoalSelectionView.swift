@@ -363,39 +363,28 @@ struct GoalSelectionView: View {
     private func generatePlan() {
         guard let goal = selectedGoal else { return }
 
-        isGenerating = true
+        let preferences = TrainingPreferences(
+            weeklyFrequency: weeklyFrequency,
+            preferredDays: Array(preferredDays).sorted(),
+            intensityLevel: intensityLevel
+        )
 
-        Task {
-            do {
-                // 构建用户偏好
-                let preferences = TrainingPreferences(
-                    weeklyFrequency: weeklyFrequency,
-                    preferredDays: Array(preferredDays).sorted(),
-                    intensityLevel: intensityLevel
-                )
+        // 同步调用，立即返回，无需 spinner
+        let result = aiManager.generateInstantPlan(
+            goal: goal.displayName,
+            runHistory: dataManager.runRecords,
+            durationWeeks: customWeeks,
+            preferences: preferences
+        )
 
-                let plan = try await aiManager.generateTrainingPlan(
-                    goal: goal.displayName,
-                    runHistory: dataManager.runRecords,
-                    durationWeeks: customWeeks,
-                    preferences: preferences
-                )
-
-                await MainActor.run {
-                    isGenerating = false
-                    onPlanGenerated(plan)
-                }
-            } catch AIManagerError.subscriptionRequired {
-                await MainActor.run {
-                    isGenerating = false
-                    showPaywall = true
-                }
-            } catch {
-                await MainActor.run {
-                    isGenerating = false
-                    errorMessage = error.localizedDescription
-                }
-            }
+        switch result {
+        case .success(let plan):
+            onPlanGenerated(plan)
+            dismiss()
+        case .failure(.subscriptionRequired):
+            showPaywall = true
+        case .failure(let error):
+            errorMessage = error.localizedDescription
         }
     }
 }

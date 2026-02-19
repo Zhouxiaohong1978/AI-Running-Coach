@@ -111,6 +111,13 @@ final class SubscriptionManager: NSObject, ObservableObject {
         }
     }
 
+    /// 外部主动触发重新拉取（PaywallView onAppear 时调用）
+    func refreshOfferings() {
+        Task {
+            await fetchOfferings()
+        }
+    }
+
     // MARK: - Purchase
 
     /// 购买套餐
