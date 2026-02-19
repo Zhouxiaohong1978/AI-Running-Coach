@@ -211,11 +211,9 @@ class AchievementManager: ObservableObject {
         achievements[index].isUnlocked = true
         achievements[index].unlockedAt = Date()
 
-        // 播放AI语音庆祝
-        let message = achievements[index].celebrationMessage
-        SpeechManager.shared.speak(message, priority: .high)
-
-        print("🏆 成就解锁: \(achievements[index].title)")
+        // 成就静默解锁，用户在RunSummaryView点击成就卡片时才播放语音
+        // 这样避免与完成语音（跑后_01/02）冲突，防止"语音轰炸"
+        print("🏆 成就解锁: \(achievements[index].title)（静默解锁，等待用户点击播放）")
     }
 
     /// 计算连续跑步天数
