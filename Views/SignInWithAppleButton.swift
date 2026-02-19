@@ -140,11 +140,31 @@ class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate, ASAut
             return
         }
 
+        // 提取Apple返回的姓名（仅首次授权时有值）
+        var userName: String?
+        if let fullName = appleIDCredential.fullName {
+            let givenName = fullName.givenName ?? ""
+            let familyName = fullName.familyName ?? ""
+
+            // 中文习惯：姓+名
+            if !familyName.isEmpty || !givenName.isEmpty {
+                userName = familyName + givenName
+                print("🍎 [Apple Sign In] 获取到用户姓名: \(userName!)")
+            }
+        }
+
         print("🍎 [Apple Sign In] 开始调用Supabase认证...")
         Task { @MainActor in
             do {
                 try await authManager.signInWithApple(idToken: idTokenString, nonce: nonce)
                 print("✅ [Apple Sign In] 登录成功")
+
+                // 如果Apple返回了姓名且用户还没有设置过用户名，则保存
+                if let name = userName, authManager.currentUserName == nil {
+                    try? await authManager.updateUserName(name)
+                    UserDefaults.standard.set(name, forKey: "user_name")
+                    print("✅ [Apple Sign In] 已保存用户名: \(name)")
+                }
             } catch {
                 print("❌ [Apple Sign In] 登录失败: \(error.localizedDescription)")
                 onError(error.localizedDescription)

@@ -155,12 +155,13 @@ class AuthManager: ObservableObject {
 
         print("🗑️ [AuthManager] 开始删除账户...")
 
-        // 调用 Supabase 函数删除账户（包括 auth.users 和 run_records）
+        // 调用 Edge Function 删除账户（包括 auth.users 和所有业务数据）
         do {
-            let _: EmptyResponse = try await supabase
-                .rpc("delete_user_account")
-                .execute()
-                .value
+            let _: DeleteAccountResponse = try await supabase.functions
+                .invoke(
+                    "delete-account",
+                    options: FunctionInvokeOptions(body: ["action": "delete"])
+                )
 
             print("✅ [AuthManager] 账户已完全删除（包括认证记录）")
         } catch {
@@ -306,5 +307,10 @@ class AuthManager: ObservableObject {
 
 // MARK: - Helper Types
 
-/// 空响应类型（用于不返回数据的 RPC 调用）
-private struct EmptyResponse: Codable {}
+/// 删除账户响应
+private struct DeleteAccountResponse: Codable {
+    let success: Bool
+    let message: String?
+    let error: String?
+    let timestamp: String?
+}
