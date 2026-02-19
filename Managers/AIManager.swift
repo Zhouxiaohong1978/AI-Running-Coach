@@ -163,7 +163,14 @@ final class AIManager: ObservableObject {
     // MARK: - Private Properties
 
     private init() {
-        print("AIManager 初始化完成")
+        // 从UserDefaults加载用户选择的教练风格
+        if let styleString = UserDefaults.standard.string(forKey: "coach_style"),
+           let style = CoachStyle(rawValue: styleString) {
+            coachStyle = style
+            print("✅ AIManager 加载教练风格: \(styleString)")
+        } else {
+            print("✅ AIManager 使用默认教练风格: encouraging")
+        }
     }
 
     // MARK: - Training Plan Generation

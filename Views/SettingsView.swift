@@ -12,12 +12,14 @@ struct SettingsView: View {
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var aiManager = AIManager.shared
     @State private var showLoginSheet = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountAlert = false
     @State private var showResetAchievementAlert = false
     @State private var showPaywall = false
     @State private var isRestoringPurchase = false
+    @State private var selectedCoachStyle: CoachStyle = .encouraging
 
     var body: some View {
         NavigationView {
@@ -148,6 +150,24 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("订阅")
+                }
+
+                // AI教练设置
+                Section {
+                    Picker("教练风格", selection: $selectedCoachStyle) {
+                        Text("鼓励型").tag(CoachStyle.encouraging)
+                        Text("严格型").tag(CoachStyle.strict)
+                        Text("温和型").tag(CoachStyle.calm)
+                    }
+                    .pickerStyle(.menu)
+                    .onChange(of: selectedCoachStyle) { newStyle in
+                        aiManager.coachStyle = newStyle
+                        saveCoachStyle(newStyle)
+                    }
+                } header: {
+                    Text("AI教练")
+                } footer: {
+                    Text(coachStyleDescription)
                 }
 
                 // 数据同步部分（仅 Pro 用户）
@@ -299,7 +319,39 @@ struct SettingsView: View {
             } message: {
                 Text("删除账户后，您的所有数据将被永久删除且无法恢复。确定要继续吗？")
             }
+            .onAppear {
+                // 加载保存的教练风格
+                selectedCoachStyle = loadCoachStyle()
+                aiManager.coachStyle = selectedCoachStyle
+            }
         }
+    }
+
+    // MARK: - Helper Methods
+
+    private var coachStyleDescription: String {
+        switch selectedCoachStyle {
+        case .encouraging:
+            return "积极鼓励，适合需要动力和正面反馈的跑者"
+        case .strict:
+            return "严格要求，适合追求高标准和自我突破的跑者"
+        case .calm:
+            return "温和指导，适合享受跑步过程和放松心态的跑者"
+        }
+    }
+
+    private func saveCoachStyle(_ style: CoachStyle) {
+        UserDefaults.standard.set(style.rawValue, forKey: "coach_style")
+        print("✅ 保存教练风格: \(style.rawValue)")
+    }
+
+    private func loadCoachStyle() -> CoachStyle {
+        if let styleString = UserDefaults.standard.string(forKey: "coach_style"),
+           let style = CoachStyle(rawValue: styleString) {
+            print("✅ 读取教练风格: \(styleString)")
+            return style
+        }
+        return .encouraging // 默认鼓励型
     }
 }
 
