@@ -83,8 +83,8 @@ Deno.serve(async (req: Request) => {
     const userDataContext = buildUserContext(avgPace, maxDistance, weeklyRuns);
     const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan);
 
-    // 根据计划周数动态计算 max_tokens（每周约 200 tokens + 基础 400，保持简洁）
-    const maxTokens = Math.min(durationWeeks * 200 + 400, 2000);
+    // 根据计划周数动态计算 max_tokens（每周约 150 tokens + 基础 300，确保快速生成）
+    const maxTokens = Math.min(durationWeeks * 150 + 300, 1500);
 
     // 调用阿里云百炼生成计划
     const aiResponse = await callBailian(

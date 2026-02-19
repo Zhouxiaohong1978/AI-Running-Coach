@@ -45,9 +45,9 @@ export async function callBailian(
     throw new Error('DASHSCOPE_API_KEY not configured');
   }
 
-  // 创建超时控制器（5秒超时）
+  // 创建超时控制器（8秒超时，平衡速度与可靠性）
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     // 阿里云百炼使用 DashScope API（国际版）
@@ -91,7 +91,7 @@ export async function callBailian(
     return text;
   } catch (error) {
     if (error.name === 'AbortError') {
-      throw new Error('API请求超时（5秒），请稍后重试');
+      throw new Error('API请求超时（8秒），请稍后重试');
     }
     throw error;
   } finally {
