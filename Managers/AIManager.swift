@@ -73,6 +73,7 @@ struct CoachFeedbackRequest: Codable {
     let kmSplits: [Double]?
     let trainingType: String?
     let goalName: String?
+    let language: String?  // "en" or "zh-Hans"
 }
 
 /// 反馈三段结构
@@ -125,6 +126,29 @@ struct DailyTaskData: Codable {
     var targetDistance: Double?  // 改为 var 以支持编辑
     var targetPace: String?  // 改为 var 以支持编辑
     var description: String  // 改为 var 以支持编辑
+
+    /// 根据 type 和 targetDistance 实时生成的 locale-aware 描述（不依赖存储的 description 字符串）
+    var localizedDescription: String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let dist = targetDistance ?? 0
+        let distStr = String(format: "%.1f", dist)
+        switch type {
+        case "easy_run":
+            return isEN ? "Easy run \(distStr) km, comfortable pace" : "轻松跑\(distStr)公里，保持舒适配速"
+        case "tempo_run":
+            return isEN ? "Tempo run \(distStr) km, comfortably hard" : "节奏跑\(distStr)公里，稍有挑战但可持续"
+        case "long_run":
+            return isEN ? "Long run \(distStr) km, slow and steady" : "长距离跑\(distStr)公里，慢慢跑完"
+        case "interval":
+            return isEN ? "Interval \(distStr) km, alternate fast & slow" : "间歇跑\(distStr)公里，快慢交替"
+        case "rest":
+            return isEN ? "Rest Day" : "休息日"
+        case "cross_training":
+            return isEN ? "Cross training \(distStr) km" : "交叉训练\(distStr)公里"
+        default:
+            return isEN ? "Run \(distStr) km" : "跑步\(distStr)公里"
+        }
+    }
 }
 
 // MARK: - Coach Style
@@ -550,7 +574,8 @@ final class AIManager: ObservableObject {
             coachStyle: coachStyle.rawValue,
             kmSplits: kmSplits,
             trainingType: trainingType,
-            goalName: goalName
+            goalName: goalName,
+            language: LanguageManager.shared.currentLocale
         )
 
         do {

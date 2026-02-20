@@ -20,6 +20,7 @@ interface CoachFeedbackRequest {
   kmSplits?: number[];
   trainingType?: string;
   goalName?: string;
+  language?: string;  // "en" or "zh-Hans"
 }
 
 // MARK: - 结构化事实
@@ -158,31 +159,60 @@ function buildPostRunPrompt(
   scene: Scene,
   body: CoachFeedbackRequest
 ): string {
+  const isEN = body.language === "en";
   const lines: string[] = [];
-  lines.push(`[场景] ${scene}`);
-  lines.push(`[总距离] ${facts.totalKm}公里`);
-  lines.push(`[均速] ${formatPaceSec(facts.avgPace)}/km`);
-  lines.push(`[最快] 第${facts.bestKm}公里 ${formatPaceSec(facts.bestKmPace)}`);
-  lines.push(`[最慢] 第${facts.worstKm}公里 ${formatPaceSec(facts.worstKmPace)}`);
-  lines.push(`[波动] ${Math.round(facts.paceVariability)}秒 (标准差${Math.round(facts.paceStdDev)}秒)`);
-  lines.push(`[前半程均速] ${formatPaceSec(facts.firstHalfAvg)}`);
-  lines.push(`[后半程均速] ${formatPaceSec(facts.secondHalfAvg)}`);
-  lines.push(`[掉速] ${facts.positiveSplit ? "是" : "否"}`);
 
-  if (body.targetPace) {
-    lines.push(`[目标配速] ${formatPaceSec(body.targetPace * 60)}/km`);
-    lines.push(`[达标率] ${Math.round(facts.complianceRate * 100)}%`);
-  }
-
-  if (body.goalName) {
-    lines.push(`[训练目标] ${body.goalName}`);
+  if (isEN) {
+    lines.push(`[Scene] ${scene}`);
+    lines.push(`[Total Distance] ${facts.totalKm} km`);
+    lines.push(`[Avg Pace] ${formatPaceSec(facts.avgPace)}/km`);
+    lines.push(`[Fastest] km ${facts.bestKm} at ${formatPaceSec(facts.bestKmPace)}`);
+    lines.push(`[Slowest] km ${facts.worstKm} at ${formatPaceSec(facts.worstKmPace)}`);
+    lines.push(`[Variation] ${Math.round(facts.paceVariability)}s (StdDev ${Math.round(facts.paceStdDev)}s)`);
+    lines.push(`[First Half Avg] ${formatPaceSec(facts.firstHalfAvg)}`);
+    lines.push(`[Second Half Avg] ${formatPaceSec(facts.secondHalfAvg)}`);
+    lines.push(`[Positive Split] ${facts.positiveSplit ? "Yes" : "No"}`);
+    if (body.targetPace) {
+      lines.push(`[Target Pace] ${formatPaceSec(body.targetPace * 60)}/km`);
+      lines.push(`[Compliance] ${Math.round(facts.complianceRate * 100)}%`);
+    }
+    if (body.goalName) lines.push(`[Training Goal] ${body.goalName}`);
+  } else {
+    lines.push(`[场景] ${scene}`);
+    lines.push(`[总距离] ${facts.totalKm}公里`);
+    lines.push(`[均速] ${formatPaceSec(facts.avgPace)}/km`);
+    lines.push(`[最快] 第${facts.bestKm}公里 ${formatPaceSec(facts.bestKmPace)}`);
+    lines.push(`[最慢] 第${facts.worstKm}公里 ${formatPaceSec(facts.worstKmPace)}`);
+    lines.push(`[波动] ${Math.round(facts.paceVariability)}秒 (标准差${Math.round(facts.paceStdDev)}秒)`);
+    lines.push(`[前半程均速] ${formatPaceSec(facts.firstHalfAvg)}`);
+    lines.push(`[后半程均速] ${formatPaceSec(facts.secondHalfAvg)}`);
+    lines.push(`[掉速] ${facts.positiveSplit ? "是" : "否"}`);
+    if (body.targetPace) {
+      lines.push(`[目标配速] ${formatPaceSec(body.targetPace * 60)}/km`);
+      lines.push(`[达标率] ${Math.round(facts.complianceRate * 100)}%`);
+    }
+    if (body.goalName) lines.push(`[训练目标] ${body.goalName}`);
   }
 
   const factsBlock = lines.join("\n");
-
   const style = body.coachStyle || "encouraging";
-  const styleName = style === "encouraging" ? "鼓励型" : style === "strict" ? "严格型" : "温和型";
 
+  if (isEN) {
+    const styleName = style === "encouraging" ? "encouraging" : style === "strict" ? "strict" : "calm";
+    return `Below are the pre-calculated running data facts. Write three paragraphs based on them.
+
+${factsBlock}
+
+Output strictly in this format:
+[P1] Performance summary (15–25 words, one sentence on pace and rhythm)
+[P2] Analysis (20–40 words, data-driven explanation)
+[P3] Next-run suggestion (20–40 words, starting with "Next time:", include specific numbers like pace X'XX" and distance Xkm)
+
+Tone: ${styleName}, conversational, no lists.
+Output only [P1] [P2] [P3], nothing else.`;
+  }
+
+  const styleName = style === "encouraging" ? "鼓励型" : style === "strict" ? "严格型" : "温和型";
   return `以下是系统已计算好的跑步数据事实，请基于这些事实写三段文案。
 
 ${factsBlock}
@@ -197,9 +227,10 @@ ${factsBlock}
 }
 
 function parseParagraphs(text: string): FeedbackParagraphs | null {
-  const p1Match = text.match(/【P1】([\s\S]*?)(?=【P2】|$)/);
-  const p2Match = text.match(/【P2】([\s\S]*?)(?=【P3】|$)/);
-  const p3Match = text.match(/【P3】([\s\S]*?)$/);
+  // Support both Chinese 【P1】 and English [P1] marker formats
+  const p1Match = text.match(/(?:【P1】|\[P1\])([\s\S]*?)(?=(?:【P2】|\[P2\])|$)/);
+  const p2Match = text.match(/(?:【P2】|\[P2\])([\s\S]*?)(?=(?:【P3】|\[P3\])|$)/);
+  const p3Match = text.match(/(?:【P3】|\[P3\])([\s\S]*?)$/);
 
   if (!p1Match || !p2Match || !p3Match) {
     return null;
@@ -250,11 +281,11 @@ Deno.serve(async (req: Request) => {
     } else {
       // 实时反馈模式
       const statsDescription = buildStatsDescription(body);
-      prompt = buildRealtimePrompt(statsDescription, coachStyle);
+      prompt = buildRealtimePrompt(statsDescription, coachStyle, body.language || "zh-Hans");
     }
 
     // 调用阿里云百炼生成反馈
-    const systemPrompt = getSystemPrompt(coachStyle, hasKmSplits);
+    const systemPrompt = getSystemPrompt(coachStyle, hasKmSplits, body.language || "zh-Hans");
     const feedback = await callBailian(
       [
         { role: "system", content: systemPrompt },
@@ -323,8 +354,14 @@ Deno.serve(async (req: Request) => {
 
 // MARK: - System Prompt
 
-function getSystemPrompt(style: string, isPostRun: boolean): string {
-  const stylePrompts: Record<string, string> = {
+function getSystemPrompt(style: string, isPostRun: boolean, language: string): string {
+  const isEN = language === "en";
+
+  const stylePrompts: Record<string, string> = isEN ? {
+    encouraging: "Your style is encouraging: enthusiastic, positive, motivating the user with uplifting language.",
+    strict: "Your style is strict: professional, direct, scientifically focused, pointing out issues with clear advice.",
+    calm: "Your style is calm: peaceful, patient, accompanying the user like a friend with warm support.",
+  } : {
     encouraging: "你的风格是鼓励型，热情、积极，善于激励用户，用正面的语言帮助用户坚持下去。",
     strict: "你的风格是严格型，专业、直接，注重科学训练，会指出问题并给出明确建议。",
     calm: "你的风格是温和型，平和、耐心，像朋友一样陪伴用户，给予温暖的支持。",
@@ -333,7 +370,16 @@ function getSystemPrompt(style: string, isPostRun: boolean): string {
   const styleDesc = stylePrompts[style] || stylePrompts.encouraging;
 
   if (isPostRun) {
-    return `你是一位专业的跑步教练，正在为用户提供跑后分析。${styleDesc}
+    return isEN
+      ? `You are a professional running coach providing post-run analysis. ${styleDesc}
+
+IMPORTANT:
+1. All data facts have been pre-calculated — just write commentary based on them
+2. Strictly output in the format [P1] [P2] [P3]
+3. Do not recalculate data; reference the provided figures directly
+4. Conversational, natural, engaging
+5. Suggestions must include specific numbers`
+      : `你是一位专业的跑步教练，正在为用户提供跑后分析。${styleDesc}
 
 **重要要求**：
 1. 系统已经计算好了所有数据事实，你只需基于这些事实写文案
@@ -343,7 +389,16 @@ function getSystemPrompt(style: string, isPostRun: boolean): string {
 5. 建议必须包含具体数字`;
   }
 
-  return `你是一位专业的跑步教练，正在通过语音为用户提供实时跑步指导。${styleDesc}
+  return isEN
+    ? `You are a professional running coach providing real-time voice coaching. ${styleDesc}
+
+IMPORTANT:
+1. Keep feedback short (15–25 words), suitable for voice playback
+2. Use conversational language, as if speaking face-to-face
+3. Give immediate, specific advice based on the user's current state
+4. Avoid formal or technical language
+5. Natural tone, engaging`
+    : `你是一位专业的跑步教练，正在通过语音为用户提供实时跑步指导。${styleDesc}
 
 **重要要求**：
 1. 反馈要简短（15-25个字），适合语音播报
@@ -403,7 +458,21 @@ function buildStatsDescription(data: CoachFeedbackRequest): string {
   return parts.join("\n");
 }
 
-function buildRealtimePrompt(statsDescription: string, style: string): string {
+function buildRealtimePrompt(statsDescription: string, style: string, language: string): string {
+  const isEN = language === "en";
+  if (isEN) {
+    const styleName = style === "encouraging" ? "encouraging" : style === "strict" ? "strict" : "calm";
+    return `The user is currently running. Current status:
+
+${statsDescription}
+
+Give the user one short real-time feedback sentence (15–25 words).
+
+Rules:
+1. Return only one sentence, no extra explanation
+2. Match the ${styleName} tone
+3. Conversational and natural`;
+  }
   const styleName = style === "encouraging" ? "鼓励型" : style === "strict" ? "严格型" : "温和型";
   return `用户正在跑步，当前状态如下：
 

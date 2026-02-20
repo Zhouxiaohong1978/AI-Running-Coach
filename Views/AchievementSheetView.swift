@@ -134,7 +134,7 @@ struct AchievementSheetView: View {
                         .font(.system(size: 18))
                         .foregroundColor(.primary)
 
-                    Text(category.displayName)
+                    Text(LocalizedStringKey(category.displayName))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.primary)
 
@@ -199,7 +199,7 @@ struct AchievementCard: View {
             // 信息
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Text(achievement.title)
+                    Text(LocalizedStringKey(achievement.title))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(isProLocked ? .secondary : (achievement.isUnlocked ? .primary : .secondary))
 
@@ -214,7 +214,7 @@ struct AchievementCard: View {
                     }
                 }
 
-                Text(achievement.description)
+                Text(LocalizedStringKey(achievement.description))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .lineLimit(1)

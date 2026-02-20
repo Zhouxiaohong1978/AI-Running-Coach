@@ -145,7 +145,9 @@ struct GoalSelectionView: View {
                 if !isUnlocked {
                     // 显示解锁条件
                     if let prerequisite = goal.prerequisite {
-                        Text("完成\(prerequisite.displayName)解锁")
+                        Text(LanguageManager.shared.currentLocale == "en"
+                        ? "Unlock after \(prerequisite.displayName)"
+                        : "完成\(prerequisite.displayName)解锁")
                             .font(.caption2)
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.center)

@@ -13,6 +13,7 @@ struct SettingsView: View {
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var aiManager = AIManager.shared
+    @ObservedObject private var languageManager = LanguageManager.shared
     @State private var showLoginSheet = false
     @State private var showLogoutAlert = false
     @State private var showDeleteAccountAlert = false
@@ -24,6 +25,20 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
+                // 语言设置（最顶部）
+                Section {
+                    Picker("语言", selection: $languageManager.currentLanguage) {
+                        ForEach(AppLanguage.allCases, id: \.self) { lang in
+                            Text(lang.displayName).tag(lang)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                } header: {
+                    Text("语言")
+                } footer: {
+                    Text("切换后立即生效")
+                }
+
                 // 账户部分
                 Section {
                     if authManager.isAuthenticated {
@@ -167,7 +182,7 @@ struct SettingsView: View {
                 } header: {
                     Text("AI教练")
                 } footer: {
-                    Text(coachStyleDescription)
+                    Text(LocalizedStringKey(coachStyleDescription))
                 }
 
                 // 数据同步部分（仅 Pro 用户）

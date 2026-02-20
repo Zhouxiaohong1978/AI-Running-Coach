@@ -70,18 +70,19 @@ struct Achievement: Identifiable, Codable {
     // 计算属性：进度描述
     var progressText: String {
         if isUnlocked {
-            return "已完成"
+            return LanguageManager.shared.currentLocale == "en" ? "Completed" : "已完成"
         }
 
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch category {
         case .distance:
-            return String(format: "%.1f/%.0f 公里", currentValue / 1000, targetValue / 1000)
+            return String(format: "%.1f/%.0f \(isEN ? "km" : "公里")", currentValue / 1000, targetValue / 1000)
         case .duration:
-            return String(format: "%.1f/%.0f 小时", currentValue / 3600, targetValue / 3600)
+            return String(format: "%.1f/%.0f \(isEN ? "hrs" : "小时")", currentValue / 3600, targetValue / 3600)
         case .frequency:
-            return String(format: "%.0f/%.0f 天", currentValue, targetValue)
+            return String(format: "%.0f/%.0f \(isEN ? "days" : "天")", currentValue, targetValue)
         case .calories:
-            return String(format: "%.0f/%.0f 卡", currentValue, targetValue)
+            return String(format: "%.0f/%.0f \(isEN ? "kcal" : "卡")", currentValue, targetValue)
         case .pace:
             let targetPace = Int(targetValue / 60)
             if currentValue >= 999 {
@@ -91,9 +92,9 @@ struct Achievement: Identifiable, Codable {
             let currentSec = Int(currentValue.truncatingRemainder(dividingBy: 60))
             return String(format: "%d'%02d\" / %d'00\"", currentPace, currentSec, targetPace)
         case .special:
-            return String(format: "%.0f/%.0f 次", currentValue, targetValue)
+            return String(format: "%.0f/%.0f \(isEN ? "times" : "次")", currentValue, targetValue)
         case .milestone:
-            return String(format: "%.0f/%.0f 公里", currentValue / 1000, targetValue / 1000)
+            return String(format: "%.0f/%.0f \(isEN ? "km" : "公里")", currentValue / 1000, targetValue / 1000)
         }
     }
 }

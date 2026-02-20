@@ -400,7 +400,7 @@ struct TrainingPlanView: View {
     private var viewModePicker: some View {
         Picker("视图模式", selection: $viewMode) {
             ForEach(PlanViewMode.allCases, id: \.self) { mode in
-                Text(mode.rawValue).tag(mode)
+                Text(LocalizedStringKey(mode.rawValue)).tag(mode)
             }
         }
         .pickerStyle(.segmented)
@@ -607,12 +607,17 @@ struct TrainingPlanView: View {
 
     // MARK: - Plan Overview Card
 
+    /// 将存储的目标名（rawValue，如"减肥燃脂"）转换为当前语言显示名
+    private func localizedGoalName(_ stored: String) -> String {
+        return TrainingGoal.allCases.first { $0.rawValue == stored }?.displayName ?? stored
+    }
+
     private func planOverviewCard(plan: TrainingPlanData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "trophy.fill")
                     .foregroundColor(.orange)
-                Text(plan.goal)
+                Text(localizedGoalName(plan.goal))
                     .font(.title3)
                     .fontWeight(.bold)
                 Spacer()
@@ -697,7 +702,7 @@ struct TrainingPlanView: View {
         }
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text(weekPlan.theme)
+            Text(LocalizedStringKey(weekPlan.theme))
                 .font(.headline)
                 .foregroundColor(.secondary)
 
@@ -722,7 +727,7 @@ struct TrainingPlanView: View {
 
         return HStack(spacing: 12) {
             // 星期
-            Text(task.dayOfWeek.dayOfWeekName)
+            Text(LocalizedStringKey(task.dayOfWeek.dayOfWeekName))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(isRest ? .secondary : .primary)
@@ -735,10 +740,18 @@ struct TrainingPlanView: View {
 
             // 任务详情
             VStack(alignment: .leading, spacing: 2) {
-                Text(task.description)
-                    .font(.subheadline)
-                    .foregroundColor(isRest ? .secondary : .primary)
-                    .lineLimit(2)
+                // 用 localizedDescription 实时生成 locale-aware 描述
+                if isRest {
+                    Text(task.localizedDescription)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                } else {
+                    Text(task.localizedDescription)
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                }
 
                 if isRest {
                     Text("点击可添加训练")
@@ -791,7 +804,7 @@ struct TrainingPlanView: View {
                 HStack(alignment: .top, spacing: 8) {
                     Text("•")
                         .foregroundColor(.blue)
-                    Text(tip)
+                    Text(LocalizedStringKey(tip))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

@@ -110,7 +110,7 @@ struct PaywallView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "gift.fill")
                         .foregroundColor(.white)
-                    Text("前 1000 名用户专属价")
+                    Text(LanguageManager.shared.currentLocale == "en" ? "Exclusive price for first 1,000 users" : "前 1000 名用户专属价")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundColor(.white)
                 }
@@ -171,7 +171,7 @@ struct PaywallView: View {
         .cornerRadius(16)
     }
 
-    private func comparisonRow(_ feature: String, free: String, pro: String) -> some View {
+    private func comparisonRow(_ feature: LocalizedStringKey, free: LocalizedStringKey, pro: LocalizedStringKey) -> some View {
         VStack(spacing: 0) {
             HStack {
                 Text(feature)
@@ -220,13 +220,13 @@ struct PaywallView: View {
                 }
             } else {
                 // 加载中
-                ProgressView("加载套餐中...")
+                ProgressView(LanguageManager.shared.currentLocale == "en" ? "Loading plans..." : "加载套餐中...")
                     .padding()
             }
         }
     }
 
-    private func packageCard(package: Package, title: String, badge: String?, isSelected: Bool) -> some View {
+    private func packageCard(package: Package, title: LocalizedStringKey, badge: String?, isSelected: Bool) -> some View {
         Button {
             selectedPackage = package
         } label: {
@@ -250,7 +250,11 @@ struct PaywallView: View {
 
                     // 显示 introductory offer 价格
                     if let intro = package.storeProduct.introductoryDiscount {
-                        Text("首发价 \(intro.localizedPriceString)/\(periodText(intro.subscriptionPeriod))")
+                        let isEN = LanguageManager.shared.currentLocale == "en"
+                        let introLabel = isEN
+                            ? "Intro \(intro.localizedPriceString)/\(periodText(intro.subscriptionPeriod))"
+                            : "首发价 \(intro.localizedPriceString)/\(periodText(intro.subscriptionPeriod))"
+                        Text(introLabel)
                             .font(.system(size: 12))
                             .foregroundColor(.orange)
                     }
@@ -261,7 +265,7 @@ struct PaywallView: View {
 
                     // 免费试用
                     if package.storeProduct.introductoryDiscount?.paymentMode == .freeTrial {
-                        Text("7 天免费试用")
+                        Text(LanguageManager.shared.currentLocale == "en" ? "7-Day Free Trial" : "7 天免费试用")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
                     }
@@ -294,23 +298,26 @@ struct PaywallView: View {
         guard monthlyPrice > 0 else { return nil }
         let savings = ((monthlyPrice - annualMonthly) / monthlyPrice * 100) as NSDecimalNumber
         let savingsInt = savings.intValue
-        return savingsInt > 0 ? "省 \(savingsInt)%" : nil
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        return savingsInt > 0 ? (isEN ? "Save \(savingsInt)%" : "省 \(savingsInt)%") : nil
     }
 
     private func packagePeriodText(_ package: Package) -> String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch package.packageType {
-        case .monthly: return "月"
-        case .annual: return "年"
+        case .monthly: return isEN ? "mo" : "月"
+        case .annual:  return isEN ? "yr" : "年"
         default: return ""
         }
     }
 
     private func periodText(_ period: SubscriptionPeriod) -> String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch period.unit {
-        case .month: return "月"
-        case .year: return "年"
-        case .week: return "周"
-        case .day: return "天"
+        case .month: return isEN ? "mo" : "月"
+        case .year:  return isEN ? "yr" : "年"
+        case .week:  return isEN ? "wk" : "周"
+        case .day:   return isEN ? "day" : "天"
         @unknown default: return ""
         }
     }
@@ -354,13 +361,22 @@ struct PaywallView: View {
     }
 
     private var purchaseButtonText: String {
-        guard let package = selectedPackage else { return "选择套餐" }
-
-        if package.storeProduct.introductoryDiscount?.paymentMode == .freeTrial {
-            return "7 天免费试用，然后 \(package.localizedPriceString)/\(packagePeriodText(package))"
+        guard let package = selectedPackage else {
+            return LanguageManager.shared.currentLocale == "en" ? "Select Plan" : "选择套餐"
         }
 
-        return "订阅 \(package.localizedPriceString)/\(packagePeriodText(package))"
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let period = packagePeriodText(package)
+
+        if package.storeProduct.introductoryDiscount?.paymentMode == .freeTrial {
+            return isEN
+                ? "Try Free 7 Days, then \(package.localizedPriceString)/\(period)"
+                : "7 天免费试用，然后 \(package.localizedPriceString)/\(period)"
+        }
+
+        return isEN
+            ? "Subscribe \(package.localizedPriceString)/\(period)"
+            : "订阅 \(package.localizedPriceString)/\(period)"
     }
 
     // MARK: - Footer

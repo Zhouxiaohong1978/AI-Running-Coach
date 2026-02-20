@@ -18,10 +18,7 @@ struct RunSummaryView: View {
 
     private let voiceMap = VoiceAssetMap.shared
 
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
-        span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-    )
+    @State private var region: MKCoordinateRegion
     @State private var showAchievementSheet = false
     @State private var aiSuggestion: String = ""
     @State private var isLoadingAI: Bool = false
@@ -31,13 +28,12 @@ struct RunSummaryView: View {
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
 
-        if let record = runRecord,
-           let firstCoord = record.routeCoordinates.first {
-            _region = State(initialValue: MKCoordinateRegion(
-                center: firstCoord.toCLLocationCoordinate2D(),
-                span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-            ))
-        }
+        let center = runRecord?.routeCoordinates.first?.toCLLocationCoordinate2D()
+            ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        _region = State(initialValue: MKCoordinateRegion(
+            center: center,
+            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+        ))
     }
 
     var body: some View {
@@ -49,8 +45,26 @@ struct RunSummaryView: View {
                 VStack(spacing: 0) {
                     // Map Header
                     ZStack(alignment: .topLeading) {
-                        Map(coordinateRegion: $region)
-                            .frame(height: 180)
+                        let coords = runRecord?.routeCoordinates ?? []
+                        if coords.isEmpty {
+                            // 无 GPS 轨迹时显示 placeholder
+                            Rectangle()
+                                .fill(Color(UIColor.systemGray5))
+                                .frame(height: 180)
+                                .overlay(
+                                    VStack(spacing: 6) {
+                                        Image(systemName: "map.slash")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(.gray)
+                                        Text("无 GPS 路线数据")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.gray)
+                                    }
+                                )
+                        } else {
+                            HistoryMapView(coordinates: coords, region: $region)
+                                .frame(height: 180)
+                        }
 
                         // 跑步完成标题（左上角）
                         VStack(alignment: .leading, spacing: 4) {
@@ -404,14 +418,15 @@ struct RunSummaryView: View {
 
     /// 生成AI建议
     private func generateAISuggestion() {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         guard let record = runRecord else {
-            aiSuggestion = "无跑步数据"
+            aiSuggestion = isEN ? "No run data" : "无跑步数据"
             return
         }
 
         // 如果距离太短，不调用AI
         if record.distance < 100 {
-            aiSuggestion = "跑步距离太短，暂无建议"
+            aiSuggestion = isEN ? "Run too short for analysis" : "跑步距离太短，暂无建议"
             return
         }
 
@@ -524,23 +539,25 @@ struct RunSummaryView: View {
     }
 
     private func formatRunDate(_ date: Date) -> String {
+        let locale = Locale(identifier: LanguageManager.shared.currentLocale)
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = locale
 
         let weekday = formatter.weekdaySymbols[Calendar.current.component(.weekday, from: date) - 1]
         let hour = Calendar.current.component(.hour, from: date)
+        let isEN = LanguageManager.shared.currentLocale == "en"
         let timeOfDay: String
         if hour < 6 {
-            timeOfDay = "凌晨跑"
+            timeOfDay = isEN ? "Late Night Run" : "凌晨跑"
         } else if hour < 12 {
-            timeOfDay = "晨跑"
+            timeOfDay = isEN ? "Morning Run" : "晨跑"
         } else if hour < 18 {
-            timeOfDay = "午后跑"
+            timeOfDay = isEN ? "Afternoon Run" : "午后跑"
         } else {
-            timeOfDay = "晚跑"
+            timeOfDay = isEN ? "Evening Run" : "晚跑"
         }
 
-        formatter.dateFormat = "M月d日"
+        formatter.dateFormat = LanguageManager.shared.currentLocale == "en" ? "MMM d" : "M月d日"
         let dateStr = formatter.string(from: date)
 
         return "\(weekday) \(timeOfDay) · \(dateStr)"
@@ -553,7 +570,7 @@ struct RunSummaryView: View {
 struct StatCard: View {
     let icon: String
     let iconColor: Color
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     let unit: String
 

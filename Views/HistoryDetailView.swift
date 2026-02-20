@@ -19,18 +19,13 @@ struct HistoryDetailView: View {
     init(runRecord: RunRecord) {
         self.runRecord = runRecord
 
-        // 设置地图中心为轨迹的第一个点
-        if let firstCoord = runRecord.routeCoordinates.first {
-            _region = State(initialValue: MKCoordinateRegion(
-                center: firstCoord.toCLLocationCoordinate2D(),
-                span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-            ))
-        } else {
-            _region = State(initialValue: MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 39.9042, longitude: 116.4074),
-                span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-            ))
-        }
+        // 有路线坐标时用第一个点，否则初始化为零点（HistoryMapView 无坐标时会显示空白）
+        let center = runRecord.routeCoordinates.first?.toCLLocationCoordinate2D()
+            ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        _region = State(initialValue: MKCoordinateRegion(
+            center: center,
+            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+        ))
     }
 
     var body: some View {
@@ -46,11 +41,29 @@ struct HistoryDetailView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         // 地图视图（显示离线轨迹）
-                        HistoryMapView(coordinates: runRecord.routeCoordinates, region: $region)
-                            .frame(height: 250)
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                            .padding(.top, 16)
+                        if runRecord.routeCoordinates.isEmpty {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(UIColor.systemGray5))
+                                .frame(height: 250)
+                                .overlay(
+                                    VStack(spacing: 6) {
+                                        Image(systemName: "map.slash")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(.gray)
+                                        Text("无 GPS 路线数据")
+                                            .font(.system(size: 13))
+                                            .foregroundColor(.gray)
+                                    }
+                                )
+                                .padding(.horizontal)
+                                .padding(.top, 16)
+                        } else {
+                            HistoryMapView(coordinates: runRecord.routeCoordinates, region: $region)
+                                .frame(height: 250)
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                                .padding(.top, 16)
+                        }
 
                         // 统计卡片
                         VStack(spacing: 16) {
@@ -220,7 +233,7 @@ struct HistoryDetailView: View {
 
 struct DetailStatCard: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     let unit: String
 

@@ -29,6 +29,7 @@ struct HomeView: View {
     @State private var showPaywall = false
     @State private var hasShownAutoPaywall = false
     @State private var hasTrainingPlan = false
+    @State private var showActiveRun = false
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var weatherManager = WeatherManager.shared
@@ -79,6 +80,36 @@ struct HomeView: View {
                         .frame(height: 1),
                     alignment: .top
                 )
+            }
+        }
+        // ActiveRunView 挂在根层级，Tab 切换无法触及
+        .fullScreenCover(isPresented: $showActiveRun) {
+            ActiveRunView()
+        }
+    }
+
+    // MARK: - Run Start Button Label
+
+    private var runStartButtonLabel: some View {
+        ZStack {
+            Circle()
+                .fill(Color.ringOuter)
+                .frame(width: 230, height: 230)
+            Circle()
+                .fill(Color.ringMiddle)
+                .frame(width: 196, height: 196)
+            ZStack {
+                Circle()
+                    .fill(Color.greenPrimary)
+                    .frame(width: 166, height: 166)
+                VStack(spacing: 10) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 34))
+                        .foregroundColor(.white)
+                    Text("开始跑步")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                }
             }
         }
     }
@@ -137,45 +168,28 @@ struct HomeView: View {
                             .padding(.top, 20)
 
                             // 开始 Run Button（新用户引导：无训练计划时跳转到创建计划页面）
-                            NavigationLink(destination: hasTrainingPlan ? AnyView(ActiveRunView()) : AnyView(GoalSelectionView(onPlanGenerated: { plan in
-                                // 保存计划到 UserDefaults，起始日期固定为本周一
-                                if let encoded = try? JSONEncoder().encode(plan) {
-                                    UserDefaults.standard.set(encoded, forKey: "saved_training_plan")
-                                    var cal = Calendar.current
-                                    cal.firstWeekday = 2
-                                    var comp = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
-                                    comp.weekday = 2
-                                    let monday = cal.date(from: comp) ?? Date()
-                                    UserDefaults.standard.set(monday, forKey: "training_plan_start_date")
-                                }
-                                hasTrainingPlan = true
-                            }))) {
-                                ZStack {
-                                    // Outer ring
-                                    Circle()
-                                        .fill(Color.ringOuter)
-                                        .frame(width: 230, height: 230)
-
-                                    // Middle ring
-                                    Circle()
-                                        .fill(Color.ringMiddle)
-                                        .frame(width: 196, height: 196)
-
-                                    // Main button
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.greenPrimary)
-                                            .frame(width: 166, height: 166)
-
-                                        VStack(spacing: 10) {
-                                            Image(systemName: "play.fill")
-                                                .font(.system(size: 34))
-                                                .foregroundColor(.white)
-
-                                            Text("开始跑步")
-                                                .font(.system(size: 20, weight: .bold))
-                                                .foregroundColor(.white)
+                            Group {
+                                if hasTrainingPlan {
+                                    // 有计划：fullScreenCover，Tab 切换不会中断跑步
+                                    Button(action: { showActiveRun = true }) {
+                                        runStartButtonLabel
+                                    }
+                                    .buttonStyle(.plain)
+                                } else {
+                                    // 无计划：引导去创建训练计划
+                                    NavigationLink(destination: GoalSelectionView(onPlanGenerated: { plan in
+                                        if let encoded = try? JSONEncoder().encode(plan) {
+                                            UserDefaults.standard.set(encoded, forKey: "saved_training_plan")
+                                            var cal = Calendar.current
+                                            cal.firstWeekday = 2
+                                            var comp = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+                                            comp.weekday = 2
+                                            let monday = cal.date(from: comp) ?? Date()
+                                            UserDefaults.standard.set(monday, forKey: "training_plan_start_date")
                                         }
+                                        hasTrainingPlan = true
+                                    })) {
+                                        runStartButtonLabel
                                     }
                                 }
                             }
@@ -298,15 +312,16 @@ struct HomeView: View {
             return userName
         }
 
-        // 3. 默认显示"跑友"
-        print("🏠 [HomeView] 使用默认名称: 跑友")
-        return "跑友"
+        // 3. 默认显示兜底名
+        let fallback = LanguageManager.shared.currentLocale == "en" ? "Runner" : "跑友"
+        print("🏠 [HomeView] 使用默认名称: \(fallback)")
+        return fallback
     }
 
     private var todayDateText: String {
         let now = Date()
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.locale = Locale(identifier: LanguageManager.shared.currentLocale)
         formatter.dateFormat = "M/d(EEE)"
         return formatter.string(from: now)
     }
@@ -316,7 +331,8 @@ struct HomeView: View {
     }
 
     private func getWeatherText() -> String {
-        return weatherManager.currentWeather?.displayText ?? "获取天气中..."
+        let fallback = LanguageManager.shared.currentLocale == "en" ? "Loading weather..." : "获取天气中..."
+        return weatherManager.currentWeather?.displayText ?? fallback
     }
 
     // MARK: - 今日招呼语
@@ -327,8 +343,12 @@ struct HomeView: View {
         // 1. 读取训练计划
         guard let data = defaults.data(forKey: "saved_training_plan"),
               let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
-            return "准备好今天的跑步了吗？"
+            return LanguageManager.shared.currentLocale == "en"
+                ? "Ready for today's run?"
+                : "准备好今天的跑步了吗？"
         }
+
+        let isEN = LanguageManager.shared.currentLocale == "en"
 
         // 2. 计算当前是第几周
         var weekNumber = 1
@@ -340,7 +360,7 @@ struct HomeView: View {
         // 3. 超出范围用最后一周
         let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
         guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else {
-            return "准备好今天的跑步了吗？"
+            return isEN ? "Ready for today's run?" : "准备好今天的跑步了吗？"
         }
 
         // 4. 获取今天是周几（1=周一 ... 7=周日）
@@ -351,7 +371,11 @@ struct HomeView: View {
         guard let task = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == dow }),
               task.type != "rest" else {
             // 休息日
-            let restMessages = [
+            let restMessages = isEN ? [
+                "Rest day — stretch and recover",
+                "Rest well, keep pushing tomorrow!",
+                "Rest is part of training, recharge your mind and body"
+            ] : [
                 "今天是休息日，做做拉伸放松一下吧",
                 "好好休息，明天继续加油！",
                 "休息也是训练的一部分，放松身心吧"
@@ -362,9 +386,14 @@ struct HomeView: View {
         // 6. 有训练任务
         let typeName = TaskType(rawValue: task.type)?.displayName ?? task.type
         if let distance = task.targetDistance, distance > 0 {
-            return "今天的目标是\(typeName)\(String(format: "%.1f", distance))公里，\n准备好就点击开始吧！"
+            let dist = String(format: "%.1f", distance)
+            return isEN
+                ? "Today's goal: \(typeName) \(dist) km\nReady? Tap start!"
+                : "今天的目标是\(typeName)\(dist)公里，\n准备好就点击开始吧！"
         } else {
-            return "今天的计划是\(typeName)，准备好就开始吧！"
+            return isEN
+                ? "Today's plan: \(typeName). Let's go!"
+                : "今天的计划是\(typeName)，准备好就开始吧！"
         }
     }
 }
@@ -403,14 +432,19 @@ struct WeeklyGoalCard: View {
 
         // 生成提示信息
         let remaining = goalKm - currentKm
+        let isEN = LanguageManager.shared.currentLocale == "en"
         let message: String
         if currentKm >= goalKm {
             let excess = currentKm - goalKm
-            message = String(format: "你已超前完成%.1f公里！", excess)
+            message = isEN
+                ? String(format: "You're %.1f km ahead of goal!", excess)
+                : String(format: "你已超前完成%.1f公里！", excess)
         } else if remaining > 0 {
-            message = String(format: "还需跑%.1f公里完成目标", remaining)
+            message = isEN
+                ? String(format: "%.1f km left to reach your goal", remaining)
+                : String(format: "还需跑%.1f公里完成目标", remaining)
         } else {
-            message = "继续加油！"
+            message = isEN ? "Keep going!" : "继续加油！"
         }
 
         return (currentKm, goalKm, progress, message)
@@ -430,7 +464,9 @@ struct WeeklyGoalCard: View {
         let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek) ?? now
 
         let formatter = DateFormatter()
-        formatter.dateFormat = "M月d日"
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        formatter.locale = Locale(identifier: LanguageManager.shared.currentLocale)
+        formatter.dateFormat = isEN ? "MMM d" : "M月d日"
 
         return "\(formatter.string(from: startOfWeek)) - \(formatter.string(from: endOfWeek))"
     }
@@ -519,7 +555,7 @@ struct WeeklyGoalCard: View {
 
 struct TabBarItem: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let isSelected: Bool
     let action: () -> Void
 

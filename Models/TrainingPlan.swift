@@ -70,22 +70,33 @@ enum TrainingGoal: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: String { rawValue }
+    var displayName: String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        switch self {
+        case .threeK:       return isEN ? "3K Beginner" : "3km新手"
+        case .weightLoss:   return isEN ? "Fat Burn" : "减肥燃脂"
+        case .fiveK:        return isEN ? "5K Starter" : "5km入门"
+        case .tenK:         return isEN ? "10K Advanced" : "10km进阶"
+        case .halfMarathon: return isEN ? "Half Marathon" : "半程马拉松"
+        case .fullMarathon: return isEN ? "Full Marathon" : "全程马拉松"
+        }
+    }
 
     var description: String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch self {
         case .threeK:
-            return "零基础新手，6周完成首个3公里"
+            return isEN ? "Zero-to-runner, finish your first 3K in 6 weeks" : "零基础新手，6周完成首个3公里"
         case .fiveK:
-            return "适合跑步新手，8周完成首个5公里"
+            return isEN ? "Beginner-friendly, complete your first 5K in 8 weeks" : "适合跑步新手，8周完成首个5公里"
         case .tenK:
-            return "适合有基础的跑者，10周突破10公里"
+            return isEN ? "For runners with a base, break 10K in 10 weeks" : "适合有基础的跑者，10周突破10公里"
         case .halfMarathon:
-            return "挑战21.1公里，12周系统训练"
+            return isEN ? "Conquer 21.1K with 12 weeks of structured training" : "挑战21.1公里，12周系统训练"
         case .fullMarathon:
-            return "完成42.195公里梦想，16周专业训练"
+            return isEN ? "Finish the 42.195K dream with 16 weeks of pro training" : "完成42.195公里梦想，16周专业训练"
         case .weightLoss:
-            return "科学燃脂，8周养成跑步习惯"
+            return isEN ? "Science-based fat burn, build the running habit in 8 weeks" : "科学燃脂，8周养成跑步习惯"
         }
     }
 
@@ -168,13 +179,14 @@ enum TaskType: String, Codable {
     case crossTraining = "cross_training"  // 交叉训练
 
     var displayName: String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch self {
-        case .easyRun: return "轻松跑"
-        case .tempoRun: return "节奏跑"
-        case .interval: return "间歇跑"
-        case .longRun: return "长距离跑"
-        case .rest: return "休息"
-        case .crossTraining: return "交叉训练"
+        case .easyRun:      return isEN ? "Easy Run" : "轻松跑"
+        case .tempoRun:     return isEN ? "Tempo Run" : "节奏跑"
+        case .interval:     return isEN ? "Interval" : "间歇跑"
+        case .longRun:      return isEN ? "Long Run" : "长距离跑"
+        case .rest:         return isEN ? "Rest" : "休息"
+        case .crossTraining: return isEN ? "Cross Training" : "交叉训练"
         }
     }
 
