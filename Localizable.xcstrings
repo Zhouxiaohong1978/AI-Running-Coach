@@ -1,0 +1,796 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "AI将根据你的跑步历史" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI will analyze your running history" } }
+      }
+    },
+    "AI教练" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI Coach" } }
+      }
+    },
+    "AI教练分析" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI Coach Analysis" } }
+      }
+    },
+    "AI教练分析中..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI Coach Analyzing..." } }
+      }
+    },
+    "AI跑步教练" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI Running Coach" } }
+      }
+    },
+    "AI跑步教练演示" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI Running Coach Demo" } }
+      }
+    },
+    "AI正在生成训练计划..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI is generating your training plan..." } }
+      }
+    },
+    "AI正在重新生成训练计划..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "AI is regenerating your training plan..." } }
+      }
+    },
+    "版本" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } }
+      }
+    },
+    "本地记录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Local Records" } }
+      }
+    },
+    "查看成就" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "View Achievements" } }
+      }
+    },
+    "查看跑步过程中的详细运行日志，用于调试" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "View detailed run logs for debugging" } }
+      }
+    },
+    "成就统计" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Achievement Stats" } }
+      }
+    },
+    "当前进度" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Current Progress" } }
+      }
+    },
+    "登录后可将跑步数据同步到云端" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in to sync your running data to the cloud" } }
+      }
+    },
+    "登录账号" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign In" } }
+      }
+    },
+    "点击可添加训练" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to add training" } }
+      }
+    },
+    "点击听语音" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to hear voice" } }
+      }
+    },
+    "订阅" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subscribe" } }
+      }
+    },
+    "订阅将自动续费，可随时在系统设置中取消" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subscription renews automatically. Cancel anytime in Settings." } }
+      }
+    },
+    "发送验证码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Send Code" } }
+      }
+    },
+    "返回登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Back to Login" } }
+      }
+    },
+    "分享" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share" } }
+      }
+    },
+    "分享成就卡片" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Share Achievement Card" } }
+      }
+    },
+    "服务条款" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Terms of Service" } }
+      }
+    },
+    "根据你的修改优化中" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Optimizing based on your adjustments" } }
+      }
+    },
+    "更换目标" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Change Goal" } }
+      }
+    },
+    "功能" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Feature" } }
+      }
+    },
+    "鼓励型" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Encouraging" } }
+      }
+    },
+    "关闭" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } }
+      }
+    },
+    "关于" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "About" } }
+      }
+    },
+    "管理订阅" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Subscription" } }
+      }
+    },
+    "还没有跑步记录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No running records yet" } }
+      }
+    },
+    "还没有训练计划" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No training plan yet" } }
+      }
+    },
+    "恢复购买" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } }
+      }
+    },
+    "或者使用以下方式登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Or sign in with" } }
+      }
+    },
+    "计划开始日期未记录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plan start date not set" } }
+      }
+    },
+    "计划时长" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Plan Duration" } }
+      }
+    },
+    "继续加油，再接再厉！" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep it up, keep pushing!" } }
+      }
+    },
+    "减肥燃脂" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fat Burning" } }
+      }
+    },
+    "将清除所有成就数据（包括测试数据），并根据真实跑步记录重新计算成就进度。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This will clear all achievement data (including test data) and recalculate progress based on actual run records." } }
+      }
+    },
+    "结束时间" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "End Time" } }
+      }
+    },
+    "解锁 AI 跑步教练 Pro" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlock AI Running Coach Pro" } }
+      }
+    },
+    "进行中" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "In Progress" } }
+      }
+    },
+    "距离" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Distance" } }
+      }
+    },
+    "距离控制" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Distance Control" } }
+      }
+    },
+    "卡路里" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Calories" } }
+      }
+    },
+    "开发者选项" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Developer Options" } }
+      }
+    },
+    "开始你的第一次跑步吧！" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start your first run!" } }
+      }
+    },
+    "开始跑步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start Running" } }
+      }
+    },
+    "开始时间" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start Time" } }
+      }
+    },
+    "历史记录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "History" } }
+      }
+    },
+    "每公里配速" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pace per km" } }
+      }
+    },
+    "每周目标" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Weekly Goal" } }
+      }
+    },
+    "每周训练几次？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "How many times per week?" } }
+      }
+    },
+    "密码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password" } }
+      }
+    },
+    "密码修改成功" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Password Changed" } }
+      }
+    },
+    "免费" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Free" } }
+      }
+    },
+    "免费次数已用完，升级 Pro 继续跑步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Free runs used up, upgrade to Pro to continue" } }
+      }
+    },
+    "模拟10公里跑步（燃脂500+）" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simulate 10km run (500+ cal burned)" } }
+      }
+    },
+    "模拟1公里跑步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simulate 1km run" } }
+      }
+    },
+    "模拟5公里跑步（燃脂300+）" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simulate 5km run (300+ cal burned)" } }
+      }
+    },
+    "模拟晨跑（7:00，触发晨跑成就）" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simulate morning run (7:00, trigger morning achievement)" } }
+      }
+    },
+    "模拟跑步记录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Simulate Run Record" } }
+      }
+    },
+    "您的密码已成功修改\n请使用新密码登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your password has been changed.\nPlease sign in with your new password." } }
+      }
+    },
+    "跑步时间" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Running Time" } }
+      }
+    },
+    "跑步完成！" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Complete!" } }
+      }
+    },
+    "跑步详情" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Details" } }
+      }
+    },
+    "配速" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pace" } }
+      }
+    },
+    "偏好哪些日子训练？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Which days do you prefer to train?" } }
+      }
+    },
+    "平衡" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Balanced" } }
+      }
+    },
+    "前 1000 名用户专属价" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Exclusive price for first 1,000 users" } }
+      }
+    },
+    "轻松为主" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Easy Focus" } }
+      }
+    },
+    "请确认新密码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirm New Password" } }
+      }
+    },
+    "请输入6位验证码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter 6-digit verification code" } }
+      }
+    },
+    "请输入新密码（至少6位）" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter new password (min. 6 characters)" } }
+      }
+    },
+    "请输入邮箱" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter your email" } }
+      }
+    },
+    "取消" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } }
+      }
+    },
+    "确定要删除这条跑步记录吗？删除后无法恢复。" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete this run record? This cannot be undone." } }
+      }
+    },
+    "确认修改" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirm Changes" } }
+      }
+    },
+    "让AI教练为你制定个性化训练计划\n科学提升跑步能力" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Let AI Coach create a personalized training plan\nto scientifically improve your running" } }
+      }
+    },
+    "删除账户" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete Account" } }
+      }
+    },
+    "删除账户后，您的所有数据将被永久删除且无法恢复。确定要继续吗？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "All your data will be permanently deleted and cannot be recovered. Are you sure you want to continue?" } }
+      }
+    },
+    "设置新密码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Set New Password" } }
+      }
+    },
+    "升级 Pro" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upgrade to Pro" } }
+      }
+    },
+    "升级 Pro 获取无限教练反馈" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upgrade to Pro for unlimited coaching" } }
+      }
+    },
+    "升级 Pro 解锁" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upgrade to Pro to Unlock" } }
+      }
+    },
+    "生成并分享" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate & Share" } }
+      }
+    },
+    "生成图片后，可分享到微信、朋友圈、微博、小红书等平台" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "After generating, share to social platforms" } }
+      }
+    },
+    "生成训练计划" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate Training Plan" } }
+      }
+    },
+    "时间" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Time" } }
+      }
+    },
+    "时间控制" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Time Control" } }
+      }
+    },
+    "时长" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Duration" } }
+      }
+    },
+    "输入验证码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter Verification Code" } }
+      }
+    },
+    "输入注册邮箱" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Enter registration email" } }
+      }
+    },
+    "数据同步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Data Sync" } }
+      }
+    },
+    "通过 Apple 登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in with Apple" } }
+      }
+    },
+    "退出登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign Out" } }
+      }
+    },
+    "退出后，您的跑步数据仍会保存在本地" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your running data will remain saved locally after signing out" } }
+      }
+    },
+    "完成" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done" } }
+      }
+    },
+    "忘记密码？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Forgot Password?" } }
+      }
+    },
+    "为你量身定制训练计划" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tailor-made training plan for you" } }
+      }
+    },
+    "温和型" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gentle" } }
+      }
+    },
+    "我们将发送6位验证码到您的邮箱" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "We'll send a 6-digit code to your email" } }
+      }
+    },
+    "无法显示日历" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cannot display calendar" } }
+      }
+    },
+    "无限 AI 训练计划 · 实时教练反馈 · 全部成就" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlimited AI Plans · Real-time Coaching · All Achievements" } }
+      }
+    },
+    "心率" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Heart Rate" } }
+      }
+    },
+    "心率控制" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Heart Rate Control" } }
+      }
+    },
+    "新手3公里" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Beginner 3km" } }
+      }
+    },
+    "选择你的目标" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose Your Goal" } }
+      }
+    },
+    "训练建议" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Training Tips" } }
+      }
+    },
+    "训练偏好" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Training Preferences" } }
+      }
+    },
+    "训练强度？" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Training Intensity?" } }
+      }
+    },
+    "训练日" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Training Day" } }
+      }
+    },
+    "训练周期" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Training Duration" } }
+      }
+    },
+    "严格型" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Strict" } }
+      }
+    },
+    "验证" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Verify" } }
+      }
+    },
+    "验证码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Verification Code" } }
+      }
+    },
+    "验证邮箱" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Verify Email" } }
+      }
+    },
+    "已登录" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Signed In" } }
+      }
+    },
+    "已解锁" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unlocked" } }
+      }
+    },
+    "已同步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Synced" } }
+      }
+    },
+    "隐私政策" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Privacy Policy" } }
+      }
+    },
+    "用户名" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Username" } }
+      }
+    },
+    "用户协议" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "User Agreement" } }
+      }
+    },
+    "邮箱" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Email" } }
+      }
+    },
+    "云端同步" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cloud Sync" } }
+      }
+    },
+    "运行日志" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Log" } }
+      }
+    },
+    "在分享面板中选择目标应用（如微信、小红书等）" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select an app in the share sheet to share" } }
+      }
+    },
+    "暂无AI建议" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No AI suggestions yet" } }
+      }
+    },
+    "暂无分段数据" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No split data yet" } }
+      }
+    },
+    "暂无新成就" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No new achievements" } }
+      }
+    },
+    "长按\n结束" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hold\nto End" } }
+      }
+    },
+    "账户" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Account" } }
+      }
+    },
+    "找回密码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset Password" } }
+      }
+    },
+    "这可能需要几秒钟" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This may take a few seconds" } }
+      }
+    },
+    "正在保存跑步数据..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Saving run data..." } }
+      }
+    },
+    "重新发送验证码" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Resend Code" } }
+      }
+    },
+    "重置成就数据" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset Achievement Data" } }
+      }
+    },
+    "重置所有成就" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset All Achievements" } }
+      }
+    },
+    "周" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Week" } }
+      }
+    },
+    "追求突破" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Push Limits" } }
+      }
+    },
+    "总成就" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Achievements" } }
+      }
+    },
+    "总次数" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Runs" } }
+      }
+    },
+    "总计" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total" } }
+      }
+    },
+    "总距离" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Distance" } }
+      }
+    },
+    "总时长" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total Time" } }
+      }
+    },
+    "7 天免费试用" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "7-day Free Trial" } }
+      }
+    },
+    "16周" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "16 Weeks" } }
+      }
+    },
+    "4周" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "4 Weeks" } }
+      }
+    },
+    "3次" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "3 times" } }
+      }
+    },
+    "4次" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "4 times" } }
+      }
+    },
+    "5次" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "5 times" } }
+      }
+    },
+    "🔊 AI教练正在指导..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "🔊 AI Coach is guiding you..." } }
+      }
+    },
+    "🏆 成就解锁" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "🏆 Achievement Unlocked" } }
+      }
+    },
+    "🏆 成就解锁！" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "🏆 Achievement Unlocked!" } }
+      }
+    },
+    "🎧 等待触发..." : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "🎧 Waiting for trigger..." } }
+      }
+    },
+    "🏆 最近解锁" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "🏆 Recently Unlocked" } }
+      }
+    }
+  },
+  "version" : "1.1"
+}
