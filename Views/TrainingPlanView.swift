@@ -21,7 +21,9 @@ struct TrainingPlanView: View {
     @State private var viewMode: PlanViewMode = .week
     @State private var selectedTask: (task: DailyTaskData, weekNumber: Int)?
     @State private var showQuickActions = false
-    @State private var showAIUpgraded = false  // AI优化完成提示
+    @State private var showAIUpgraded = false     // AI优化完成提示
+    @State private var lastEditTime: Date? = nil  // 记录最后一次用户手动编辑时间
+    @State private var reoptimizeTriggerTime: Date? = nil  // 记录触发AI优化的时间
 
     /// 快速编辑操作
     enum QuickEditAction {
@@ -81,15 +83,23 @@ struct TrainingPlanView: View {
                 Text(errorMessage ?? "")
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AIOptimizationComplete"))) { notification in
-                if let plan = notification.userInfo?["plan"] as? TrainingPlanData {
-                    withAnimation(.easeInOut(duration: 0.4)) {
-                        currentPlan = plan
-                    }
-                    savePlan(plan)
-                    showAIUpgraded = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                        showAIUpgraded = false
-                    }
+                guard let plan = notification.userInfo?["plan"] as? TrainingPlanData else { return }
+
+                // 若用户在AI运行期间做了新编辑，则放弃AI结果，避免覆盖用户意图
+                if let triggerTime = reoptimizeTriggerTime,
+                   let editTime = lastEditTime,
+                   editTime > triggerTime {
+                    print("⚠️ AI优化结果被丢弃：用户在AI运行期间进行了手动编辑")
+                    return
+                }
+
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    currentPlan = plan
+                }
+                savePlan(plan)
+                showAIUpgraded = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    showAIUpgraded = false
                 }
             }
         }
@@ -158,26 +168,66 @@ struct TrainingPlanView: View {
         }
     }
 
-    /// 更新任务
+    /// 更新单周某天的任务（用于距离调整）
     private func updateTask(_ updatedTask: DailyTaskData, weekNumber: Int) {
         guard var plan = currentPlan else { return }
 
-        // 找到对应的周计划
         if let weekIndex = plan.weeklyPlans.firstIndex(where: { $0.weekNumber == weekNumber }) {
             var weekPlan = plan.weeklyPlans[weekIndex]
 
             if let taskIndex = weekPlan.dailyTasks.firstIndex(where: { $0.dayOfWeek == updatedTask.dayOfWeek }) {
-                // 已有该天的任务，直接更新
                 weekPlan.dailyTasks[taskIndex] = updatedTask
             } else {
-                // 该天原本是补充的休息日（不在 dailyTasks 中），需要插入
                 weekPlan.dailyTasks.append(updatedTask)
             }
 
             plan.weeklyPlans[weekIndex] = weekPlan
             currentPlan = plan
             savePlan(plan)
+            lastEditTime = Date()
         }
+    }
+
+    /// 添加/删除训练日，应用到所有周（训练日安排是全局意图）
+    private func applyScheduleChangeToAllWeeks(dayOfWeek: Int, makeTraining: Bool) {
+        guard var plan = currentPlan else { return }
+
+        for weekIndex in plan.weeklyPlans.indices {
+            var weekPlan = plan.weeklyPlans[weekIndex]
+            let taskIndex = weekPlan.dailyTasks.firstIndex(where: { $0.dayOfWeek == dayOfWeek })
+
+            if makeTraining {
+                // 该天改为训练：如果已存在且不是rest，保留；否则添加轻松跑
+                if let idx = taskIndex, weekPlan.dailyTasks[idx].type != "rest" {
+                    // 已是训练日，无需改动
+                } else if let idx = taskIndex {
+                    // 存在但是rest类型，更新为训练
+                    weekPlan.dailyTasks[idx] = DailyTaskData(
+                        dayOfWeek: dayOfWeek, type: "easy_run",
+                        targetDistance: 3.0, targetPace: "7'00\"",
+                        description: "轻松跑3.0公里"
+                    )
+                } else {
+                    // 不存在，插入
+                    weekPlan.dailyTasks.append(DailyTaskData(
+                        dayOfWeek: dayOfWeek, type: "easy_run",
+                        targetDistance: 3.0, targetPace: "7'00\"",
+                        description: "轻松跑3.0公里"
+                    ))
+                }
+            } else {
+                // 该天改为休息：从 dailyTasks 移除（或置为rest）
+                if let idx = taskIndex {
+                    weekPlan.dailyTasks.remove(at: idx)
+                }
+            }
+
+            plan.weeklyPlans[weekIndex] = weekPlan
+        }
+
+        currentPlan = plan
+        savePlan(plan)
+        lastEditTime = Date()
     }
 
     /// 快速操作按钮
@@ -186,17 +236,12 @@ struct TrainingPlanView: View {
         let isRest = task.type == "rest"
 
         if isRest {
-            // 休息日：改为训练
-            Button("改为轻松跑") {
-                var newTask = task
-                newTask.type = "easy_run"
-                newTask.targetDistance = 3.0
-                newTask.targetPace = "7'00\""
-                newTask.description = "轻松跑3公里"
-                updateTask(newTask, weekNumber: weekNumber)
+            // 休息日→训练日：应用到所有周
+            Button("改为轻松跑（所有周）") {
+                applyScheduleChangeToAllWeeks(dayOfWeek: task.dayOfWeek, makeTraining: true)
             }
         } else {
-            // 训练日：调整距离或改为休息
+            // 训练日：距离调整仅当前周，改为休息日应用所有周
             Button("减少 0.5km") {
                 var newTask = task
                 if let distance = task.targetDistance, distance > 0.5 {
@@ -221,13 +266,8 @@ struct TrainingPlanView: View {
                 }
             }
 
-            Button("改为休息日", role: .destructive) {
-                var newTask = task
-                newTask.type = "rest"
-                newTask.targetDistance = nil
-                newTask.targetPace = nil
-                newTask.description = "休息日"
-                updateTask(newTask, weekNumber: weekNumber)
+            Button("改为休息日（所有周）", role: .destructive) {
+                applyScheduleChangeToAllWeeks(dayOfWeek: task.dayOfWeek, makeTraining: false)
             }
         }
 
@@ -243,6 +283,9 @@ struct TrainingPlanView: View {
             showPaywall = true
             return
         }
+
+        // 记录触发时间，用于判断AI结果是否要应用（若期间用户有新编辑则丢弃）
+        reoptimizeTriggerTime = Date()
 
         // 不重建本地模板，直接用用户当前计划启动后台AI优化
         // AI收到 currentPlan 后会严格保留训练天数和用户设置的距离
