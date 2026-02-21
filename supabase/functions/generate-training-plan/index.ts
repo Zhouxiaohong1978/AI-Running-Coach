@@ -212,49 +212,40 @@ ${userContext}`;
     }
   }
 
-  // 序列化用户修改后的计划，让 AI 严格保留用户修改
+  // 序列化用户修改后的计划，让 AI 严格保留每周各自的安排（每周独立，互不影响）
   if (currentPlan && currentPlan.weeklyPlans && currentPlan.weeklyPlans.length > 0) {
     const typeNames: Record<string, string> = {
       easy_run: '轻松跑', tempo_run: '节奏跑', interval: '间歇跑',
       long_run: '长距离跑', cross_training: '交叉训练', rest: '休息'
     };
     const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const allDays = [1, 2, 3, 4, 5, 6, 7];
 
-    prompt += `\n\n**【必须严格遵守】用户已确认的计划安排**：`;
-    prompt += `\n用户手动调整了以下计划，这些是用户的明确意愿，你必须100%保留：`;
+    prompt += `\n\n**【必须严格遵守】用户已确认的各周独立安排**：`;
+    prompt += `\n每一周的训练日和距离均已由用户确认，各周互相独立，不得以任何周为模板套用其他周：`;
 
-    // 展示第1周的完整7天安排（包括休息日），作为每周模板
-    const week1 = currentPlan.weeklyPlans[0];
-    const allDays = new Set(week1.dailyTasks.map(t => t.dayOfWeek));
+    for (const week of currentPlan.weeklyPlans) {
+      const trainTasks = week.dailyTasks
+        .filter(t => t.type !== 'rest')
+        .sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+      const restDayNums = allDays.filter(d => !trainTasks.find(t => t.dayOfWeek === d));
 
-    prompt += `\n\n第1周模板（每周固定安排）：`;
-    for (let d = 1; d <= 7; d++) {
-      const day = dayNames[d - 1];
-      const task = week1.dailyTasks.find(t => t.dayOfWeek === d);
-      if (task && task.type !== 'rest') {
-        const typeName = typeNames[task.type] || task.type;
-        const dist = task.targetDistance ? `${task.targetDistance}km` : '';
-        prompt += `\n  ${day}: ${typeName} ${dist}（训练日 - 必须保留）`;
-      } else {
-        prompt += `\n  ${day}: 休息（休息日 - 必须保留）`;
-      }
-    }
+      const trainStr = trainTasks
+        .map(t => {
+          const typeName = typeNames[t.type] || t.type;
+          const dist = t.targetDistance ? `${t.targetDistance}km` : '';
+          return `${dayNames[t.dayOfWeek - 1]}${dist}`;
+        })
+        .join('、');
+      const restStr = restDayNums.map(d => dayNames[d - 1]).join('、');
 
-    // 简要展示后续几周的递进情况
-    if (currentPlan.weeklyPlans.length > 1) {
-      prompt += `\n\n后续周次递进参考：`;
-      for (const week of currentPlan.weeklyPlans.slice(1, 4)) {
-        const trainTasks = week.dailyTasks.filter(t => t.type !== 'rest');
-        const distances = trainTasks.map(t => `${t.targetDistance || '?'}km`).join('、');
-        prompt += `\n  第${week.weekNumber}周：${distances}`;
-      }
+      prompt += `\n  第${week.weekNumber}周 训练日：${trainStr || '无'}；休息日：${restStr}`;
     }
 
     prompt += `\n\n**严格要求**：`;
-    prompt += `\n- 每周哪些天训练、哪些天休息，必须和第1周模板完全一致`;
-    prompt += `\n- 第1周的训练距离必须和上面完全一致，不得修改`;
-    prompt += `\n- 后续周次在保持相同训练日/休息日安排的前提下，可以适当递增距离`;
-    prompt += `\n- 你只能优化：训练类型（如轻松跑→节奏跑）、配速建议、训练描述`;
+    prompt += `\n- 以上每周的训练日/休息日安排各自独立有效，不得相互覆盖`;
+    prompt += `\n- 每周的训练距离必须和上面完全一致，不得修改`;
+    prompt += `\n- 你只能优化：训练类型（如轻松跑→节奏跑）、配速建议、训练描述文字`;
   }
 
   prompt += `\n\n科学渐进，难度递增合理`;

@@ -188,60 +188,23 @@ struct TrainingPlanView: View {
         }
     }
 
-    /// 添加/删除训练日，应用到所有周（训练日安排是全局意图）
-    private func applyScheduleChangeToAllWeeks(dayOfWeek: Int, makeTraining: Bool) {
-        guard var plan = currentPlan else { return }
-
-        for weekIndex in plan.weeklyPlans.indices {
-            var weekPlan = plan.weeklyPlans[weekIndex]
-            let taskIndex = weekPlan.dailyTasks.firstIndex(where: { $0.dayOfWeek == dayOfWeek })
-
-            if makeTraining {
-                // 该天改为训练：如果已存在且不是rest，保留；否则添加轻松跑
-                if let idx = taskIndex, weekPlan.dailyTasks[idx].type != "rest" {
-                    // 已是训练日，无需改动
-                } else if let idx = taskIndex {
-                    // 存在但是rest类型，更新为训练
-                    weekPlan.dailyTasks[idx] = DailyTaskData(
-                        dayOfWeek: dayOfWeek, type: "easy_run",
-                        targetDistance: 3.0, targetPace: "7'00\"",
-                        description: "轻松跑3.0公里"
-                    )
-                } else {
-                    // 不存在，插入
-                    weekPlan.dailyTasks.append(DailyTaskData(
-                        dayOfWeek: dayOfWeek, type: "easy_run",
-                        targetDistance: 3.0, targetPace: "7'00\"",
-                        description: "轻松跑3.0公里"
-                    ))
-                }
-            } else {
-                // 该天改为休息：从 dailyTasks 移除（或置为rest）
-                if let idx = taskIndex {
-                    weekPlan.dailyTasks.remove(at: idx)
-                }
-            }
-
-            plan.weeklyPlans[weekIndex] = weekPlan
-        }
-
-        currentPlan = plan
-        savePlan(plan)
-        lastEditTime = Date()
-    }
-
     /// 快速操作按钮
     @ViewBuilder
     private func quickActionButtons(for task: DailyTaskData, weekNumber: Int) -> some View {
         let isRest = task.type == "rest"
 
         if isRest {
-            // 休息日→训练日：应用到所有周
-            Button("改为轻松跑（所有周）") {
-                applyScheduleChangeToAllWeeks(dayOfWeek: task.dayOfWeek, makeTraining: true)
+            // 休息日→本周训练日（只改当前周）
+            Button("改为轻松跑") {
+                var newTask = task
+                newTask.type = "easy_run"
+                newTask.targetDistance = 3.0
+                newTask.targetPace = "7'00\""
+                newTask.description = "轻松跑3.0公里"
+                updateTask(newTask, weekNumber: weekNumber)
             }
         } else {
-            // 训练日：距离调整仅当前周，改为休息日应用所有周
+            // 训练日：调整距离或改为休息（均只改当前周）
             Button("减少 0.5km") {
                 var newTask = task
                 if let distance = task.targetDistance, distance > 0.5 {
@@ -266,8 +229,13 @@ struct TrainingPlanView: View {
                 }
             }
 
-            Button("改为休息日（所有周）", role: .destructive) {
-                applyScheduleChangeToAllWeeks(dayOfWeek: task.dayOfWeek, makeTraining: false)
+            Button("改为休息日", role: .destructive) {
+                var newTask = task
+                newTask.type = "rest"
+                newTask.targetDistance = nil
+                newTask.targetPace = nil
+                newTask.description = "休息日"
+                updateTask(newTask, weekNumber: weekNumber)
             }
         }
 
