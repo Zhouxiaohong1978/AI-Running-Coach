@@ -21,8 +21,7 @@ struct TrainingPlanView: View {
     @State private var viewMode: PlanViewMode = .week
     @State private var selectedTask: (task: DailyTaskData, weekNumber: Int)?
     @State private var showQuickActions = false
-    @State private var isRegenerating = false
-    @State private var isAIOptimizing = false  // AI后台优化状态
+    @State private var showAIUpgraded = false  // AI优化完成提示
 
     /// 快速编辑操作
     enum QuickEditAction {
@@ -81,37 +80,53 @@ struct TrainingPlanView: View {
             } message: {
                 Text(errorMessage ?? "")
             }
-            .overlay {
-                if isRegenerating {
-                    regeneratingOverlay
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AIOptimizationComplete"))) { notification in
+                if let plan = notification.userInfo?["plan"] as? TrainingPlanData {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        currentPlan = plan
+                    }
+                    savePlan(plan)
+                    showAIUpgraded = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                        showAIUpgraded = false
+                    }
                 }
             }
         }
     }
 
-    // MARK: - Regenerating Overlay
+    // MARK: - AI Optimizing Banner
 
-    private var regeneratingOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                ProgressView()
-                    .scaleEffect(1.5)
-                    .tint(.white)
-
-                Text("AI正在重新生成训练计划...")
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                Text("根据你的修改优化中")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+    /// 顶部小横幅：AI后台优化中 / 优化完成
+    @ViewBuilder
+    private var aiStatusBanner: some View {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        if showAIUpgraded {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                Text(isEN ? "AI plan upgraded" : "AI已优化计划")
+                    .font(.caption)
+                    .fontWeight(.medium)
             }
-            .padding(40)
-            .background(Color(.systemGray5).opacity(0.9))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(Color.green.opacity(0.12))
             .cornerRadius(20)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        } else if aiManager.isAIOptimizing {
+            HStack(spacing: 6) {
+                ProgressView()
+                    .scaleEffect(0.65)
+                Text(isEN ? "AI optimizing..." : "AI优化中...")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(Color(.systemGray6))
+            .cornerRadius(20)
+            .transition(.opacity)
         }
     }
 
@@ -219,38 +234,27 @@ struct TrainingPlanView: View {
         Button("取消", role: .cancel) {}
     }
 
-    /// 根据用户修改重新生成计划
+    /// 根据用户修改重新生成计划（混合模式：模板立即显示 + AI后台优化）
     private func regeneratePlan() {
         guard let plan = currentPlan else { return }
 
-        isRegenerating = true
+        // 立即生成模板计划（<10ms），AI在后台优化，完成后通过通知更新
+        let result = aiManager.generateInstantPlan(
+            goal: plan.goal,
+            runHistory: dataManager.runRecords,
+            durationWeeks: plan.durationWeeks,
+            currentPlan: plan,
+            preferences: plan.preferences
+        )
 
-        Task {
-            do {
-                let newPlan = try await aiManager.generateTrainingPlan(
-                    goal: plan.goal,
-                    runHistory: dataManager.runRecords,
-                    durationWeeks: plan.durationWeeks,
-                    currentPlan: plan,  // 传入用户修改后的计划作为参考
-                    preferences: plan.preferences  // 复用保存的用户偏好
-                )
-
-                await MainActor.run {
-                    currentPlan = newPlan
-                    savePlan(newPlan)
-                    isRegenerating = false
-                }
-            } catch AIManagerError.subscriptionRequired {
-                await MainActor.run {
-                    isRegenerating = false
-                    showPaywall = true
-                }
-            } catch {
-                await MainActor.run {
-                    isRegenerating = false
-                    errorMessage = "重新生成失败: \(error.localizedDescription)"
-                }
-            }
+        switch result {
+        case .success(let newPlan):
+            currentPlan = newPlan
+            savePlan(newPlan)
+        case .failure(.subscriptionRequired):
+            showPaywall = true
+        case .failure(let error):
+            errorMessage = "重新生成失败: \(error.localizedDescription)"
         }
     }
 
@@ -317,6 +321,12 @@ struct TrainingPlanView: View {
         VStack(spacing: 0) {
             // 视图模式切换
             viewModePicker
+
+            // AI状态横幅（优化中 / 优化完成）
+            aiStatusBanner
+                .animation(.easeInOut(duration: 0.3), value: aiManager.isAIOptimizing)
+                .animation(.easeInOut(duration: 0.3), value: showAIUpgraded)
+                .padding(.top, 4)
 
             ScrollView {
                 VStack(spacing: 20) {

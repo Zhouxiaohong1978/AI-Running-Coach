@@ -180,6 +180,7 @@ final class AIManager: ObservableObject {
     // MARK: - Published Properties
 
     @Published var isGeneratingPlan = false
+    @Published var isAIOptimizing = false      // 后台AI优化进行中
     @Published var isGeneratingFeedback = false
     @Published var lastFeedback: String?
     @Published var coachStyle: CoachStyle = .encouraging
@@ -205,6 +206,7 @@ final class AIManager: ObservableObject {
         goal: String,
         runHistory: [RunRecord],
         durationWeeks: Int = 8,
+        currentPlan: TrainingPlanData? = nil,
         preferences: TrainingPreferences? = nil
     ) -> Result<TrainingPlanData, AIManagerError> {
 
@@ -238,6 +240,7 @@ final class AIManager: ObservableObject {
         // 后台AI优化（不阻塞当前线程）
         let capturedGoal = goal
         let capturedDurationWeeks = durationWeeks
+        let capturedCurrentPlan = currentPlan
         let capturedPreferences = preferences
         Task {
             await optimizePlanWithAI(
@@ -246,7 +249,7 @@ final class AIManager: ObservableObject {
                 maxDistance: maxDistance,
                 weeklyRuns: weeklyRuns,
                 durationWeeks: capturedDurationWeeks,
-                currentPlan: nil,
+                currentPlan: capturedCurrentPlan,
                 preferences: capturedPreferences
             )
         }
@@ -383,6 +386,10 @@ final class AIManager: ObservableObject {
         preferences: TrainingPreferences?
     ) async {
         print("🔄 后台开始AI优化...")
+        await MainActor.run { isAIOptimizing = true }
+        defer {
+            Task { @MainActor in isAIOptimizing = false }
+        }
 
         let request = GeneratePlanRequest(
             goal: goal,
