@@ -234,28 +234,19 @@ struct TrainingPlanView: View {
         Button("取消", role: .cancel) {}
     }
 
-    /// 根据用户修改重新生成计划（混合模式：模板立即显示 + AI后台优化）
+    /// 根据用户修改重新生成计划（混合模式）
+    /// 保留用户编辑后的计划结构（天数/距离不变），只让AI后台优化描述/配速
     private func regeneratePlan() {
         guard let plan = currentPlan else { return }
 
-        // 立即生成模板计划（<10ms），AI在后台优化，完成后通过通知更新
-        let result = aiManager.generateInstantPlan(
-            goal: plan.goal,
-            runHistory: dataManager.runRecords,
-            durationWeeks: plan.durationWeeks,
-            currentPlan: plan,
-            preferences: plan.preferences
-        )
-
-        switch result {
-        case .success(let newPlan):
-            currentPlan = newPlan
-            savePlan(newPlan)
-        case .failure(.subscriptionRequired):
+        guard subscriptionManager.canGeneratePlan() else {
             showPaywall = true
-        case .failure(let error):
-            errorMessage = "重新生成失败: \(error.localizedDescription)"
+            return
         }
+
+        // 不重建本地模板，直接用用户当前计划启动后台AI优化
+        // AI收到 currentPlan 后会严格保留训练天数和用户设置的距离
+        aiManager.triggerReoptimize(plan: plan, runHistory: dataManager.runRecords)
     }
 
     // MARK: - Loading View

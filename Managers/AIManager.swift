@@ -257,6 +257,33 @@ final class AIManager: ObservableObject {
         return .success(plan)
     }
 
+    /// 重新优化已有计划（保持用户编辑的结构，只启动后台AI优化）
+    /// 不重建本地模板，不改变训练天数/距离，只让AI优化描述/配速
+    func triggerReoptimize(plan: TrainingPlanData, runHistory: [RunRecord]) {
+        guard AuthManager.shared.currentUser != nil else { return }
+        guard SubscriptionManager.shared.canGeneratePlan() else { return }
+
+        SubscriptionManager.shared.incrementPlanCount()
+
+        let avgPace = calculateAveragePace(from: runHistory)
+        let maxDistance = runHistory.map { $0.distance / 1000.0 }.max()
+        let weeklyRuns = calculateWeeklyRuns(from: runHistory)
+
+        print("🔁 触发重新优化（保持用户计划结构不变）")
+
+        Task {
+            await optimizePlanWithAI(
+                goal: plan.goal,
+                avgPace: avgPace,
+                maxDistance: maxDistance,
+                weeklyRuns: weeklyRuns,
+                durationWeeks: plan.durationWeeks,
+                currentPlan: plan,
+                preferences: plan.preferences
+            )
+        }
+    }
+
     /// 异步生成训练计划（供重新生成使用，保留现有逻辑）
     func generateTrainingPlan(
         goal: String,
