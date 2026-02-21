@@ -37,7 +37,8 @@ export async function callBailian(
   messages: BailianMessage[],
   model: string = 'qwen-plus',
   temperature: number = 0.7,
-  maxTokens: number = 2000
+  maxTokens: number = 2000,
+  timeoutMs: number = 8000  // 实时反馈用 8s，计划生成用 25s
 ): Promise<string> {
   const apiKey = Deno.env.get('DASHSCOPE_API_KEY');
 
@@ -45,9 +46,8 @@ export async function callBailian(
     throw new Error('DASHSCOPE_API_KEY not configured');
   }
 
-  // 创建超时控制器（8秒超时，平衡速度与可靠性）
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     // 阿里云百炼使用 DashScope API（国际版）
@@ -91,7 +91,7 @@ export async function callBailian(
     return text;
   } catch (error) {
     if (error.name === 'AbortError') {
-      throw new Error('API请求超时（8秒），请稍后重试');
+      throw new Error(`API请求超时（${timeoutMs / 1000}秒），请稍后重试`);
     }
     throw error;
   } finally {

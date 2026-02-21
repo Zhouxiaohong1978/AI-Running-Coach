@@ -100,7 +100,8 @@ Deno.serve(async (req: Request) => {
       ],
       "qwen-turbo",
       0.7,
-      maxTokens
+      maxTokens,
+      25000  // 计划生成允许 25 秒，比实时反馈的 8 秒更宽裕
     );
 
     // 解析 AI 返回的 JSON
