@@ -35,6 +35,7 @@ struct ActiveRunView: View {
 
     // MVP 1.0: 智能语音系统
     @State private var userGoal: TrainingGoal = .threeK  // 用户当前训练目标
+    @State private var todayTargetKm: Double = 3.0       // 今日训练计划目标距离
     @State private var hasSpokenStart = false
     @State private var hasSpoken500m = false
     @State private var hasSpoken1km = false

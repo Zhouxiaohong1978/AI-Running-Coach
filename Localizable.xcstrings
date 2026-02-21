@@ -400,6 +400,12 @@
         }
       }
     },
+    "AI optimizing..." : {
+
+    },
+    "AI plan upgraded" : {
+
+    },
     "AI 教练反馈" : {
       "localizations" : {
         "en" : {
@@ -430,6 +436,9 @@
         }
       }
     },
+    "AI优化中..." : {
+
+    },
     "AI将根据你的跑步历史" : {
       "localizations" : {
         "en" : {
@@ -439,6 +448,9 @@
           }
         }
       }
+    },
+    "AI已优化计划" : {
+
     },
     "AI教练" : {
       "localizations" : {
@@ -492,6 +504,7 @@
       }
     },
     "AI正在重新生成训练计划..." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2375,6 +2388,7 @@
       }
     },
     "根据你的修改优化中" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

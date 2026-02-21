@@ -238,9 +238,10 @@ final class AIManager: ObservableObject {
         SubscriptionManager.shared.incrementPlanCount()
 
         // 后台AI优化（不阻塞当前线程）
+        // 将刚生成的模板作为 currentPlan 传给 AI，确保 Edge Function 严格保留训练天数/距离结构
         let capturedGoal = goal
         let capturedDurationWeeks = durationWeeks
-        let capturedCurrentPlan = currentPlan
+        let capturedCurrentPlan = currentPlan ?? plan  // 初次生成时用模板，重新生成时用用户计划
         let capturedPreferences = preferences
         Task {
             await optimizePlanWithAI(
@@ -324,7 +325,7 @@ final class AIManager: ObservableObject {
                 maxDistance: maxDistance,
                 weeklyRuns: weeklyRuns,
                 durationWeeks: durationWeeks,
-                currentPlan: currentPlan,
+                currentPlan: currentPlan ?? plan,  // 初次生成时用模板，确保 AI 保留训练天数结构
                 preferences: preferences
             )
         }
@@ -442,6 +443,13 @@ final class AIManager: ObservableObject {
 
             plan.preferences = preferences
 
+            // 合并校验：以模板结构为准，只采用 AI 优化的训练类型/配速/描述
+            // 确保 AI 无论返回几天，最终都严格保留用户设定的训练天数和距离
+            if let templatePlan = currentPlan {
+                plan = mergeAIPlanWithTemplate(aiPlan: plan, templatePlan: templatePlan)
+                print("🔀 合并完成：保留用户训练结构，应用AI优化内容")
+            }
+
             // 发送通知：AI优化完成
             await MainActor.run {
                 NotificationCenter.default.post(
@@ -456,6 +464,42 @@ final class AIManager: ObservableObject {
         } catch {
             print("❌ AI优化失败: \(error.localizedDescription)，保持使用模板计划")
         }
+    }
+
+    // MARK: - AI计划合并（保结构 + 用AI内容）
+
+    /// 以模板为基础，合并 AI 返回的优化内容
+    /// - 保留模板的训练日、距离（用户设定，不可变）
+    /// - 使用 AI 的训练类型、配速、描述（AI 优化价值所在）
+    private func mergeAIPlanWithTemplate(aiPlan: TrainingPlanData, templatePlan: TrainingPlanData) -> TrainingPlanData {
+        var result = aiPlan
+        result.weeklyPlans = templatePlan.weeklyPlans.map { templateWeek in
+            var mergedWeek = templateWeek
+
+            // 找到 AI 对应的周
+            if let aiWeek = aiPlan.weeklyPlans.first(where: { $0.weekNumber == templateWeek.weekNumber }) {
+                mergedWeek.theme = aiWeek.theme  // 使用 AI 的主题描述
+
+                // 以模板的训练日为准，逐天合并 AI 内容
+                mergedWeek.dailyTasks = templateWeek.dailyTasks.map { templateTask in
+                    var mergedTask = templateTask
+                    if let aiTask = aiWeek.dailyTasks.first(where: { $0.dayOfWeek == templateTask.dayOfWeek }) {
+                        // 保留模板的 dayOfWeek 和 targetDistance，使用 AI 的 type/pace/description
+                        mergedTask.type = aiTask.type
+                        if let pace = aiTask.targetPace, !pace.isEmpty {
+                            mergedTask.targetPace = pace
+                        }
+                        if !aiTask.description.isEmpty {
+                            mergedTask.description = aiTask.description
+                        }
+                    }
+                    return mergedTask
+                }
+            }
+
+            return mergedWeek
+        }
+        return result
     }
 
     // MARK: - 模板生成辅助函数
