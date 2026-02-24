@@ -27,6 +27,7 @@ private extension Color {
 struct HomeView: View {
     @State private var selectedTab = 0
     @State private var showPaywall = false
+    @State private var showHelp = false
     @State private var hasShownAutoPaywall = false
     @State private var hasTrainingPlan = false
     @State private var showActiveRun = false
@@ -225,7 +226,7 @@ struct HomeView: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: {}) {
+                        Button(action: { showHelp = true }) {
                             ZStack {
                                 Circle()
                                     .fill(Color.bgDark)
@@ -244,6 +245,9 @@ struct HomeView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showHelp) {
+                HelpGuideView()
             }
             .onAppear {
                 // 检查是否存在训练计划
