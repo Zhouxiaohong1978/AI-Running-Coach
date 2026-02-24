@@ -43,6 +43,7 @@ struct ActiveRunView: View {
     @State private var hasSpoken2km = false
     @State private var hasSpoken2_5km = false
     @State private var hasSpoken3km = false
+    @State private var hasSpokenTodayGoal = false  // 今日目标达成语音
     @State private var achievement1kmWarned = false  // 是否已提醒1km成就
     @State private var achievement3kmWarned = false  // 是否已提醒3km成就
     @State private var achievement300calWarned = false  // 是否已提醒300卡成就
@@ -335,6 +336,9 @@ struct ActiveRunView: View {
             audioPlayerManager.isEnabled = isVoiceEnabled
             subscriptionManager.resetRunFeedbackCount()
 
+            // 加载今日训练目标距离
+            todayTargetKm = loadTodayTargetKm()
+
             // 延迟一点播报，确保视图完全加载
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 print("🏃 MVP 1.0 开始跑步，三位一体联动启动")
@@ -371,9 +375,9 @@ struct ActiveRunView: View {
         isEnding = true
         locationManager.stopTracking()
 
-        // 检查是否提前结束（未到3km）
+        // 检查是否提前结束（未到今日目标）
         let distanceKm = locationManager.distance / 1000.0
-        if distanceKm < 3.0 {
+        if distanceKm < todayTargetKm {
             playEarlyStopVoice()
         }
 
@@ -407,6 +411,26 @@ struct ActiveRunView: View {
 
     private let voiceMap = VoiceAssetMap.shared
 
+    /// 从训练计划读取今日目标距离
+    private func loadTodayTargetKm() -> Double {
+        guard let data = UserDefaults.standard.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else {
+            return 3.0
+        }
+        var weekNumber = 1
+        if let startDate = UserDefaults.standard.object(forKey: "training_plan_start_date") as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+            weekNumber = max(1, days / 7 + 1)
+        }
+        let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
+        guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else { return 3.0 }
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let dow = weekday == 1 ? 7 : weekday - 1
+        guard let task = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == dow }),
+              let distance = task.targetDistance, distance > 0 else { return 3.0 }
+        return distance
+    }
+
     /// 播放开始语音（女声：跑前_01）
     private func playStartVoice() {
         guard let startVoice = voiceMap.getStartVoice() else { return }
@@ -424,10 +448,15 @@ struct ActiveRunView: View {
         // 1. 检查跑中距离语音（男声）
         checkDistanceVoice(distanceKm: distanceKm)
 
-        // 2. 检查完成语音（3km）
-        if distanceKm >= 3.0 && !hasSpoken3km {
+        // 2. 检查今日目标完成
+        if distanceKm >= todayTargetKm && !hasSpokenTodayGoal {
+            hasSpokenTodayGoal = true
             hasSpoken3km = true
-            logger.log("🎉 到达3km，触发完成语音", category: "VOICE")
+            logger.log("🎉 到达今日目标 \(todayTargetKm)km，触发完成语音", category: "VOICE")
+            if todayTargetKm != 3.0 {
+                // 非3km目标：TTS播报今日目标完成（3km目标已有 新手跑中_08 语音）
+                SpeechManager.shared.speak("今日目标完成，太棒了！")
+            }
             playCompleteVoices()
         }
 
