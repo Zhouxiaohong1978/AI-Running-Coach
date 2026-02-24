@@ -18,7 +18,6 @@
 		39D64756CC5960F79DADD7BF /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57817154FCD67BD41E729CD8 /* SpeechManager.swift */; };
 		44B7954EDF8907BBCE9C14B5 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = A2748FE8AA57D3D4216DA4BB /* CLAUDE.md */; };
 		453459F66B42C9B87464885C /* AIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08283168190FCE5DFD3E65E2 /* AIManager.swift */; };
-		EE22222222222222LANGUAGE2 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11111111111111LANGUAGE1 /* LanguageManager.swift */; };
 		471E235160A4D4B6DD0AAB8D /* RunMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFA0A9E0B60BB59445969ED /* RunMapView.swift */; };
 		4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827E775AD7E76C78ECE86370 /* DebugLogView.swift */; };
 		5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10A16B363C8A7D23A6306F61 /* DebugLogger.swift */; };
@@ -50,17 +49,18 @@
 		CC88888888888888888888CC /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD88888888888888888888DD /* Achievement.swift */; };
 		CC99999999999999999999CC /* AchievementSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD99999999999999999999DD /* AchievementSheetView.swift */; };
 		CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */; };
+		CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */; };
 		CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */; };
 		CD34EF5678901234AB567890 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56789012345678 /* SubscriptionManager.swift */; };
 		D1CA8A1D5E3ECAC654312872 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */; };
 		E54ECD75E3E6F871ADD559FB /* GoalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35628295DD86A50D091E306 /* GoalSelectionView.swift */; };
 		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
 		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
+		EE22222222222222LANGUAGE2 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11111111111111LANGUAGE1 /* LanguageManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		08283168190FCE5DFD3E65E2 /* AIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIManager.swift; sourceTree = "<group>"; };
-		EE11111111111111LANGUAGE1 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		10A16B363C8A7D23A6306F61 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		124707344CABB85DE155A5AC /* TrainingPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPlanView.swift; sourceTree = "<group>"; };
 		19618B5AC9B32D7DC89473B9 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
@@ -102,7 +102,9 @@
 		DD88888888888888888888DD /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
 		DD99999999999999999999DD /* AchievementSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSheetView.swift; sourceTree = "<group>"; };
 		DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementShareView.swift; sourceTree = "<group>"; };
+		DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpGuideView.swift; sourceTree = "<group>"; };
 		DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementTestView.swift; sourceTree = "<group>"; };
+		EE11111111111111LANGUAGE1 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		EF56789012345678CD901234 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,6 +153,7 @@
 				5492D4946BDDB9584CBD3AA8 /* ActiveRunView.swift */,
 				DD99999999999999999999DD /* AchievementSheetView.swift */,
 				DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */,
+				DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */,
 				DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */,
 				31B78260DAB77DEDF48D8765 /* ContentView.swift */,
 				74744F7FF003A409921152AB /* DetailedStatsView.swift */,
@@ -345,6 +348,7 @@
 				CC88888888888888888888CC /* Achievement.swift in Sources */,
 				CC99999999999999999999CC /* AchievementSheetView.swift in Sources */,
 				CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */,
+				CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */,
 				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
 				5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */,
 				4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */,
