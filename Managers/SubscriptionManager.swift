@@ -56,7 +56,7 @@ final class SubscriptionManager: NSObject, ObservableObject {
 
     // MARK: - Constants
 
-    private let apiKey = "test_HSVDtwqQLDtQfEFXCHRQmuspqXb"
+    private let apiKey = "appl_UaMzrPLwFdaslCwUoWIxwdKqrum"
     private let entitlementID = "pro"
     private let planGenerationMonthKey = "planGenerationMonth"
     private let planGenerationCountKey = "planGenerationCount"

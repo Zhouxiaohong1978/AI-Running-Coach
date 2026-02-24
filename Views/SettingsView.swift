@@ -21,6 +21,8 @@ struct SettingsView: View {
     @State private var showPaywall = false
     @State private var isRestoringPurchase = false
     @State private var selectedCoachStyle: CoachStyle = .encouraging
+    @State private var showPrivacyPolicy = false
+    @State private var showSupport = false
 
     var body: some View {
         NavigationView {
@@ -230,7 +232,7 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    Link(destination: URL(string: "https://zhouxiaohong1978.github.io/airunningcoach-support/privacy.html")!) {
+                    Button(action: { showPrivacyPolicy = true }) {
                         HStack {
                             Text("隐私政策")
                                 .foregroundColor(.primary)
@@ -241,7 +243,7 @@ struct SettingsView: View {
                         }
                     }
 
-                    Link(destination: URL(string: "https://zhouxiaohong1978.github.io/airunningcoach-support/support.html")!) {
+                    Button(action: { showSupport = true }) {
                         HStack {
                             Text("技术支持")
                                 .foregroundColor(.primary)
@@ -254,11 +256,7 @@ struct SettingsView: View {
                 } header: {
                     Text("关于")
                 } footer: {
-                    Text("AI跑步教练 © 2026 Xiaohong Zhou")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.bottom, 20)
+                    Color.clear.padding(.bottom, 20)
                 }
             }
             .navigationTitle("设置")
@@ -268,6 +266,12 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showPrivacyPolicy) {
+                PrivacyPolicyView()
+            }
+            .sheet(isPresented: $showSupport) {
+                SupportView()
             }
             .onChange(of: authManager.isAuthenticated) { isAuthenticated in
                 // 登录成功后自动关闭登录页面

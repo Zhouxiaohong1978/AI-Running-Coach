@@ -13,6 +13,7 @@ struct AI跑步教练App: App {
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var languageManager = LanguageManager.shared
+    @State private var showSplash = true
 
     init() {
         SubscriptionManager.shared.configure()
@@ -22,15 +23,21 @@ struct AI跑步教练App: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if authManager.isAuthenticated {
+                if showSplash {
+                    SplashVideoView {
+                        withAnimation(.easeInOut(duration: 0.6)) {
+                            showSplash = false
+                        }
+                    }
+                } else if authManager.isAuthenticated {
                     HomeView()
                         .environmentObject(subscriptionManager)
                 } else {
                     LoginView()
                 }
             }
-            .id(languageManager.currentLocale)                                       // locale 变化时重建整个视图树
-            .environment(\.locale, Locale(identifier: languageManager.currentLocale)) // 告诉 SwiftUI Text 用哪个语言
+            .id(languageManager.currentLocale)
+            .environment(\.locale, Locale(identifier: languageManager.currentLocale))
             .environmentObject(languageManager)
         }
     }

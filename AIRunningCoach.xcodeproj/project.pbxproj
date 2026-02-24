@@ -50,6 +50,10 @@
 		CC99999999999999999999CC /* AchievementSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD99999999999999999999DD /* AchievementSheetView.swift */; };
 		CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */; };
 		CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */; };
+		CCPRIVACYPOLICYVIEWBUILD /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */; };
+		CCSUPPORTVIEWBUILDPHASE /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDSUPPORTVIEWFILEREF /* SupportView.swift */; };
+		CCSPLASHVIDEOVIEWBUILD /* SplashVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDSPLASHVIDEOVIEWFILE /* SplashVideoView.swift */; };
+		CCSPLASHMP4RESOURCES /* splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = DDSPLASHMP4FILEREF /* splash.mp4 */; };
 		CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */; };
 		CD34EF5678901234AB567890 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56789012345678 /* SubscriptionManager.swift */; };
 		D1CA8A1D5E3ECAC654312872 /* RunSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422F9F0D34D3FCD8D5E2A4F8 /* RunSummaryView.swift */; };
@@ -103,6 +107,10 @@
 		DD99999999999999999999DD /* AchievementSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSheetView.swift; sourceTree = "<group>"; };
 		DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementShareView.swift; sourceTree = "<group>"; };
 		DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpGuideView.swift; sourceTree = "<group>"; };
+		DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		DDSUPPORTVIEWFILEREF /* SupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
+		DDSPLASHVIDEOVIEWFILE /* SplashVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashVideoView.swift; sourceTree = "<group>"; };
+		DDSPLASHMP4FILEREF /* splash.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = splash.mp4; sourceTree = "<group>"; };
 		DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementTestView.swift; sourceTree = "<group>"; };
 		EE11111111111111LANGUAGE1 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		EF56789012345678CD901234 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -138,6 +146,7 @@
 				6A67206C7BB05873D7687676 /* AIRunningCoach-Bridging-Header.h */,
 				88700A4E8EF7AD6D3FABF1D2 /* AIRunningCoachApp.swift */,
 				B36821D05F7DD4C28B01B428 /* Assets.xcassets */,
+				DDSPLASHMP4FILEREF /* splash.mp4 */,
 				A2748FE8AA57D3D4216DA4BB /* CLAUDE.md */,
 				569AAD41CFF77AC7B4D12F2E /* Managers */,
 				3F5C132E5FDB4128CB8C1BFC /* Models */,
@@ -154,6 +163,9 @@
 				DD99999999999999999999DD /* AchievementSheetView.swift */,
 				DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */,
 				DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */,
+				DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */,
+				DDSUPPORTVIEWFILEREF /* SupportView.swift */,
+				DDSPLASHVIDEOVIEWFILE /* SplashVideoView.swift */,
 				DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */,
 				31B78260DAB77DEDF48D8765 /* ContentView.swift */,
 				74744F7FF003A409921152AB /* DetailedStatsView.swift */,
@@ -299,6 +311,7 @@
 				746E9A51EC53E774635EBAEC /* Assets.xcassets in Resources */,
 				2BFDEB9E2F47E42C00064D16 /* Localizable.xcstrings in Resources */,
 				44B7954EDF8907BBCE9C14B5 /* CLAUDE.md in Resources */,
+				CCSPLASHMP4RESOURCES /* splash.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,6 +362,9 @@
 				CC99999999999999999999CC /* AchievementSheetView.swift in Sources */,
 				CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */,
 				CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */,
+				CCPRIVACYPOLICYVIEWBUILD /* PrivacyPolicyView.swift in Sources */,
+				CCSUPPORTVIEWBUILDPHASE /* SupportView.swift in Sources */,
+				CCSPLASHVIDEOVIEWBUILD /* SplashVideoView.swift in Sources */,
 				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
 				5453371260BEEF1D10370532 /* DebugLogger.swift in Sources */,
 				4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */,

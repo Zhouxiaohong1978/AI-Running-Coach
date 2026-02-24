@@ -47,7 +47,7 @@ struct LoginView: View {
                             .font(.system(size: 32, weight: .bold))
                             .foregroundColor(.white)
 
-                        Text(selectedTab == 0 ? "欢迎回来" : "创建新账号")
+                        Text(LocalizedStringKey(selectedTab == 0 ? "欢迎回来" : "创建新账号"))
                             .font(.system(size: 16))
                             .foregroundColor(.white.opacity(0.9))
                     }
@@ -161,7 +161,7 @@ struct LoginView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                Text(selectedTab == 0 ? "登录" : "注册")
+                                Text(LocalizedStringKey(selectedTab == 0 ? "登录" : "注册"))
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(Color(red: 0.3, green: 0.6, blue: 0.1))
                             }
@@ -287,7 +287,7 @@ struct LoginView: View {
                 dismiss()
             } catch {
                 print("❌ [验证] OTP 验证失败: \(error.localizedDescription)")
-                errorMessage = "验证码错误，请重新输入"
+                errorMessage = String(localized: "验证码错误，请重新输入")
                 showError = true
             }
         }
@@ -304,7 +304,7 @@ struct TabButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 8) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? .white : .white.opacity(0.6))
 

@@ -103,7 +103,7 @@ struct HelpGuideView: View {
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(.secondary)
                                 ForEach(freeFeatures, id: \.self) { item in
-                                    Label(item, systemImage: "checkmark")
+                                    Label(LocalizedStringKey(item), systemImage: "checkmark")
                                         .font(.system(size: 12))
                                         .foregroundColor(.primary)
                                 }
@@ -117,7 +117,7 @@ struct HelpGuideView: View {
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(Color(red: 0.49, green: 0.84, blue: 0.11))
                                 ForEach(proFeatures, id: \.self) { item in
-                                    Label(item, systemImage: "checkmark.seal.fill")
+                                    Label(LocalizedStringKey(item), systemImage: "checkmark.seal.fill")
                                         .font(.system(size: 12))
                                         .foregroundColor(Color(red: 0.49, green: 0.84, blue: 0.11))
                                 }
@@ -170,7 +170,7 @@ private struct HelpCard: View {
             HStack(spacing: 8) {
                 Text(emoji)
                     .font(.system(size: 20))
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 16, weight: .bold))
                 Spacer()
             }
@@ -184,7 +184,7 @@ private struct HelpCard: View {
                             .frame(width: 20, height: 20)
                             .background(Color(red: 0.49, green: 0.84, blue: 0.11))
                             .clipShape(Circle())
-                        Text(step)
+                        Text(LocalizedStringKey(step))
                             .font(.system(size: 14))
                             .foregroundColor(.primary)
                             .fixedSize(horizontal: false, vertical: true)

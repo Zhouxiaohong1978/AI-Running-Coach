@@ -207,7 +207,7 @@ struct RunSummaryView: View {
                             Spacer()
 
                             if let scene = aiScene {
-                                Text(scene)
+                                Text(LocalizedStringKey(scene))
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 8)

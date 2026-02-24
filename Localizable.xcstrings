@@ -10,6 +10,9 @@
     "—" : {
 
     },
+    "：%@" : {
+
+    },
     "?" : {
 
     },
@@ -36,6 +39,16 @@
         }
       }
     },
+    "%@ · %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
     "%@ km" : {
       "localizations" : {
         "en" : {
@@ -58,6 +71,16 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@：%2$@"
+          }
+        }
+      }
+    },
+    "%@. %@ · %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@. %2$@ · %3$@"
           }
         }
       }
@@ -247,6 +270,9 @@
         }
       }
     },
+    "🏃" : {
+
+    },
     "🏆" : {
       "localizations" : {
         "en" : {
@@ -327,6 +353,17 @@
         }
       }
     },
+    "3秒内看到计划，AI 在后台自动优化（约15秒）" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See your plan in 3 seconds, AI optimizes in background (~15s)"
+          }
+        }
+      }
+    },
     "4周" : {
       "localizations" : {
         "en" : {
@@ -343,6 +380,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "4 times"
+          }
+        }
+      }
+    },
+    "5分钟上手，轻松开始跑步之旅" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started in 5 minutes"
           }
         }
       }
@@ -380,6 +427,17 @@
         }
       }
     },
+    "10个成就" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 achievements"
+          }
+        }
+      }
+    },
     "16周" : {
       "localizations" : {
         "en" : {
@@ -389,6 +447,9 @@
           }
         }
       }
+    },
+    "1614103587@qq.com" : {
+
     },
     "AI COACH INSIGHT" : {
       "localizations" : {
@@ -514,6 +575,17 @@
         }
       }
     },
+    "AI计划1次/月" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 AI plan/month"
+          }
+        }
+      }
+    },
     "AI训练计划" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -531,6 +603,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "AI Running Coach"
+          }
+        }
+      }
+    },
+    "AI跑步教练使用指南" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Running Coach Guide"
           }
         }
       }
@@ -555,8 +637,24 @@
         }
       }
     },
+    "Contact Us · 联系我们" : {
+
+    },
+    "Done" : {
+
+    },
     "Exclusive price for first 1,000 users" : {
 
+    },
+    "🆓 免费 vs 👑 Pro" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🆓 Free vs 👑 Pro"
+          }
+        }
+      }
     },
     "GPS ACTIVE" : {
       "localizations" : {
@@ -591,6 +689,9 @@
     "Loading plans..." : {
 
     },
+    "Privacy Policy" : {
+
+    },
     "Pro" : {
       "localizations" : {
         "en" : {
@@ -611,6 +712,9 @@
         }
       }
     },
+    "Send Email" : {
+
+    },
     "Share" : {
       "localizations" : {
         "en" : {
@@ -621,6 +725,9 @@
         }
       }
     },
+    "Still need help? Email us within 1–2 business days." : {
+
+    },
     "Supabase 连接测试" : {
       "localizations" : {
         "en" : {
@@ -630,6 +737,9 @@
           }
         }
       }
+    },
+    "Technical Support" : {
+
     },
     "Unlock after %@" : {
 
@@ -761,6 +871,27 @@
         }
       }
     },
+    "使用指南" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User Guide"
+          }
+        }
+      }
+    },
+    "保证充足的休息和营养" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensure adequate rest and nutrition"
+          }
+        }
+      }
+    },
     "偏好哪些日子训练？" : {
       "localizations" : {
         "en" : {
@@ -777,6 +908,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stop Run"
+          }
+        }
+      }
+    },
+    "允许定位权限，GPS 开始追踪路线" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grant location permission — GPS starts tracking your route"
           }
         }
       }
@@ -811,12 +953,55 @@
         }
       }
     },
+    "免费版" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free"
+          }
+        }
+      }
+    },
+    "全程偏快风险高" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too Fast"
+          }
+        }
+      }
+    },
+    "全程偏慢但稳定" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slow but Steady"
+          }
+        }
+      }
+    },
     "全部" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "All"
+          }
+        }
+      }
+    },
+    "全部30+成就" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All 30+ achievements"
           }
         }
       }
@@ -972,6 +1157,7 @@
       }
     },
     "分享" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1023,6 +1209,7 @@
       }
     },
     "创建新账号" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1094,12 +1281,45 @@
         }
       }
     },
+    "到达今日目标距离时播报完成庆祝语音" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celebratory voice plays when you reach today's target"
+          }
+        }
+      }
+    },
+    "到达目标距离或手动长按「结束」按钮停止" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reach your target distance or long-press \"End\" to stop"
+          }
+        }
+      }
+    },
     "前 1000 名用户专属价" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Exclusive price for first 1,000 users"
+          }
+        }
+      }
+    },
+    "前快后崩" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Positive Split"
           }
         }
       }
@@ -1271,6 +1491,9 @@
         }
       }
     },
+    "发送邮件" : {
+
+    },
     "发送验证码" : {
       "localizations" : {
         "en" : {
@@ -1287,6 +1510,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "可删除不需要的记录" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete records you no longer need"
+          }
+        }
+      }
+    },
+    "右上角麦克风图标可随时开关语音" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the mic icon (top right) to toggle voice on/off"
           }
         }
       }
@@ -1431,6 +1676,17 @@
         }
       }
     },
+    "基础期" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foundation Phase"
+          }
+        }
+      }
+    },
     "基础期 - 打好基础" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1438,6 +1694,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Foundation - Build the Base"
+          }
+        }
+      }
+    },
+    "基础语音" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basic voice"
           }
         }
       }
@@ -1483,6 +1750,9 @@
           }
         }
       }
+    },
+    "如以上内容未能解决问题，欢迎发邮件，1-2个工作日内回复。" : {
+
     },
     "完成" : {
       "localizations" : {
@@ -1591,6 +1861,17 @@
         }
       }
     },
+    "完整语音" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full voice"
+          }
+        }
+      }
+    },
     "密码" : {
       "localizations" : {
         "en" : {
@@ -1617,6 +1898,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This will clear all achievement data (including test data) and recalculate progress based on actual run records."
+          }
+        }
+      }
+    },
+    "巩固期" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consolidation Phase"
           }
         }
       }
@@ -1713,6 +2005,7 @@
       }
     },
     "开发者选项" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2014,6 +2307,16 @@
         }
       }
     },
+    "技术支持" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technical Support"
+          }
+        }
+      }
+    },
     "持之以恒" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2031,6 +2334,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recommended: %lld wks"
+          }
+        }
+      }
+    },
+    "提高期" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Development Phase"
           }
         }
       }
@@ -2148,12 +2462,34 @@
         }
       }
     },
+    "无限AI计划" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlimited AI plans"
+          }
+        }
+      }
+    },
     "无限制" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unlimited"
+          }
+        }
+      }
+    },
+    "无限跑步记录" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlimited runs"
           }
         }
       }
@@ -2378,6 +2714,7 @@
       }
     },
     "查看跑步过程中的详细运行日志，用于调试" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2460,6 +2797,7 @@
       }
     },
     "欢迎回来" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2479,12 +2817,45 @@
         }
       }
     },
+    "每个成就可点击分享给朋友" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each achievement can be shared with friends"
+          }
+        }
+      }
+    },
+    "每个里程碑（500m、1km、2km…）自动播报" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto-announces each milestone (500m, 1km, 2km…)"
+          }
+        }
+      }
+    },
     "每公里配速" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pace per km"
+          }
+        }
+      }
+    },
+    "每周增加跑量不超过10%" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Increase weekly mileage by no more than 10%"
           }
         }
       }
@@ -2519,6 +2890,17 @@
         }
       }
     },
+    "每天按计划完成对应训练任务" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Complete your daily training tasks as planned"
+          }
+        }
+      }
+    },
     "每月1次" : {
       "localizations" : {
         "en" : {
@@ -2535,6 +2917,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "3/month"
+          }
+        }
+      }
+    },
+    "每月3次跑步" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 runs/month"
+          }
+        }
+      }
+    },
+    "每条记录包含地图轨迹、配速、卡路里" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each record includes map route, pace and calories"
           }
         }
       }
@@ -2560,12 +2964,35 @@
         }
       }
     },
+    "波动大" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inconsistent"
+          }
+        }
+      }
+    },
     "注册" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sign Up"
+          }
+        }
+      }
+    },
+    "注意监控心率，避免过度训练" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monitor your heart rate to avoid overtraining"
           }
         }
       }
@@ -2620,6 +3047,17 @@
         }
       }
     },
+    "涵盖距离、配速、次数、连续打卡等维度" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Covers distance, pace, frequency, streaks and more"
+          }
+        }
+      }
+    },
     "添加训练" : {
       "localizations" : {
         "en" : {
@@ -2640,6 +3078,17 @@
         }
       }
     },
+    "点击「我的」→「成就」查看全部成就" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap \"Me\" → \"Achievements\" to view all"
+          }
+        }
+      }
+    },
     "点击可添加训练" : {
       "localizations" : {
         "en" : {
@@ -2656,6 +3105,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap to hear voice"
+          }
+        }
+      }
+    },
+    "点击底部「历史」查看所有跑步记录" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap \"History\" at the bottom to view all runs"
+          }
+        }
+      }
+    },
+    "点击底部「计划」标签进入训练计划页" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the \"Plan\" tab at the bottom"
+          }
+        }
+      }
+    },
+    "点击记录查看详情" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap a record to view details"
+          }
+        }
+      }
+    },
+    "点击首页大绿按钮「开始跑步」" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the large green \"Start Running\" button on the home screen"
           }
         }
       }
@@ -2775,6 +3268,7 @@
       }
     },
     "用户协议" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2795,6 +3289,7 @@
       }
     },
     "登录" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2901,6 +3396,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Encouraging coaching for runners who need motivation"
+          }
+        }
+      }
+    },
+    "稳定达标" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steady"
           }
         }
       }
@@ -3067,6 +3573,17 @@
         }
       }
     },
+    "结束后查看配速、卡路里、AI 教练分析" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View pace, calories and AI analysis after finishing"
+          }
+        }
+      }
+    },
     "结束时间" : {
       "localizations" : {
         "en" : {
@@ -3105,6 +3622,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keep going!"
+          }
+        }
+      }
+    },
+    "联系我们：1614103587@qq.com" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact: 1614103587@qq.com"
           }
         }
       }
@@ -3168,6 +3695,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unlocked on %@"
+          }
+        }
+      }
+    },
+    "解锁成就时语音播报庆祝" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice celebration when an achievement unlocks"
           }
         }
       }
@@ -3352,6 +3890,17 @@
         }
       }
     },
+    "语音教练" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice Coach"
+          }
+        }
+      }
+    },
     "请确认新密码" : {
       "localizations" : {
         "en" : {
@@ -3432,6 +3981,17 @@
         }
       }
     },
+    "跑前热身，跑后拉伸" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm up before running, stretch after"
+          }
+        }
+      }
+    },
     "跑后拉伸很重要，预防受伤" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3443,12 +4003,45 @@
         }
       }
     },
+    "跑步全程自动语音陪伴，无需看屏幕" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic voice companion throughout your run — no need to check the screen"
+          }
+        }
+      }
+    },
+    "跑步历史" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run History"
+          }
+        }
+      }
+    },
     "跑步完成！" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Run Complete!"
+          }
+        }
+      }
+    },
+    "跑步数据自动检测，达成条件即时解锁" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run data auto-detected — achievements unlock instantly"
           }
         }
       }
@@ -3494,12 +4087,34 @@
         }
       }
     },
+    "跑步结束后播报 AI 教练总结分析" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI coach summary plays after your run ends"
+          }
+        }
+      }
+    },
     "跑步详情" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Run Details"
+          }
+        }
+      }
+    },
+    "跑步过程中语音教练自动播报里程进度" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice coach auto-announces your progress during the run"
           }
         }
       }
@@ -3544,6 +4159,9 @@
           }
         }
       }
+    },
+    "跳过" : {
+
     },
     "轻松为主" : {
       "localizations" : {
@@ -3795,6 +4413,17 @@
         }
       }
     },
+    "适应期" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptation Phase"
+          }
+        }
+      }
+    },
     "适应期 - 建立习惯" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3816,12 +4445,34 @@
         }
       }
     },
+    "选择每周训练天数和训练强度" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose weekly training days and intensity"
+          }
+        }
+      }
+    },
     "选择训练目标" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Select Goal"
+          }
+        }
+      }
+    },
+    "选择训练目标（3km / 5km / 减肥 等）" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select your training goal (3km / 5km / Weight Loss, etc.)"
           }
         }
       }
@@ -3952,6 +4603,7 @@
       }
     },
     "重置成就数据" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4045,6 +4697,16 @@
         }
       }
     },
+    "需要帮助？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Need Help?"
+          }
+        }
+      }
+    },
     "频率成就" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4095,6 +4757,17 @@
         }
       }
     },
+    "首次使用点击「生成训练计划」" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First time: tap \"Generate Training Plan\""
+          }
+        }
+      }
+    },
     "马拉松精神" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4132,6 +4805,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Code sent to %@"
+          }
+        }
+      }
+    },
+    "验证码错误，请重新输入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid code, please try again"
           }
         }
       }
