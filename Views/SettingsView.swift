@@ -221,35 +221,6 @@ struct SettingsView: View {
                     }
                 }
 
-                // 开发者选项
-                Section {
-                    NavigationLink(destination: DebugLogView()) {
-                        HStack {
-                            Image(systemName: "doc.text.magnifyingglass")
-                                .font(.system(size: 20))
-                                .foregroundColor(.blue)
-                            Text("运行日志")
-                            Spacer()
-                        }
-                    }
-
-                    Button(action: {
-                        showResetAchievementAlert = true
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                                .font(.system(size: 20))
-                                .foregroundColor(.orange)
-                            Text("重置成就数据")
-                            Spacer()
-                        }
-                    }
-                } header: {
-                    Text("开发者选项")
-                } footer: {
-                    Text("查看跑步过程中的详细运行日志，用于调试")
-                }
-
                 // 关于部分
                 Section {
                     HStack {
@@ -259,9 +230,10 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    Button(action: {}) {
+                    Link(destination: URL(string: "https://zhouxiaohong1978.github.io/airunningcoach-support/privacy.html")!) {
                         HStack {
                             Text("隐私政策")
+                                .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 14))
@@ -269,9 +241,10 @@ struct SettingsView: View {
                         }
                     }
 
-                    Button(action: {}) {
+                    Link(destination: URL(string: "https://zhouxiaohong1978.github.io/airunningcoach-support/support.html")!) {
                         HStack {
-                            Text("用户协议")
+                            Text("技术支持")
+                                .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 14))
@@ -280,6 +253,12 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text("关于")
+                } footer: {
+                    Text("AI跑步教练 © 2026 Xiaohong Zhou")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.bottom, 20)
                 }
             }
             .navigationTitle("设置")
