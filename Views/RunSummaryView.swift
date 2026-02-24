@@ -330,8 +330,7 @@ struct RunSummaryView: View {
             VStack {
                 Spacer()
 
-                HStack(spacing: 12) {
-                    Button(action: {
+                Button(action: {
                         dismiss()
                     }) {
                         HStack(spacing: 8) {
@@ -346,27 +345,6 @@ struct RunSummaryView: View {
                         .background(Color.gray.opacity(0.7))
                         .cornerRadius(16)
                     }
-
-                    Button(action: {}) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 18))
-                            Text("分享")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            LinearGradient(
-                                colors: [Color(red: 0.5, green: 0.8, blue: 0.1), Color(red: 0.4, green: 0.7, blue: 0.2)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(16)
-                    }
-                }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 10)
             }

@@ -164,11 +164,6 @@ struct HistoryDetailView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 16) {
-                        Button(action: {}) {
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
-                        }
-
                         Button(action: {
                             showDeleteConfirmation = true
                         }) {
