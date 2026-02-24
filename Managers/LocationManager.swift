@@ -71,8 +71,8 @@ class LocationManager: NSObject, ObservableObject {
             guard let self = self, let start = self.startTime else { return }
             self.duration = Date().timeIntervalSince(start)
 
-            // 计算卡路里 (粗略估算: 1km约60卡路里)
-            self.calories = (self.distance / 1000.0) * 60.0
+            // 计算卡路里 (粗略估算: 1km约100卡路里)
+            self.calories = (self.distance / 1000.0) * 100.0
         }
     }
 
@@ -91,7 +91,7 @@ class LocationManager: NSObject, ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let start = self.startTime else { return }
             self.duration = Date().timeIntervalSince(start)
-            self.calories = (self.distance / 1000.0) * 60.0
+            self.calories = (self.distance / 1000.0) * 100.0
         }
     }
 
