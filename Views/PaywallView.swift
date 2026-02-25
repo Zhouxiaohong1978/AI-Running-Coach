@@ -163,9 +163,9 @@ struct PaywallView: View {
             comparisonRow("AI 训练计划", free: "每月1次", pro: "无限制")
             comparisonRow("AI 教练反馈", free: "每次跑步3条", pro: "无限制")
             comparisonRow("语音播报", free: "基础", pro: "完整")
+            comparisonRow("训练目标", free: "2个", pro: "全部6个")
             comparisonRow("云端同步", free: "—", pro: "✓")
             comparisonRow("成就系统", free: "10个", pro: "全部")
-            comparisonRow("高级统计", free: "—", pro: "✓")
         }
         .background(Color(UIColor.systemBackground))
         .cornerRadius(16)

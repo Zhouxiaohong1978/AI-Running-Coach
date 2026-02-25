@@ -12,11 +12,8 @@ struct RunSummaryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var achievementManager = AchievementManager.shared
-    @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 成就语音
     @StateObject private var aiManager = AIManager.shared  // AI建议生成
     var runRecord: RunRecord?
-
-    private let voiceMap = VoiceAssetMap.shared
 
     @State private var region: MKCoordinateRegion
     @State private var showAchievementSheet = false
@@ -24,6 +21,7 @@ struct RunSummaryView: View {
     @State private var isLoadingAI: Bool = false
     @State private var aiParagraphs: FeedbackParagraphs? = nil
     @State private var aiScene: String? = nil
+    @State private var hasAutoPlayedAchievement = false
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -354,6 +352,7 @@ struct RunSummaryView: View {
         }
         .onAppear {
             generateAISuggestion()
+            scheduleAchievementVoices()
         }
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSheetView()
@@ -381,20 +380,213 @@ struct RunSummaryView: View {
         }
     }
 
-    /// 播放成就语音（用户点击成就徽章时）
-    private func playAchievementVoice(achievement: Achievement) {
-        // 先清空TTS队列，确保播放的是用户点击的那条
-        SpeechManager.shared.stopAll()
+    // MARK: - 成就语音系统（个性化TTS）
 
-        // 优先使用预录音频
-        if let voice = voiceMap.getAchievementVoice(achievementName: achievement.title) {
-            audioPlayerManager.play(voice.fileName, priority: voice.priority, allowRepeat: true)
-            print("🎙️ 播放成就语音: \(voice.fileName)")
-        } else {
-            // 无预录音频时，使用TTS朗读庆祝语
-            SpeechManager.shared.speak(achievement.celebrationMessage, priority: .high)
-            print("🎙️ TTS播放成就庆祝语: \(achievement.title)")
+    /// RunSummaryView 出现时自动播报新解锁的成就（最多3条，每隔5秒）
+    private func scheduleAchievementVoices() {
+        let unlocked = achievementManager.recentlyUnlocked
+        guard !unlocked.isEmpty, !hasAutoPlayedAchievement else { return }
+        hasAutoPlayedAchievement = true
+
+        for (index, achievement) in unlocked.prefix(3).enumerated() {
+            let delay = 1.5 + Double(index) * 5.0  // 首条1.5s后，后续每隔5s
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                playAchievementVoice(achievement: achievement)
+            }
         }
+    }
+
+    /// 播放个性化成就语音（用户点击成就卡片时也调用，可重播）
+    private func playAchievementVoice(achievement: Achievement) {
+        let text = makeAchievementText(for: achievement)
+        guard !text.isEmpty else { return }
+
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let language = isEN ? "en" : "zh-Hans"
+        let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: language)
+
+        Task {
+            _ = await VoiceService.shared.speak(text: text, voice: voiceId, language: language)
+        }
+        print("🏆 个性化成就语音: \(achievement.title) → \(text.prefix(20))…")
+    }
+
+    /// 根据成就类别和真实跑步数据生成个性化播报文案
+    private func makeAchievementText(for achievement: Achievement) -> String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let record = runRecord
+        let title = achievement.title
+
+        // 本次跑步数据
+        let distKm    = String(format: "%.1f", (record?.distance ?? 0) / 1000)
+        let paceStr   = formatPace(record?.pace ?? 0)
+        let calStr    = String(Int(record?.calories ?? 0))
+        let minStr    = String(Int((record?.duration ?? 0) / 60))
+
+        // 历史累计数据
+        let allRecords = dataManager.runRecords
+        let totalKm   = String(format: "%.0f", allRecords.reduce(0) { $0 + $1.distance / 1000.0 } + (record?.distance ?? 0) / 1000.0)
+        let totalHrs  = String(format: "%.0f", (allRecords.reduce(0) { $0 + $1.duration } + (record?.duration ?? 0)) / 3600)
+        let totalCal  = String(Int(allRecords.reduce(0) { $0 + $1.calories } + (record?.calories ?? 0)))
+        let streak    = String(computeAchievementStreak())
+
+        let variants: [String]
+
+        switch achievement.category {
+
+        case .distance:
+            let zh = [
+                "太棒了！今天跑了\(distKm)公里，配速\(paceStr)，正式解锁\(title)！你已经不一样了！",
+                "历史性突破！\(distKm)公里达成，解锁\(title)！配速\(paceStr)，继续突破自己吧！",
+                "解锁\(title)！今天\(distKm)公里，用时\(minStr)分钟，你又向更好的自己迈进了一步！"
+            ]
+            let en = [
+                "Amazing! \(distKm) km today at pace \(paceStr) — \(title) unlocked! You're not the same runner you were!",
+                "Historic run! \(distKm) km done — \(title) unlocked! Pace \(paceStr), keep pushing your limits!",
+                "\(title) unlocked! \(distKm) km in \(minStr) minutes — every step brings you closer to your best self!"
+            ]
+            variants = isEN ? en : zh
+
+        case .duration:
+            let zh = [
+                "累计跑步\(totalHrs)小时，解锁\(title)！时间是最好的见证者，你的每一分钟都有价值！",
+                "已跑\(totalHrs)小时，解锁\(title)！每一个小时都是你选择自律的证明！",
+                "解锁\(title)！\(totalHrs)小时的积累，你的体能正在悄悄升级！"
+            ]
+            let en = [
+                "\(totalHrs) hours of running — \(title) unlocked! Time is the greatest witness to your dedication!",
+                "\(totalHrs) hours clocked — \(title) unlocked! Every hour is proof of your commitment!",
+                "\(title) unlocked! \(totalHrs) hours accumulated — your endurance is quietly leveling up!"
+            ]
+            variants = isEN ? en : zh
+
+        case .frequency:
+            let zh = [
+                "连续跑步\(streak)天，解锁\(title)！你的意志力已经超越了大多数人！",
+                "连跑\(streak)天，解锁\(title)！这份坚持，正在重塑你的身体和心态！",
+                "解锁\(title)！\(streak)天连续跑步，习惯的力量正在改变你！"
+            ]
+            let en = [
+                "\(streak) consecutive days — \(title) unlocked! Your willpower has surpassed most people!",
+                "\(streak)-day streak — \(title) unlocked! This consistency is reshaping your body and mindset!",
+                "\(title) unlocked! \(streak) days straight — the power of habit is changing you!"
+            ]
+            variants = isEN ? en : zh
+
+        case .calories:
+            if achievement.id.contains("total") {
+                // 累计卡路里成就
+                let zh = [
+                    "累计消耗\(totalCal)大卡，解锁\(title)！每次跑步的努力都在你身上留下了印记！",
+                    "历史燃脂\(totalCal)大卡，解锁\(title)！你的坚持正在从量变引起质变！",
+                    "解锁\(title)！\(totalCal)大卡的积累，你的身体代谢已经全面升级！"
+                ]
+                let en = [
+                    "\(totalCal) calories burned lifetime — \(title) unlocked! Every run leaves its mark on your body!",
+                    "Lifetime fat-burn \(totalCal) calories — \(title) unlocked! Consistency is creating real change!",
+                    "\(title) unlocked! \(totalCal) calories accumulated — your metabolism has fully leveled up!"
+                ]
+                variants = isEN ? en : zh
+            } else {
+                // 单次卡路里成就
+                let zh = [
+                    "本次燃脂\(calStr)大卡，解锁\(title)！你的身体正在悄悄发生变化！",
+                    "单次\(calStr)大卡！解锁\(title)！这是教科书级别的燃脂效果！",
+                    "解锁\(title)！今天燃掉\(calStr)大卡，脂肪正在悄悄离开！"
+                ]
+                let en = [
+                    "\(calStr) calories this run — \(title) unlocked! Your body is quietly transforming!",
+                    "Single-run \(calStr) calories — \(title) unlocked! This is textbook fat-burning efficiency!",
+                    "\(title) unlocked! \(calStr) calories torched today — fat is quietly retreating!"
+                ]
+                variants = isEN ? en : zh
+            }
+
+        case .pace:
+            let zh = [
+                "配速突破到\(paceStr)！解锁\(title)！速度不是天生的，是跑出来的！",
+                "最快配速\(paceStr)，解锁\(title)！你跑得越来越快，这才是进步的味道！",
+                "解锁\(title)！\(paceStr)的配速，你今天重写了自己的极速纪录！"
+            ]
+            let en = [
+                "Pace crushed to \(paceStr) — \(title) unlocked! Speed isn't born, it's earned on the road!",
+                "Best pace \(paceStr) — \(title) unlocked! You're getting faster and that's what progress feels like!",
+                "\(title) unlocked! \(paceStr) pace — today you rewrote your personal speed record!"
+            ]
+            variants = isEN ? en : zh
+
+        case .special:
+            if achievement.id.contains("morning") {
+                let zh = [
+                    "坚持晨跑，解锁\(title)！清晨的汗水，是你送给自己最好的礼物！",
+                    "解锁\(title)！早起跑步5次，你的自律已经超越了大多数人！",
+                    "\(title)到手！每个清晨你都选择了更好的自己！"
+                ]
+                let en = [
+                    "Morning running habit — \(title) unlocked! Morning sweat is the best gift you give yourself!",
+                    "\(title) unlocked! 5 early morning runs — your discipline is truly exceptional!",
+                    "\(title) is yours! Every morning you choose to be a better version of yourself!"
+                ]
+                variants = isEN ? en : zh
+            } else if achievement.id.contains("night") {
+                let zh = [
+                    "夜跑5次，解锁\(title)！当城市沉睡时，你选择了奔跑！",
+                    "解锁\(title)！夜幕下的坚持，是独属于夜跑者的浪漫！",
+                    "\(title)解锁！夜晚的跑道属于你！"
+                ]
+                let en = [
+                    "5 night runs — \(title) unlocked! When the city sleeps, you choose to run!",
+                    "\(title) unlocked! Persistence under the night sky — the romance of the night runner!",
+                    "\(title) is yours! The night track belongs to you!"
+                ]
+                variants = isEN ? en : zh
+            } else {
+                // 雨天跑步
+                let zh = [
+                    "雨天不停跑，解锁\(title)！天气挡不住你，这才是跑者精神！",
+                    "解锁\(title)！雨天跑步，你的意志力比天气更强悍！",
+                    "\(title)解锁！风雨中的坚持，才是真正的勇气！"
+                ]
+                let en = [
+                    "Running in the rain — \(title) unlocked! Weather can't stop you — that's the true runner's spirit!",
+                    "\(title) unlocked! Running in the rain — your willpower is stronger than the weather!",
+                    "\(title) is yours! Persisting through rain and wind is true courage!"
+                ]
+                variants = isEN ? en : zh
+            }
+
+        case .milestone:
+            let zh = [
+                "累计跑步\(totalKm)公里，解锁\(title)！你用脚步丈量了世界！",
+                "历史总里程\(totalKm)公里，解锁\(title)！每一步都是伟大的积累！",
+                "解锁\(title)！\(totalKm)公里的足迹，正在书写你的跑步传奇！"
+            ]
+            let en = [
+                "\(totalKm) km total — \(title) unlocked! You're measuring the world with your footsteps!",
+                "Lifetime \(totalKm) km — \(title) unlocked! Every step is a great accumulation!",
+                "\(title) unlocked! \(totalKm) km of footprints — writing your running legend!"
+            ]
+            variants = isEN ? en : zh
+        }
+
+        return variants.randomElement() ?? ""
+    }
+
+    /// 计算连续跑步天数（用于频率成就语音注入）
+    private func computeAchievementStreak() -> Int {
+        var streak = 0
+        let cal = Calendar.current
+        var checkDay = cal.startOfDay(for: Date())
+        for record in dataManager.runRecords {
+            let day = cal.startOfDay(for: record.startTime)
+            if day == checkDay {
+                streak += 1
+                checkDay = cal.date(byAdding: .day, value: -1, to: checkDay)!
+            } else if day < checkDay {
+                break
+            }
+        }
+        return streak
     }
 
     /// 生成AI建议

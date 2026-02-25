@@ -346,6 +346,9 @@
         }
       }
     },
+    "2个" : {
+
+    },
     "3次" : {
       "localizations" : {
         "en" : {
@@ -698,6 +701,9 @@
     "Loading plans..." : {
 
     },
+    "or finish %@" : {
+
+    },
     "Privacy Policy" : {
 
     },
@@ -750,7 +756,7 @@
     "Technical Support" : {
 
     },
-    "Unlock after %@" : {
+    "Upgrade Pro" : {
 
     },
     "三日连跑" : {
@@ -1003,6 +1009,9 @@
           }
         }
       }
+    },
+    "全部6个" : {
+
     },
     "全部30+成就" : {
       "extractionState" : "stale",
@@ -1774,6 +1783,7 @@
       }
     },
     "完成%@解锁" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2295,6 +2305,9 @@
           }
         }
       }
+    },
+    "或完成%@" : {
+
     },
     "或者使用以下方式登录" : {
       "localizations" : {
@@ -3849,6 +3862,9 @@
         }
       }
     },
+    "训练目标" : {
+
+    },
     "训练计划" : {
       "localizations" : {
         "en" : {
@@ -4849,6 +4865,7 @@
       }
     },
     "高级统计" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

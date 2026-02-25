@@ -62,6 +62,10 @@
 		EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF11111111111111111111FF /* AudioPlayerManager.swift */; };
 		EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF22222222222222222222FF /* VoiceAssetMap.swift */; };
 		EE22222222222222LANGUAGE2 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11111111111111LANGUAGE1 /* LanguageManager.swift */; };
+		DV11111111111111111111DV /* DynamicVoiceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DV22222222222222222222DV /* DynamicVoiceEngine.swift */; };
+		VT11111111111111111111VT /* VoiceTemplateMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = VT22222222222222222222VT /* VoiceTemplateMap.swift */; };
+		ER11111111111111111111ER /* EnrichedRunContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = ER22222222222222222222ER /* EnrichedRunContext.swift */; };
+		VL11111111111111111111VL /* VoiceTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = VL22222222222222222222VL /* VoiceTemplate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +74,10 @@
 		124707344CABB85DE155A5AC /* TrainingPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPlanView.swift; sourceTree = "<group>"; };
 		19618B5AC9B32D7DC89473B9 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		HK22222222222222222222HK /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		DV22222222222222222222DV /* DynamicVoiceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicVoiceEngine.swift; sourceTree = "<group>"; };
+		VT22222222222222222222VT /* VoiceTemplateMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTemplateMap.swift; sourceTree = "<group>"; };
+		ER22222222222222222222ER /* EnrichedRunContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichedRunContext.swift; sourceTree = "<group>"; };
+		VL22222222222222222222VL /* VoiceTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTemplate.swift; sourceTree = "<group>"; };
 		2BFDEB9D2F47E42C00064D16 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		2BFE65342F324D78004BBA13 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		31B78260DAB77DEDF48D8765 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -206,6 +214,8 @@
 				729CB00236199C7E5B34912F /* TrainingPlan.swift */,
 				BB11111111111111111111BB /* VoiceScript.swift */,
 				FF22222222222222222222FF /* VoiceAssetMap.swift */,
+				ER22222222222222222222ER /* EnrichedRunContext.swift */,
+				VL22222222222222222222VL /* VoiceTemplate.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -228,6 +238,8 @@
 				FF11111111111111111111FF /* AudioPlayerManager.swift */,
 				10A16B363C8A7D23A6306F61 /* DebugLogger.swift */,
 				AB12CD34EF56789012345678 /* SubscriptionManager.swift */,
+				DV22222222222222222222DV /* DynamicVoiceEngine.swift */,
+				VT22222222222222222222VT /* VoiceTemplateMap.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -360,6 +372,10 @@
 				2BFE65352F324D78004BBA13 /* WeatherManager.swift in Sources */,
 				EE11111111111111111111EE /* AudioPlayerManager.swift in Sources */,
 				EE22222222222222222222EE /* VoiceAssetMap.swift in Sources */,
+				DV11111111111111111111DV /* DynamicVoiceEngine.swift in Sources */,
+				VT11111111111111111111VT /* VoiceTemplateMap.swift in Sources */,
+				ER11111111111111111111ER /* EnrichedRunContext.swift in Sources */,
+				VL11111111111111111111VL /* VoiceTemplate.swift in Sources */,
 				CC66666666666666666666CC /* SimpleConditionCheck.swift in Sources */,
 				CC77777777777777777777CC /* AchievementManager.swift in Sources */,
 				CC88888888888888888888CC /* Achievement.swift in Sources */,

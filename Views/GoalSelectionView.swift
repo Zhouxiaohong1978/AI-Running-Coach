@@ -38,6 +38,11 @@ struct GoalSelectionView: View {
 
                     // 周期设置
                     if let goal = selectedGoal {
+                        // 适配度提示（当前跑量不足目标要求时）
+                        if needsFitnessAdvisory(for: goal) {
+                            fitnessAdvisoryBanner(for: goal)
+                        }
+
                         durationSection(goal: goal)
 
                         // 偏好设置
@@ -115,77 +120,127 @@ struct GoalSelectionView: View {
     private func goalCard(goal: TrainingGoal) -> some View {
         let isUnlocked = isGoalUnlocked(goal)
         let isSelected = selectedGoal == goal
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        // Pro会员的进阶目标显示王冠徽章
+        let showProBadge = subscriptionManager.isPro && goal.prerequisite != nil
 
         Button(action: {
-            guard isUnlocked else { return }
-            withAnimation(.spring(response: 0.3)) {
-                selectedGoal = goal
-                customWeeks = goal.recommendedWeeks
+            if isUnlocked {
+                withAnimation(.spring(response: 0.3)) {
+                    selectedGoal = goal
+                    customWeeks = goal.recommendedWeeks
+                }
+            } else {
+                // 未解锁：点击直接弹出 Paywall
+                showPaywall = true
             }
         }) {
-            VStack(spacing: 12) {
-                // 锁定图标或目标图标
-                ZStack {
-                    if !isUnlocked {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.gray)
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 12) {
+                    // 图标
+                    Image(systemName: isUnlocked ? goal.icon : "lock.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(isUnlocked ? (isSelected ? .white : .blue) : .gray)
+
+                    Text(goal.displayName)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(isUnlocked ? (isSelected ? .white : .primary) : .gray)
+
+                    // 底部说明
+                    if isUnlocked {
+                        Text(goal.description)
+                            .font(.caption)
+                            .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
                     } else {
-                        Image(systemName: goal.icon)
-                            .font(.system(size: 32))
-                            .foregroundColor(isSelected ? .white : .blue)
+                        // 未解锁：提示两条路径
+                        VStack(spacing: 3) {
+                            Label(isEN ? "Upgrade Pro" : "升级 Pro 解锁",
+                                  systemImage: "crown.fill")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.orange)
+                            if let pre = goal.prerequisite {
+                                Text(isEN ? "or finish \(pre.displayName)"
+                                         : "或完成\(pre.displayName)")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .multilineTextAlignment(.center)
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(isUnlocked ? (isSelected ? Color.blue : Color(.systemGray6)) : Color(.systemGray5))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(isUnlocked ? (isSelected ? Color.blue : Color.clear)
+                                           : Color.gray.opacity(0.3), lineWidth: 2)
+                )
+                .opacity(isUnlocked ? 1.0 : 0.6)
 
-                Text(goal.displayName)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(isUnlocked ? (isSelected ? .white : .primary) : .gray)
-
-                if !isUnlocked {
-                    // 显示解锁条件
-                    if let prerequisite = goal.prerequisite {
-                        Text(LanguageManager.shared.currentLocale == "en"
-                        ? "Unlock after \(prerequisite.displayName)"
-                        : "完成\(prerequisite.displayName)解锁")
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.center)
-                    }
-                } else {
-                    Text(goal.description)
-                        .font(.caption)
-                        .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                // Pro 王冠徽章（Pro会员的进阶目标右上角）
+                if showProBadge && !isSelected {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.white)
+                        .padding(5)
+                        .background(Color.orange)
+                        .clipShape(Circle())
+                        .padding([.top, .trailing], 6)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(isUnlocked ? (isSelected ? Color.blue : Color(.systemGray6)) : Color(.systemGray5))
-            .cornerRadius(16)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isUnlocked ? (isSelected ? Color.blue : Color.clear) : Color.gray.opacity(0.3), lineWidth: 2)
-            )
-            .opacity(isUnlocked ? 1.0 : 0.6)
         }
         .buttonStyle(.plain)
-        .disabled(!isUnlocked)
     }
 
     // MARK: - Goal Unlock Logic
 
-    /// 检查目标是否已解锁
+    /// 检查目标是否已解锁（Pro 全部解锁 / 免费靠成就解锁）
     private func isGoalUnlocked(_ goal: TrainingGoal) -> Bool {
-        // 没有前置条件的目标默认解锁（3km新手 和 减肥燃脂）
-        guard goal.prerequisite != nil else {
-            return true
-        }
-
-        // 检查用户跑步历史：只要跑过目标所需的最低距离就自动解锁
+        guard goal.prerequisite != nil else { return true }   // 默认解锁的目标
+        if subscriptionManager.isPro { return true }          // Pro 全部解锁
         let maxDistance = dataManager.runRecords.map { $0.distance }.max() ?? 0
         return maxDistance >= goal.requiredDistance
+    }
+
+    // MARK: - Fitness Advisory
+
+    /// 用户当前最大单次跑距是否低于目标要求
+    private func needsFitnessAdvisory(for goal: TrainingGoal) -> Bool {
+        guard goal.requiredDistance > 0 else { return false }
+        let maxDistance = dataManager.runRecords.map { $0.distance }.max() ?? 0
+        return maxDistance < goal.requiredDistance
+    }
+
+    /// 橙色适配度提示条（软性，不阻止操作）
+    private func fitnessAdvisoryBanner(for goal: TrainingGoal) -> some View {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let requiredKm = Int(goal.requiredDistance / 1000)
+        let message = isEN
+            ? "Recommended: \(requiredKm)km+ base. AI will tailor the plan to your actual fitness."
+            : "建议先积累 \(requiredKm) 公里以上跑步基础，AI 会根据你的实际情况制定计划。"
+
+        return HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "info.circle.fill")
+                .foregroundColor(.orange)
+                .padding(.top, 1)
+            Text(message)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.08))
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
     }
 
     // MARK: - Duration Section

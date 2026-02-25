@@ -18,6 +18,7 @@ struct ActiveRunView: View {
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var healthKit = HealthKitManager.shared
+    @StateObject private var dynamicEngine = DynamicVoiceEngine.shared  // 动态语音引擎
     private let logger = DebugLogger.shared  // 日志记录器
 
     @State private var isPaused = false
@@ -359,6 +360,10 @@ struct ActiveRunView: View {
             // 加载今日训练目标距离
             todayTargetKm = loadTodayTargetKm()
 
+            // 重置动态语音引擎（传入历史最佳距离用于个人记录检测）
+            let bestKm = dataManager.runRecords.compactMap { $0.distance > 0 ? $0.distance / 1000.0 : nil }.max() ?? 0
+            dynamicEngine.reset(personalBestDistanceKm: bestKm)
+
             // 延迟一点播报，确保视图完全加载
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 print("🏃 MVP 1.0 开始跑步，三位一体联动启动")
@@ -374,6 +379,24 @@ struct ActiveRunView: View {
         }
         .onChange(of: locationManager.distance) { newDistance in
             checkAndAnnounce(distance: newDistance)
+            // 距离更新时也驱动动态引擎（覆盖配速/卡路里/个人记录事件）
+            dynamicEngine.update(context: buildRunContext())
+        }
+        .onChange(of: locationManager.duration) { newDuration in
+            // 每 10 秒驱动一次动态引擎（覆盖时间里程碑事件）
+            if Int(newDuration) % 10 == 0 {
+                dynamicEngine.update(context: buildRunContext())
+            }
+        }
+        .onChange(of: healthKit.heartRate) { _ in
+            // 心率变化时驱动引擎（覆盖心率区间事件）
+            dynamicEngine.update(context: buildRunContext())
+        }
+        .onChange(of: dynamicEngine.showBubble) { showing in
+            // 动态引擎触发气泡时同步显示
+            if showing {
+                showFeedbackBubble(dynamicEngine.bubbleText)
+            }
         }
         .onChange(of: showSummary) { newValue in
             // 当跑步结束后，摘要页面被关闭时，自动返回主页
@@ -452,12 +475,98 @@ struct ActiveRunView: View {
         return distance
     }
 
+    // MARK: - 构建富上下文（供 DynamicVoiceEngine 使用）
+
+    private func buildRunContext() -> EnrichedRunContext {
+        let records = dataManager.runRecords  // 按时间倒序，不含本次
+        let distanceKm = locationManager.distance / 1000.0
+
+        // 本月统计
+        let cal = Calendar.current
+        let startOfMonth = cal.date(from: cal.dateComponents([.year, .month], from: Date()))!
+        let monthRecords = records.filter { $0.startTime >= startOfMonth }
+        let monthlyKm = monthRecords.reduce(0.0) { $0 + $1.distance / 1000.0 } + distanceKm
+        let monthlyRunCount = monthRecords.count + 1  // +1 含本次
+
+        // 历史配速
+        let validPaces = records.compactMap { $0.pace > 0 && $0.pace < 30 ? $0.pace : nil }
+        let personalBestPace = validPaces.min() ?? 0
+        let lastRunPace = records.first?.pace ?? 0
+        let lastRunDistanceKm = (records.first?.distance ?? 0) / 1000.0
+
+        // 累计公里（含本次）
+        let historicalKm = records.reduce(0.0) { $0 + $1.distance / 1000.0 }
+        let totalLifetimeKm = historicalKm + distanceKm
+
+        // 连续跑步天数
+        let streak = computeStreak(records: records)
+
+        return EnrichedRunContext(
+            distanceKm: distanceKm,
+            durationSeconds: locationManager.duration,
+            currentPace: locationManager.currentPace,
+            calories: locationManager.calories,
+            heartRate: healthKit.heartRate,
+            goal: userGoal,
+            goalDistanceKm: todayTargetKm,
+            totalRunCount: records.count + 1,
+            personalBestPace: personalBestPace,
+            lastRunPace: lastRunPace,
+            lastRunDistanceKm: lastRunDistanceKm,
+            totalLifetimeKm: totalLifetimeKm,
+            monthlyKm: monthlyKm,
+            monthlyRunCount: monthlyRunCount,
+            currentStreak: streak
+        )
+    }
+
+    private func computeStreak(records: [RunRecord]) -> Int {
+        var streak = 0
+        let cal = Calendar.current
+        var checkDay = cal.startOfDay(for: Date())
+        for record in records {
+            let recordDay = cal.startOfDay(for: record.startTime)
+            if recordDay == checkDay {
+                streak += 1
+                checkDay = cal.date(byAdding: .day, value: -1, to: checkDay)!
+            } else if recordDay < checkDay {
+                break
+            }
+        }
+        return streak
+    }
+
+    // MARK: - 统一语音路由（中文=本地文件 / 英文=TTS API）
+
+    /// 播放语音资源，自动按 App 语言路由
+    /// - Returns: 是否触发了播放
+    @discardableResult
+    private func playVoiceAsset(_ voice: VoiceAsset) -> Bool {
+        let isEN = LanguageManager.shared.currentLocale == "en"
+
+        if isEN {
+            // 英文：调用 Supabase TTS（Aiden/Katerina 根据教练风格）
+            let text = voice.descriptionEn.isEmpty ? voice.description : voice.descriptionEn
+            let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: "en")
+            showFeedbackBubble(text)
+            Task {
+                _ = await VoiceService.shared.speak(text: text, voice: voiceId, language: "en")
+            }
+            return true
+        } else {
+            // 中文：播放本地预录制 .m4a 文件
+            if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+                showFeedbackBubble(voice.description)
+                return true
+            }
+            return false
+        }
+    }
+
     /// 播放开始语音（女声：跑前_01）
     private func playStartVoice() {
         guard let startVoice = voiceMap.getStartVoice() else { return }
-        if audioPlayerManager.play(startVoice.fileName, priority: startVoice.priority) {
-            showFeedbackBubble(startVoice.description)
-        }
+        playVoiceAsset(startVoice)
         print("🎙️ 播放开始语音: \(startVoice.fileName)")
     }
 

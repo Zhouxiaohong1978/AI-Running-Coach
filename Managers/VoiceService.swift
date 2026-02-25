@@ -12,6 +12,18 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private var lastSpeechTime: Date = Date.distantPast
     private let globalCooldown: TimeInterval = 15.0  // 全局最小冷却 15 秒
 
+    // MARK: - 声音路由（教练风格 × 语言）
+
+    /// 根据教练风格和语言返回 Qwen3-TTS 声音 ID
+    static func voiceId(for coachStyle: CoachStyle, language: String) -> String {
+        switch (language, coachStyle) {
+        case ("en", .strict):       return "Aiden"     // 英文磁性男声
+        case ("en", _):             return "Katerina"  // 英文温柔女声
+        case (_, .strict):          return "Kai"       // 中文磁性男声
+        default:                    return "Qianyue"   // 中文温柔女声
+        }
+    }
+
     override init() {
         super.init()
         configureAudioSession()
@@ -43,7 +55,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 
-    func speak(text: String, voice: String = "cherry", scriptCooldown: TimeInterval = 0) async -> Bool {
+    func speak(text: String, voice: String = "cherry", language: String = "zh-Hans", scriptCooldown: TimeInterval = 0) async -> Bool {
         print("🔊 开始 TTS 请求: \(text.prefix(20))...")
 
         // 检查冷却
@@ -64,7 +76,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.timeoutInterval = 30  // 增加超时时间
-            request.httpBody = try JSONSerialization.data(withJSONObject: ["text": text, "voice": voice])
+            request.httpBody = try JSONSerialization.data(withJSONObject: ["text": text, "voice": voice, "lang": language])
 
             // 2. 下载音频数据
             let (data, response) = try await URLSession.shared.data(for: request)
