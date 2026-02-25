@@ -17,6 +17,7 @@ struct ActiveRunView: View {
     @StateObject private var achievementManager = AchievementManager.shared
     @StateObject private var audioPlayerManager = AudioPlayerManager.shared  // MVP 1.0: 真实语音播放
     @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @StateObject private var healthKit = HealthKitManager.shared
     private let logger = DebugLogger.shared  // 日志记录器
 
     @State private var isPaused = false
@@ -165,9 +166,14 @@ struct ActiveRunView: View {
                         Text("配速")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white.opacity(0.7))
-                        Text(formatPace(locationManager.currentPace))
-                            .font(.system(size: 72, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(formatPace(locationManager.currentPace))
+                                .font(.system(size: 72, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("/km")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
                     }
 
                     // 距离和时间
@@ -206,9 +212,14 @@ struct ActiveRunView: View {
                                 .foregroundColor(.orange)
                                 .font(.system(size: 18))
                             VStack(alignment: .leading, spacing: 0) {
-                                Text("\(Int(locationManager.calories))")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
+                                HStack(alignment: .lastTextBaseline, spacing: 2) {
+                                    Text("\(Int(locationManager.calories))")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    Text("kcal")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
                                 Text("卡路里")
                                     .font(.system(size: 10))
                                     .foregroundColor(.white.opacity(0.7))
@@ -221,9 +232,16 @@ struct ActiveRunView: View {
                                 .foregroundColor(.red)
                                 .font(.system(size: 18))
                             VStack(alignment: .leading, spacing: 0) {
-                                Text("--")
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
+                                HStack(alignment: .lastTextBaseline, spacing: 2) {
+                                    Text(healthKit.heartRate > 0 ? "\(healthKit.heartRate)" : "--")
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    if healthKit.heartRate > 0 {
+                                        Text("bpm")
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.7))
+                                    }
+                                }
                                 Text("心率")
                                     .font(.system(size: 10))
                                     .foregroundColor(.white.opacity(0.7))
@@ -329,6 +347,8 @@ struct ActiveRunView: View {
         .onAppear {
             logger.log("🏃 开始真实跑步", category: "START")
             locationManager.startTracking()
+            healthKit.requestAuthorization()
+            healthKit.startHeartRateMonitoring()
             lastFeedbackTime = Date()
 
             // 重置音频播放状态和免费反馈计数
@@ -349,6 +369,7 @@ struct ActiveRunView: View {
         }
         .onDisappear {
             locationManager.stopTracking()
+            healthKit.stopHeartRateMonitoring()
             audioPlayerManager.stopAll()
         }
         .onChange(of: locationManager.distance) { newDistance in

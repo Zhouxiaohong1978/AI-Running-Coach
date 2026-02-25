@@ -330,7 +330,9 @@ struct RunSummaryView: View {
             VStack {
                 Spacer()
 
-                Button(action: {
+                HStack {
+                    Spacer()
+                    Button(action: {
                         dismiss()
                     }) {
                         HStack(spacing: 8) {
@@ -340,11 +342,12 @@ struct RunSummaryView: View {
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 14)
                         .background(Color.gray.opacity(0.7))
                         .cornerRadius(16)
                     }
+                }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 10)
             }

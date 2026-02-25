@@ -39,6 +39,9 @@
         }
       }
     },
+    "/km" : {
+
+    },
     "%@ · %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -627,6 +630,9 @@
         }
       }
     },
+    "bpm" : {
+
+    },
     "Close" : {
       "localizations" : {
         "en" : {
@@ -675,6 +681,9 @@
           }
         }
       }
+    },
+    "kcal" : {
+
     },
     "km" : {
       "localizations" : {

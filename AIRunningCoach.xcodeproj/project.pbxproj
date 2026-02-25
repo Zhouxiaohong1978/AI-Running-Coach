@@ -36,6 +36,7 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* RevenueCat */; };
 		A3E9FFE3FC41587E6ADD47AE /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA319CC8959DF6E6FE212DC /* SupabaseClient.swift */; };
 		A85DA2F7B1D1737FEF275F4A /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19618B5AC9B32D7DC89473B9 /* LocationManager.swift */; };
+		HK11111111111111111111HK /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = HK22222222222222222222HK /* HealthKitManager.swift */; };
 		A9703CD761A26E53EF525DFF /* ActiveRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5492D4946BDDB9584CBD3AA8 /* ActiveRunView.swift */; };
 		AA11111111111111111111AA /* VoiceScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11111111111111111111BB /* VoiceScript.swift */; };
 		AA22222222222222222222AA /* VoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB22222222222222222222BB /* VoiceService.swift */; };
@@ -68,6 +69,7 @@
 		10A16B363C8A7D23A6306F61 /* DebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		124707344CABB85DE155A5AC /* TrainingPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingPlanView.swift; sourceTree = "<group>"; };
 		19618B5AC9B32D7DC89473B9 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		HK22222222222222222222HK /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		2BFDEB9D2F47E42C00064D16 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		2BFE65342F324D78004BBA13 /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		31B78260DAB77DEDF48D8765 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				EE11111111111111LANGUAGE1 /* LanguageManager.swift */,
 				70FCE61FF494009D17442EF2 /* AuthManager.swift */,
 				19618B5AC9B32D7DC89473B9 /* LocationManager.swift */,
+				HK22222222222222222222HK /* HealthKitManager.swift */,
 				9BFE82D22737A33E13E702B6 /* RunDataManager.swift */,
 				DD66666666666666666666DD /* SimpleConditionCheck.swift */,
 				57817154FCD67BD41E729CD8 /* SpeechManager.swift */,
@@ -336,6 +339,7 @@
 				659D5117543B7138C9DA34DF /* HistoryView.swift in Sources */,
 				897329D7D9CE6DD3624B73C5 /* HomeView.swift in Sources */,
 				A85DA2F7B1D1737FEF275F4A /* LocationManager.swift in Sources */,
+				HK11111111111111111111HK /* HealthKitManager.swift in Sources */,
 				993799552B04199F5B4905D7 /* LoginView.swift in Sources */,
 				61559B75B36BEB69FC5BD4F1 /* RunDataManager.swift in Sources */,
 				471E235160A4D4B6DD0AAB8D /* RunMapView.swift in Sources */,
@@ -511,6 +515,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI跑步教练";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "需要访问健康数据以显示跑步时的实时心率";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离，即使应用在后台运行";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -546,6 +551,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI跑步教练";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "需要访问健康数据以显示跑步时的实时心率";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离，即使应用在后台运行";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
