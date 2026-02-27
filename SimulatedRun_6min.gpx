@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="AIRunningCoach"
+     xmlns="http://www.topografix.com/GPX/1/1">
+  <!--
+    模拟跑步路线：北京环形 ~3.5km
+    配速：6'00"/km（每100m间隔36秒）
+    总时长：约 21 分钟
+    用法：Xcode → Debug → Simulate Location → 选择此文件
+  -->
+  <trk>
+    <name>Simulated Run 6min/km</name>
+    <trkseg>
+      <!-- Leg 1: 向北 ~1km (10 points) -->
+      <trkpt lat="39.90420" lon="116.40740"><time>2026-02-27T08:00:00Z</time></trkpt>
+      <trkpt lat="39.90510" lon="116.40740"><time>2026-02-27T08:00:36Z</time></trkpt>
+      <trkpt lat="39.90600" lon="116.40740"><time>2026-02-27T08:01:12Z</time></trkpt>
+      <trkpt lat="39.90690" lon="116.40740"><time>2026-02-27T08:01:48Z</time></trkpt>
+      <trkpt lat="39.90780" lon="116.40740"><time>2026-02-27T08:02:24Z</time></trkpt>
+      <trkpt lat="39.90870" lon="116.40740"><time>2026-02-27T08:03:00Z</time></trkpt>
+      <trkpt lat="39.90960" lon="116.40740"><time>2026-02-27T08:03:36Z</time></trkpt>
+      <trkpt lat="39.91050" lon="116.40740"><time>2026-02-27T08:04:12Z</time></trkpt>
+      <trkpt lat="39.91140" lon="116.40740"><time>2026-02-27T08:04:48Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.40740"><time>2026-02-27T08:05:24Z</time></trkpt>
+
+      <!-- Leg 2: 向东 ~0.8km (8 points) -->
+      <trkpt lat="39.91230" lon="116.40858"><time>2026-02-27T08:06:00Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.40976"><time>2026-02-27T08:06:36Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41094"><time>2026-02-27T08:07:12Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41212"><time>2026-02-27T08:07:48Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41330"><time>2026-02-27T08:08:24Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41448"><time>2026-02-27T08:09:00Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41566"><time>2026-02-27T08:09:36Z</time></trkpt>
+      <trkpt lat="39.91230" lon="116.41684"><time>2026-02-27T08:10:12Z</time></trkpt>
+
+      <!-- Leg 3: 向南 ~1km (10 points) -->
+      <trkpt lat="39.91140" lon="116.41684"><time>2026-02-27T08:10:48Z</time></trkpt>
+      <trkpt lat="39.91050" lon="116.41684"><time>2026-02-27T08:11:24Z</time></trkpt>
+      <trkpt lat="39.90960" lon="116.41684"><time>2026-02-27T08:12:00Z</time></trkpt>
+      <trkpt lat="39.90870" lon="116.41684"><time>2026-02-27T08:12:36Z</time></trkpt>
+      <trkpt lat="39.90780" lon="116.41684"><time>2026-02-27T08:13:12Z</time></trkpt>
+      <trkpt lat="39.90690" lon="116.41684"><time>2026-02-27T08:13:48Z</time></trkpt>
+      <trkpt lat="39.90600" lon="116.41684"><time>2026-02-27T08:14:24Z</time></trkpt>
+      <trkpt lat="39.90510" lon="116.41684"><time>2026-02-27T08:15:00Z</time></trkpt>
+      <trkpt lat="39.90420" lon="116.41684"><time>2026-02-27T08:15:36Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.41684"><time>2026-02-27T08:16:12Z</time></trkpt>
+
+      <!-- Leg 4: 向西 ~0.8km (8 points, 回到起点) -->
+      <trkpt lat="39.90330" lon="116.41566"><time>2026-02-27T08:16:48Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.41448"><time>2026-02-27T08:17:24Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.41330"><time>2026-02-27T08:18:00Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.41212"><time>2026-02-27T08:18:36Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.41094"><time>2026-02-27T08:19:12Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.40976"><time>2026-02-27T08:19:48Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.40858"><time>2026-02-27T08:20:24Z</time></trkpt>
+      <trkpt lat="39.90330" lon="116.40740"><time>2026-02-27T08:21:00Z</time></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

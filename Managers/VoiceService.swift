@@ -12,6 +12,9 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private var lastSpeechTime: Date = Date.distantPast
     private let globalCooldown: TimeInterval = 15.0  // 全局最小冷却 15 秒
 
+    // TTS 音频预缓存
+    private var audioCache: [String: Data] = [:]
+
     // MARK: - 声音路由（教练风格 × 语言）
 
     /// 根据教练风格和语言返回 Qwen3-TTS 声音 ID
@@ -46,7 +49,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             // 设置为播放类别，确保即使静音开关打开也能播放
-            try audioSession.setCategory(.playback, mode: .default, options: [.duckOthers])
+            try audioSession.setCategory(.playback, mode: .voicePrompt, options: [.duckOthers])
             // 激活会话，允许与其他音频共存
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
             print("✅ 音频会话配置成功")
@@ -55,7 +58,34 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
 
-    func speak(text: String, voice: String = "cherry", language: String = "zh-Hans", scriptCooldown: TimeInterval = 0) async -> Bool {
+    /// 预缓存 TTS 音频（只下载不播放、不触发冷却）
+    func prefetch(cacheKey: String, text: String, voice: String, language: String) async {
+        let hasCached = await MainActor.run { self.audioCache[cacheKey] != nil }
+        guard !hasCached else { return }
+
+        do {
+            var request = URLRequest(url: supabaseURL)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 30
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "text": text, "voice": voice, "lang": language
+            ])
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count > 1000 else { return }
+            await MainActor.run { self.audioCache[cacheKey] = data }
+            print("✅ 预缓存: \(cacheKey) (\(data.count) bytes)")
+        } catch {
+            print("⚠️ 预缓存失败: \(cacheKey)")
+        }
+    }
+
+    /// 清除预缓存
+    func clearCache() {
+        audioCache.removeAll()
+    }
+
+    func speak(text: String, voice: String = "cherry", language: String = "zh-Hans", scriptCooldown: TimeInterval = 0, cacheKey: String? = nil) async -> Bool {
         print("🔊 开始 TTS 请求: \(text.prefix(20))...")
 
         // 检查冷却
@@ -70,6 +100,28 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             self.stop()
         }
 
+        // 缓存命中 → 直接播放，跳过网络下载
+        if let key = cacheKey {
+            let cachedData = await MainActor.run { self.audioCache[key] }
+            if let data = cachedData {
+                print("🎯 缓存命中: \(key)")
+                return await MainActor.run {
+                    do {
+                        let player = try AVAudioPlayer(data: data)
+                        player.delegate = self
+                        player.volume = 1.0
+                        guard player.prepareToPlay() else { return false }
+                        guard player.play() else { return false }
+                        self.audioPlayer = player
+                        self.isPlaying = true
+                        self.lastSpeechTime = Date()
+                        return true
+                    } catch { return false }
+                }
+            }
+        }
+
+        // 缓存未命中：走原有网络下载路径
         do {
             // 1. 发送请求
             var request = URLRequest(url: supabaseURL)
@@ -144,6 +196,92 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 self.isPlaying = false
             }
             return false
+        }
+    }
+
+    // MARK: - 里程碑/完成/应急语音专用（绕过所有冷却）
+
+    /// 等待当前播放完成后立即播放，绕过冷却，适用于里程碑/完成/应急语音
+    func speakImmediate(text: String, voice: String, language: String, cacheKey: String? = nil) async -> Bool {
+        print("🔊 [speakImmediate] \(text.prefix(20))...")
+
+        // 等待当前播放完成（最多 15s）
+        let waitStart = Date()
+        while await MainActor.run(body: { self.isPlaying }) && Date().timeIntervalSince(waitStart) < 15 {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+        // 强制停止残留播放
+        await MainActor.run { self.stop() }
+
+        // 缓存命中 → 即时播放
+        if let key = cacheKey {
+            let cachedData = await MainActor.run { self.audioCache[key] }
+            if let data = cachedData {
+                print("🎯 [speakImmediate] 缓存命中: \(key)")
+                return await MainActor.run {
+                    do {
+                        let player = try AVAudioPlayer(data: data)
+                        player.delegate = self
+                        player.volume = 1.0
+                        guard player.prepareToPlay() else { return false }
+                        guard player.play() else { return false }
+                        self.audioPlayer = player
+                        self.isPlaying = true
+                        self.lastSpeechTime = Date()
+                        return true
+                    } catch { return false }
+                }
+            }
+        }
+
+        // 缓存未命中：走网络下载
+        do {
+            var request = URLRequest(url: supabaseURL)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 30
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "text": text, "voice": voice, "lang": language
+            ])
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count > 1000 else {
+                print("❌ [speakImmediate] 网络响应异常")
+                return false
+            }
+
+            // 缓存下载结果（供后续复用）
+            if let key = cacheKey {
+                await MainActor.run { self.audioCache[key] = data }
+            }
+
+            return await MainActor.run {
+                do {
+                    let player = try AVAudioPlayer(data: data)
+                    player.delegate = self
+                    player.volume = 1.0
+                    guard player.prepareToPlay() else { return false }
+                    guard player.play() else { return false }
+                    self.audioPlayer = player
+                    self.isPlaying = true
+                    self.lastSpeechTime = Date()
+                    print("🎵 [speakImmediate] 开始播放")
+                    return true
+                } catch {
+                    print("❌ [speakImmediate] 播放器创建失败: \(error)")
+                    return false
+                }
+            }
+        } catch {
+            print("❌ [speakImmediate] 网络请求失败: \(error)")
+            return false
+        }
+    }
+
+    /// 等待当前播放完成
+    func waitForFinish() async {
+        while await MainActor.run(body: { self.isPlaying }) {
+            try? await Task.sleep(nanoseconds: 200_000_000)
         }
     }
 

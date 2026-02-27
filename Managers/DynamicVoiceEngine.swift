@@ -267,8 +267,9 @@ class DynamicVoiceEngine: ObservableObject {
         // 2. 全局冷却
         if now.timeIntervalSince(lastSpeakTime) < globalCooldown { return false }
 
-        // 3. 本地音频正在播放时不打断
+        // 3. 任一播放器正在播放时不打断
         if AudioPlayerManager.shared.isPlaying { return false }
+        if VoiceService.shared.isPlaying { return false }
 
         // 4. 同事件冷却
         if event.perTriggerCooldown > 0,
@@ -307,11 +308,12 @@ class DynamicVoiceEngine: ObservableObject {
         let voiceId = VoiceService.voiceId(for: AIManager.shared.coachStyle, language: language)
 
         Task {
+            // scriptCooldown: 0 — DynamicVoiceEngine 已有 18s 防刷屏，不需要 VoiceService 二次冷却
             _ = await VoiceService.shared.speak(
                 text: text,
                 voice: voiceId,
                 language: language,
-                scriptCooldown: globalCooldown
+                scriptCooldown: 0
             )
         }
 

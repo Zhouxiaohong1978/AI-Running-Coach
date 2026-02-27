@@ -74,7 +74,7 @@ final class AudioPlayerManager: NSObject, ObservableObject {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             // 使用 playback 模式，允许与其他音频混合
-            try audioSession.setCategory(.playback, mode: .voicePrompt, options: [.mixWithOthers, .duckOthers])
+            try audioSession.setCategory(.playback, mode: .voicePrompt, options: [.duckOthers])
             try audioSession.setActive(true)
             print("✅ 音频会话配置成功")
         } catch {
@@ -120,6 +120,16 @@ final class AudioPlayerManager: NSObject, ObservableObject {
 
         processQueue()
         return true
+    }
+
+    /// 检查是否已播放过（供 EN 模式语音路由使用）
+    func hasPlayed(_ fileName: String) -> Bool {
+        return playedAudios.contains(fileName)
+    }
+
+    /// 标记为已播放（供 EN 模式语音路由使用）
+    func markPlayed(_ fileName: String) {
+        playedAudios.insert(fileName)
     }
 
     /// 停止当前播放

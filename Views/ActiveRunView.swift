@@ -287,9 +287,9 @@ struct ActiveRunView: View {
                         }) {
                             Image(systemName: isPaused ? "play.fill" : "pause.fill")
                                 .font(.system(size: 28))
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .frame(width: 60, height: 60)
-                                .background(Color.white.opacity(0.2))
+                                .background(Color.white.opacity(0.85))
                                 .clipShape(Circle())
                         }
 
@@ -364,8 +364,13 @@ struct ActiveRunView: View {
             let bestKm = dataManager.runRecords.compactMap { $0.distance > 0 ? $0.distance / 1000.0 : nil }.max() ?? 0
             dynamicEngine.reset(personalBestDistanceKm: bestKm)
 
-            // 延迟一点播报，确保视图完全加载
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // EN 模式预缓存所有里程碑 TTS 音频
+            if LanguageManager.shared.currentLocale == "en" {
+                prefetchENVoicesForRun()
+            }
+
+            // 延迟 2s 播报，给 EN 模式预缓存留出下载时间（单条 TTS 约 1-1.5s）
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 print("🏃 MVP 1.0 开始跑步，三位一体联动启动")
                 self.logger.log("🎯 准备播放开始语音", category: "VOICE")
                 // 播放开始语音（女声）
@@ -376,6 +381,7 @@ struct ActiveRunView: View {
             locationManager.stopTracking()
             healthKit.stopHeartRateMonitoring()
             audioPlayerManager.stopAll()
+            VoiceService.shared.clearCache()
         }
         .onChange(of: locationManager.distance) { newDistance in
             checkAndAnnounce(distance: newDistance)
@@ -545,12 +551,22 @@ struct ActiveRunView: View {
         let isEN = LanguageManager.shared.currentLocale == "en"
 
         if isEN {
-            // 英文：调用 Supabase TTS（Aiden/Katerina 根据教练风格）
+            // 去重：与 ZH 模式共享 audioPlayerManager.playedAudios
+            guard !audioPlayerManager.hasPlayed(voice.fileName) else { return false }
+            audioPlayerManager.markPlayed(voice.fileName)
+
             let text = voice.descriptionEn.isEmpty ? voice.description : voice.descriptionEn
             let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: "en")
-            showFeedbackBubble(text)
+
             Task {
-                _ = await VoiceService.shared.speak(text: text, voice: voiceId, language: "en")
+                // speakImmediate 绕过所有冷却，等待上一条播完再播
+                let started = await VoiceService.shared.speakImmediate(
+                    text: text, voice: voiceId, language: "en", cacheKey: voice.fileName
+                )
+                if started {
+                    // 播放开始后才显示气泡（与声音同步）
+                    await MainActor.run { showFeedbackBubble(text) }
+                }
             }
             return true
         } else {
@@ -560,6 +576,36 @@ struct ActiveRunView: View {
                 return true
             }
             return false
+        }
+    }
+
+    /// EN 模式预缓存所有里程碑 TTS 音频（跑步开始时后台并行下载）
+    /// 开始语音优先单独预缓存，确保 2s 后 playStartVoice 命中缓存
+    private func prefetchENVoicesForRun() {
+        let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: "en")
+        Task {
+            // 1. 优先预缓存开始语音（单独下载，不等其他）
+            if let startVoice = voiceMap.getStartVoice() {
+                let text = startVoice.descriptionEn.isEmpty ? startVoice.description : startVoice.descriptionEn
+                await VoiceService.shared.prefetch(
+                    cacheKey: startVoice.fileName, text: text, voice: voiceId, language: "en"
+                )
+                print("✅ 开始语音预缓存完成: \(startVoice.fileName)")
+            }
+
+            // 2. 并行预缓存其余里程碑语音
+            let voices = voiceMap.getAllRunVoices(goal: userGoal)
+            await withTaskGroup(of: Void.self) { group in
+                for voice in voices {
+                    let text = voice.descriptionEn.isEmpty ? voice.description : voice.descriptionEn
+                    group.addTask {
+                        await VoiceService.shared.prefetch(
+                            cacheKey: voice.fileName, text: text, voice: voiceId, language: "en"
+                        )
+                    }
+                }
+            }
+            print("✅ EN 预缓存完成，共 \(voices.count) 条")
         }
     }
 
@@ -585,7 +631,18 @@ struct ActiveRunView: View {
             logger.log("🎉 到达今日目标 \(todayTargetKm)km，触发完成语音", category: "VOICE")
             if todayTargetKm != 3.0 {
                 // 非3km目标：TTS播报今日目标完成（3km目标已有 新手跑中_08 语音）
-                SpeechManager.shared.speak("今日目标完成，太棒了！")
+                let isEN = LanguageManager.shared.currentLocale == "en"
+                let goalText = isEN ? "Goal completed, well done!" : "今日目标完成，太棒了！"
+                let lang = isEN ? "en" : "zh-Hans"
+                let goalVoiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: lang)
+                Task {
+                    let started = await VoiceService.shared.speakImmediate(
+                        text: goalText, voice: goalVoiceId, language: lang
+                    )
+                    if started {
+                        await MainActor.run { showFeedbackBubble(goalText) }
+                    }
+                }
             }
             playCompleteVoices()
         }
@@ -615,27 +672,42 @@ struct ActiveRunView: View {
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
             logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
-            if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
-                subscriptionManager.incrementFeedbackCount()  // 只有播放成功才计数
-                showFeedbackBubble(voice.description)
+            // 通过 playVoiceAsset 路由：中文=本地.m4a，英文=TTS API
+            if playVoiceAsset(voice) {
+                subscriptionManager.incrementFeedbackCount()  // 触发即计数（EN/ZH统一）
                 print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
             }
         }
     }
 
-    /// 播放完成语音（女声：跑后_01 → 跑后_02）
+    /// 播放完成语音（女声：跑后_01 → 跑后_02，自动按语言路由）
     private func playCompleteVoices() {
         let completeVoices = voiceMap.getCompleteVoices()
+        let isEN = LanguageManager.shared.currentLocale == "en"
 
-        // 按顺序播放两条完成语音
-        for (index, voice) in completeVoices.enumerated() {
-            // 第二条语音延迟播放（等第一条播完）
-            let delay = index == 0 ? 0.0 : 3.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                if self.audioPlayerManager.play(voice.fileName, priority: voice.priority) {
-                    self.showFeedbackBubble(voice.description)
+        if isEN {
+            // EN 模式：串行播放，等第一条播完再播第二条
+            Task {
+                for voice in completeVoices {
+                    guard !audioPlayerManager.hasPlayed(voice.fileName) else { continue }
+                    audioPlayerManager.markPlayed(voice.fileName)
+                    let text = voice.descriptionEn.isEmpty ? voice.description : voice.descriptionEn
+                    let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: "en")
+                    let started = await VoiceService.shared.speakImmediate(
+                        text: text, voice: voiceId, language: "en", cacheKey: voice.fileName
+                    )
+                    if started {
+                        await MainActor.run { showFeedbackBubble(text) }
+                        await VoiceService.shared.waitForFinish()  // 等播完再播下一条
+                    }
                 }
-                print("🎙️ 播放完成语音: \(voice.fileName)")
+            }
+        } else {
+            // ZH 模式：AudioPlayerManager 自带队列，不变
+            for voice in completeVoices {
+                if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
+                    showFeedbackBubble(voice.description)
+                }
             }
         }
     }
@@ -663,21 +735,17 @@ struct ActiveRunView: View {
         }
     }
 
-    /// 播放应急语音（心率过高/状态不佳时调用）
+    /// 播放应急语音（心率过高/状态不佳时调用，自动按语言路由）
     func playEmergencyVoice() {
         guard let voice = voiceMap.getEmergencyVoice() else { return }
-        if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
-            showFeedbackBubble(voice.description)
-        }
+        playVoiceAsset(voice)
         print("🚨 播放应急语音: \(voice.fileName)")
     }
 
-    /// 播放提前结束语音（用户提前停止时调用）
+    /// 播放提前结束语音（用户提前停止时调用，自动按语言路由）
     func playEarlyStopVoice() {
         guard let voice = voiceMap.getEarlyStopVoice() else { return }
-        if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
-            showFeedbackBubble(voice.description)
-        }
+        playVoiceAsset(voice)
         print("⏹️ 播放提前结束语音: \(voice.fileName)")
     }
 
