@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		TOULAVIEWBUILDFILE0001 /* TermsOfUseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */; };
 		013E8DF120C6E48A11C0550B /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */; };
 		21AA9534577C9498A99CFB43 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B78260DAB77DEDF48D8765 /* ContentView.swift */; };
 		22BD2B8A7BD2B0444558525F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C65651F0929BD30431988091 /* SettingsView.swift */; };
@@ -125,6 +126,7 @@
 		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		GPX6MIN000000000000000001 /* SimulatedRun_6min.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = SimulatedRun_6min.gpx; sourceTree = "<group>"; };
+		TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfUseView.swift; sourceTree = "<group>"; };
 		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
 		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
 		HK22222222222222222222HK /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 				124707344CABB85DE155A5AC /* TrainingPlanView.swift */,
 				827E775AD7E76C78ECE86370 /* DebugLogView.swift */,
 				EF56789012345678CD901234 /* PaywallView.swift */,
+				TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				4DCB36FF6374C78D8E984CFD /* DebugLogView.swift in Sources */,
 				CD34EF5678901234AB567890 /* SubscriptionManager.swift in Sources */,
 				9012345678AB34CDEF561234 /* PaywallView.swift in Sources */,
+				TOULAVIEWBUILDFILE0001 /* TermsOfUseView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -531,7 +535,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";
@@ -542,7 +546,10 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = location;
+				INFOPLIST_KEY_UIBackgroundModes = (
+					audio,
+					location,
+				);
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -573,7 +580,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";
@@ -584,7 +591,10 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = location;
+				INFOPLIST_KEY_UIBackgroundModes = (
+					audio,
+					location,
+				);
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

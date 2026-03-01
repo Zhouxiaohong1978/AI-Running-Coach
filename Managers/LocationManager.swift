@@ -39,6 +39,20 @@ class LocationManager: NSObject, ObservableObject {
     private let minMovementDistance: Double = 3.0     // 最小移动距离（米），小于此值视为漂移（distanceFilter=5，真实跑步delta常在5-8m）
     private let minSpeed: Double = 0.5                // 最小速度（米/秒），低于此值可能是静止（慢跑约1.5m/s）
 
+    // MARK: - 模拟器模拟跑步
+    #if targetEnvironment(simulator)
+    private var simulationTimer: Timer?
+    /// 模拟配速（分钟/公里），默认 6'00"/km
+    var simulationPace: Double = 6.0
+    /// 模拟起点（Cupertino Apple Park 附近）
+    private let simStartLat: Double = 37.3349
+    private let simStartLon: Double = -122.0090
+    /// 模拟方向角度（弧度），每段微调模拟转弯
+    private var simHeading: Double = 0.0
+    private var simLat: Double = 0
+    private var simLon: Double = 0
+    #endif
+
     override init() {
         super.init()
         locationManager.delegate = self
@@ -64,6 +78,10 @@ class LocationManager: NSObject, ObservableObject {
         lastKmDistance = 0
         lastKmTime = Date()
 
+        // 跑步开始后启用后台定位（口袋模式：熄屏继续GPS+语音）
+        locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.showsBackgroundLocationIndicator = true
+        locationManager.pausesLocationUpdatesAutomatically = false
         locationManager.startUpdatingLocation()
 
         // 开始计时器
@@ -74,6 +92,10 @@ class LocationManager: NSObject, ObservableObject {
             // 计算卡路里 (粗略估算: 1km约100卡路里)
             self.calories = (self.distance / 1000.0) * 100.0
         }
+
+        #if targetEnvironment(simulator)
+        startSimulation()
+        #endif
     }
 
     func pauseTracking() {
@@ -81,6 +103,10 @@ class LocationManager: NSObject, ObservableObject {
         locationManager.stopUpdatingLocation()
         timer?.invalidate()
         timer = nil
+        #if targetEnvironment(simulator)
+        simulationTimer?.invalidate()
+        simulationTimer = nil
+        #endif
     }
 
     func resumeTracking() {
@@ -93,6 +119,10 @@ class LocationManager: NSObject, ObservableObject {
             self.duration = Date().timeIntervalSince(start)
             self.calories = (self.distance / 1000.0) * 100.0
         }
+
+        #if targetEnvironment(simulator)
+        startSimulation()
+        #endif
     }
 
     func stopTracking() {
@@ -107,8 +137,15 @@ class LocationManager: NSObject, ObservableObject {
 
         isTracking = false
         locationManager.stopUpdatingLocation()
+        // 跑步结束，关闭后台定位
+        locationManager.allowsBackgroundLocationUpdates = false
+        locationManager.showsBackgroundLocationIndicator = false
         timer?.invalidate()
         timer = nil
+        #if targetEnvironment(simulator)
+        simulationTimer?.invalidate()
+        simulationTimer = nil
+        #endif
     }
 
     private func calculatePace() {
@@ -122,6 +159,66 @@ class LocationManager: NSObject, ObservableObject {
         let durationInMinutes = duration / 60.0
         currentPace = durationInMinutes / distanceInKm
     }
+    // MARK: - 模拟器自动跑步
+
+    #if targetEnvironment(simulator)
+    /// 启动模拟跑步：每 2 秒生成一个 GPS 点，按 simulationPace 配速移动
+    private func startSimulation() {
+        simulationTimer?.invalidate()
+
+        // 用当前位置或默认起点
+        if let loc = userLocation {
+            simLat = loc.latitude
+            simLon = loc.longitude
+        } else {
+            simLat = simStartLat
+            simLon = simStartLon
+        }
+        simHeading = 0.3  // 初始方向（略偏东北）
+
+        // 配速转速度：6 min/km = 360s/km → speed = 1000/360 ≈ 2.78 m/s
+        // 每 2 秒更新一次 → 每次移动 speed * 2 米
+        let speedMPS = 1000.0 / (simulationPace * 60.0)
+        let interval: TimeInterval = 2.0
+        let stepMeters = speedMPS * interval
+
+        print("🏃‍♂️ [模拟器] 开始模拟跑步: 配速 \(simulationPace)'/km, 速度 \(String(format: "%.2f", speedMPS))m/s, 每步 \(String(format: "%.1f", stepMeters))m")
+
+        simulationTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+            guard let self = self, self.isTracking else { return }
+
+            // 每 500m 微调方向（模拟转弯）
+            let totalDist = self.distance
+            if Int(totalDist) % 500 < Int(stepMeters) + 1 {
+                self.simHeading += 0.5  // 每 500m 右转约 28 度
+            }
+
+            // 1 度纬度 ≈ 111,000 米，1 度经度 ≈ 111,000 * cos(lat) 米
+            let metersPerDegreeLat = 111_000.0
+            let metersPerDegreeLon = 111_000.0 * cos(self.simLat * .pi / 180.0)
+
+            let dLat = stepMeters * cos(self.simHeading) / metersPerDegreeLat
+            let dLon = stepMeters * sin(self.simHeading) / metersPerDegreeLon
+
+            self.simLat += dLat
+            self.simLon += dLon
+
+            // 构造模拟 CLLocation（高精度，确保通过 GPS 过滤）
+            let simLocation = CLLocation(
+                coordinate: CLLocationCoordinate2D(latitude: self.simLat, longitude: self.simLon),
+                altitude: 10,
+                horizontalAccuracy: 5.0,
+                verticalAccuracy: 5.0,
+                course: self.simHeading * 180.0 / .pi,
+                speed: speedMPS,
+                timestamp: Date()
+            )
+
+            // 注入到 didUpdateLocations 处理流程
+            self.locationManager(self.locationManager, didUpdateLocations: [simLocation])
+        }
+    }
+    #endif
 }
 
 extension LocationManager: CLLocationManagerDelegate {

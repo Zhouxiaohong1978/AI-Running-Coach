@@ -286,6 +286,9 @@
         }
       }
     },
+    "🏆 Achievement Unlocked!" : {
+
+    },
     "🏆 最近解锁" : {
       "localizations" : {
         "en" : {
@@ -346,7 +349,22 @@
         }
       }
     },
+    "1/month" : {
+
+    },
+    "2" : {
+
+    },
     "2个" : {
+
+    },
+    "3/month" : {
+
+    },
+    "3/run" : {
+
+    },
+    "3条/次" : {
 
     },
     "3次" : {
@@ -423,6 +441,9 @@
     "7-Day Free Trial" : {
 
     },
+    "10" : {
+
+    },
     "10个" : {
       "localizations" : {
         "en" : {
@@ -457,6 +478,12 @@
     "1614103587@qq.com" : {
 
     },
+    "Achievements" : {
+
+    },
+    "AI Coach Feedback" : {
+
+    },
     "AI COACH INSIGHT" : {
       "localizations" : {
         "en" : {
@@ -471,6 +498,19 @@
 
     },
     "AI plan upgraded" : {
+
+    },
+    "AI Running Coach Pro (%@) — %@. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage in Settings > Apple ID > Subscriptions." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "AI Running Coach Pro (%1$@) — %2$@. Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage in Settings > Apple ID > Subscriptions."
+          }
+        }
+      }
+    },
+    "AI Training Plans" : {
 
     },
     "AI 教练反馈" : {
@@ -613,6 +653,16 @@
         }
       }
     },
+    "AI跑步教练 Pro（%@）— %@。订阅将自动续费，如需取消请在当前订阅期结束前至少24小时操作。管理方式：设置 > Apple ID > 订阅。" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "AI跑步教练 Pro（%1$@）— %2$@。订阅将自动续费，如需取消请在当前订阅期结束前至少24小时操作。管理方式：设置 > Apple ID > 订阅。"
+          }
+        }
+      }
+    },
     "AI跑步教练使用指南" : {
       "localizations" : {
         "en" : {
@@ -633,6 +683,21 @@
         }
       }
     },
+    "All" : {
+
+    },
+    "All 6" : {
+
+    },
+    "Apple Standard EULA" : {
+
+    },
+    "Apple 标准最终用户许可协议" : {
+
+    },
+    "Basic" : {
+
+    },
     "bpm" : {
 
     },
@@ -645,6 +710,9 @@
           }
         }
       }
+    },
+    "Cloud Sync" : {
+
     },
     "Contact Us · 联系我们" : {
 
@@ -664,6 +732,9 @@
           }
         }
       }
+    },
+    "Full" : {
+
     },
     "GPS ACTIVE" : {
       "localizations" : {
@@ -698,7 +769,13 @@
         }
       }
     },
+    "Last updated: February 2026" : {
+
+    },
     "Loading plans..." : {
+
+    },
+    "Loading..." : {
 
     },
     "or finish %@" : {
@@ -727,6 +804,12 @@
         }
       }
     },
+    "Restore Purchases" : {
+
+    },
+    "Runs" : {
+
+    },
     "Send Email" : {
 
     },
@@ -753,10 +836,31 @@
         }
       }
     },
+    "Tap to play" : {
+
+    },
     "Technical Support" : {
 
     },
+    "Terms of Use" : {
+
+    },
+    "Terms of Use (EULA)" : {
+
+    },
+    "Training Goals" : {
+
+    },
+    "Unlimited" : {
+
+    },
     "Upgrade Pro" : {
+
+    },
+    "Upgrade to Pro for unlimited coaching" : {
+
+    },
+    "Voice Coaching" : {
 
     },
     "三日连跑" : {
@@ -821,6 +925,9 @@
         }
       }
     },
+    "今天是休息日" : {
+
+    },
     "今天的目标是" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -865,6 +972,9 @@
         }
       }
     },
+    "休息有助于恢复体力。如需调整，可以修改训练计划。" : {
+
+    },
     "低心率110" : {
       "localizations" : {
         "en" : {
@@ -896,6 +1006,12 @@
         }
       }
     },
+    "使用条款" : {
+
+    },
+    "使用条款 (EULA)" : {
+
+    },
     "保证充足的休息和营养" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -906,6 +1022,9 @@
           }
         }
       }
+    },
+    "修改计划" : {
+
     },
     "偏好哪些日子训练？" : {
       "localizations" : {
@@ -1066,6 +1185,9 @@
         }
       }
     },
+    "最后更新：2026年2月" : {
+
+    },
     "最快配速达到 4'00\"/公里" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1206,6 +1328,7 @@
       }
     },
     "切换后立即生效" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1351,6 +1474,9 @@
           }
         }
       }
+    },
+    "加载中..." : {
+
     },
     "加载套餐中..." : {
       "localizations" : {
@@ -2236,6 +2362,9 @@
         }
       }
     },
+    "成就" : {
+
+    },
     "成就系统" : {
       "localizations" : {
         "en" : {
@@ -2695,6 +2824,7 @@
       }
     },
     "服务条款" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2966,6 +3096,7 @@
       }
     },
     "每次跑步3条" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3773,6 +3904,7 @@
       }
     },
     "订阅将自动续费，可随时在系统设置中取消" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3896,6 +4028,7 @@
       }
     },
     "语言" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

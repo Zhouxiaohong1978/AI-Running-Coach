@@ -350,7 +350,10 @@ struct GoalSelectionView: View {
 
     // 日期按钮
     private func dayButton(day: Int) -> some View {
-        let dayNames = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        let dayNames = isEN
+            ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            : ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
         let isSelected = preferredDays.contains(day)
 
         return Button(action: {

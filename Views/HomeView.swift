@@ -31,6 +31,7 @@ struct HomeView: View {
     @State private var hasShownAutoPaywall = false
     @State private var hasTrainingPlan = false
     @State private var showActiveRun = false
+    @State private var showRestDayAlert = false
     @StateObject private var dataManager = RunDataManager.shared
     @StateObject private var authManager = AuthManager.shared
     @StateObject private var weatherManager = WeatherManager.shared
@@ -86,6 +87,12 @@ struct HomeView: View {
         // ActiveRunView 挂在根层级，Tab 切换无法触及
         .fullScreenCover(isPresented: $showActiveRun) {
             ActiveRunView()
+        }
+        .alert("今天是休息日", isPresented: $showRestDayAlert) {
+            Button("取消", role: .cancel) {}
+            Button("修改计划") { selectedTab = 1 }
+        } message: {
+            Text("休息有助于恢复体力。如需调整，可以修改训练计划。")
         }
     }
 
@@ -172,7 +179,16 @@ struct HomeView: View {
                             Group {
                                 if hasTrainingPlan {
                                     // 有计划：fullScreenCover，Tab 切换不会中断跑步
-                                    Button(action: { showActiveRun = true }) {
+                                    Button(action: {
+                                        // 免费用户次数用完 → 弹 Paywall
+                                        if !subscriptionManager.isPro && dataManager.runRecords.count >= 3 {
+                                            showPaywall = true
+                                        } else if isRestDay {
+                                            showRestDayAlert = true
+                                        } else {
+                                            showActiveRun = true
+                                        }
+                                    }) {
                                         runStartButtonLabel
                                     }
                                     .buttonStyle(.plain)
@@ -337,6 +353,24 @@ struct HomeView: View {
     private func getWeatherText() -> String {
         let fallback = LanguageManager.shared.currentLocale == "en" ? "Loading weather..." : "获取天气中..."
         return weatherManager.currentWeather?.displayText ?? fallback
+    }
+
+    // MARK: - 是否为休息日
+
+    private var isRestDay: Bool {
+        guard let data = UserDefaults.standard.data(forKey: "saved_training_plan"),
+              let plan = try? JSONDecoder().decode(TrainingPlanData.self, from: data) else { return false }
+        var weekNumber = 1
+        if let startDate = UserDefaults.standard.object(forKey: "training_plan_start_date") as? Date {
+            let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+            weekNumber = max(1, days / 7 + 1)
+        }
+        let clampedWeek = min(weekNumber, plan.weeklyPlans.count)
+        guard let weekPlan = plan.weeklyPlans.first(where: { $0.weekNumber == clampedWeek }) else { return false }
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        let dow = weekday == 1 ? 7 : weekday - 1
+        guard let task = weekPlan.dailyTasks.first(where: { $0.dayOfWeek == dow }) else { return true }
+        return task.type == "rest"
     }
 
     // MARK: - 今日招呼语

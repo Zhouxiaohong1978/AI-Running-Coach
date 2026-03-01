@@ -16,6 +16,8 @@ struct PaywallView: View {
     @State private var errorMessage: String?
     @State private var showError = false
 
+    private var isEN: Bool { LanguageManager.shared.currentLocale == "en" }
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -159,13 +161,13 @@ struct PaywallView: View {
 
             Divider()
 
-            comparisonRow("跑步次数", free: "每月3次", pro: "无限制")
-            comparisonRow("AI 训练计划", free: "每月1次", pro: "无限制")
-            comparisonRow("AI 教练反馈", free: "每次跑步3条", pro: "无限制")
-            comparisonRow("语音播报", free: "基础", pro: "完整")
-            comparisonRow("训练目标", free: "2个", pro: "全部6个")
-            comparisonRow("云端同步", free: "—", pro: "✓")
-            comparisonRow("成就系统", free: "10个", pro: "全部")
+            comparisonRow(isEN ? "Runs" : "跑步次数", free: isEN ? "3/month" : "每月3次", pro: isEN ? "Unlimited" : "无限制")
+            comparisonRow(isEN ? "AI Training Plans" : "AI 训练计划", free: isEN ? "1/month" : "每月1次", pro: isEN ? "Unlimited" : "无限制")
+            comparisonRow(isEN ? "AI Coach Feedback" : "AI 教练反馈", free: isEN ? "3/run" : "3条/次", pro: isEN ? "Unlimited" : "无限制")
+            comparisonRow(isEN ? "Voice Coaching" : "语音播报", free: isEN ? "Basic" : "基础", pro: isEN ? "Full" : "完整")
+            comparisonRow(isEN ? "Training Goals" : "训练目标", free: isEN ? "2" : "2个", pro: isEN ? "All 6" : "全部6个")
+            comparisonRow(isEN ? "Cloud Sync" : "云端同步", free: "—", pro: "✓")
+            comparisonRow(isEN ? "Achievements" : "成就系统", free: isEN ? "10" : "10个", pro: isEN ? "All" : "全部")
         }
         .background(Color(UIColor.systemBackground))
         .cornerRadius(16)
@@ -381,6 +383,9 @@ struct PaywallView: View {
 
     // MARK: - Footer
 
+    @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
+
     private var footerSection: some View {
         VStack(spacing: 12) {
             Button {
@@ -399,16 +404,29 @@ struct PaywallView: View {
                     }
                 }
             } label: {
-                Text("恢复购买")
+                Text(isEN ? "Restore Purchases" : "恢复购买")
                     .font(.system(size: 14))
                     .foregroundColor(.blue)
             }
 
+            // Apple 要求：订阅说明（名称、时长、价格、自动续费说明）
+            if let package = selectedPackage {
+                let period = package.packageType == .annual
+                    ? (isEN ? "1 year" : "1年")
+                    : (isEN ? "1 month" : "1个月")
+                Text(isEN
+                    ? "AI Running Coach Pro (\(period)) — \(package.localizedPriceString). Subscription auto-renews unless cancelled at least 24 hours before the end of the current period. Manage in Settings > Apple ID > Subscriptions."
+                    : "AI跑步教练 Pro（\(period)）— \(package.localizedPriceString)。订阅将自动续费，如需取消请在当前订阅期结束前至少24小时操作。管理方式：设置 > Apple ID > 订阅。"
+                )
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+            }
+
             HStack(spacing: 16) {
-                Button {
-                    // TODO: 打开隐私政策
-                } label: {
-                    Text("隐私政策")
+                Button { showPrivacyPolicy = true } label: {
+                    Text(isEN ? "Privacy Policy" : "隐私政策")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
@@ -416,19 +434,18 @@ struct PaywallView: View {
                 Text("·")
                     .foregroundColor(.secondary)
 
-                Button {
-                    // TODO: 打开服务条款
-                } label: {
-                    Text("服务条款")
+                Button { showTermsOfUse = true } label: {
+                    Text(isEN ? "Terms of Use (EULA)" : "使用条款 (EULA)")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
             }
-
-            Text("订阅将自动续费，可随时在系统设置中取消")
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+        }
+        .sheet(isPresented: $showTermsOfUse) {
+            TermsOfUseView()
         }
     }
 }

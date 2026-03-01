@@ -50,6 +50,7 @@ struct ActiveRunView: View {
     @State private var achievement3kmWarned = false  // 是否已提醒3km成就
     @State private var achievement300calWarned = false  // 是否已提醒300卡成就
     @State private var showUpgradeHint = false  // 免费用户反馈用完时的升级提示
+    @State private var showPaywallFromRun = false // 跑步中点击升级提示弹出付费墙
 
     var body: some View {
         ZStack {
@@ -140,20 +141,24 @@ struct ActiveRunView: View {
                     .padding(.top, 10)
                 }
 
-                // 免费用户升级提示
+                // 免费用户升级提示（可点击跳转付费墙）
                 if showUpgradeHint {
-                    HStack(spacing: 6) {
-                        Image(systemName: "crown.fill")
-                            .foregroundColor(.orange)
-                        Text("升级 Pro 获取无限教练反馈")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundColor(.orange)
+                    Button {
+                        showPaywallFromRun = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.orange)
+                            Text(LanguageManager.shared.currentLocale == "en" ? "Upgrade to Pro for unlimited coaching" : "升级 Pro 获取无限教练反馈")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(16)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.white.opacity(0.9))
-                    .cornerRadius(16)
                     .transition(.opacity)
                     .padding(.top, 4)
                 }
@@ -410,6 +415,9 @@ struct ActiveRunView: View {
                 dismiss()
             }
         }
+        .sheet(isPresented: $showPaywallFromRun) {
+            PaywallView()
+        }
         .fullScreenCover(isPresented: $showSummary) {
             if let record = savedRecord {
                 RunSummaryView(runRecord: record)
@@ -660,8 +668,8 @@ struct ActiveRunView: View {
 
         // 免费用户检查反馈次数限制
         if !subscriptionManager.canGetFeedback() {
-            // 显示升级提示（仅一次）
-            if !showUpgradeHint {
+            // 语音气泡还在显示时不弹升级提示，避免自相矛盾
+            if !showUpgradeHint && !showCoachFeedback {
                 withAnimation {
                     showUpgradeHint = true
                 }
@@ -723,6 +731,8 @@ struct ActiveRunView: View {
     /// 显示教练反馈气泡
     private func showFeedbackBubble(_ message: String) {
         currentFeedback = message
+        // 语音正在播报时隐藏升级提示，避免自相矛盾
+        showUpgradeHint = false
         withAnimation(.spring()) {
             showCoachFeedback = true
         }

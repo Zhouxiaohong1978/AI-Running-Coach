@@ -22,6 +22,7 @@ struct RunSummaryView: View {
     @State private var aiParagraphs: FeedbackParagraphs? = nil
     @State private var aiScene: String? = nil
     @State private var hasAutoPlayedAchievement = false
+    @State private var loadingAchievementId: String? = nil
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -85,7 +86,10 @@ struct RunSummaryView: View {
                                 Button(action: {
                                     playAchievementVoice(achievement: achievement)
                                 }) {
-                                    AchievementBanner(achievement: achievement)
+                                    AchievementBanner(
+                                        achievement: achievement,
+                                        isLoading: loadingAchievementId == achievement.id
+                                    )
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
@@ -352,6 +356,7 @@ struct RunSummaryView: View {
         }
         .onAppear {
             generateAISuggestion()
+            VoiceService.shared.resetCooldown()  // 跑步结束后重置冷却，确保成就语音能播放
             scheduleAchievementVoices()
         }
         .sheet(isPresented: $showAchievementSheet) {
@@ -405,8 +410,13 @@ struct RunSummaryView: View {
         let language = isEN ? "en" : "zh-Hans"
         let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: language)
 
+        // 手动点击/成就页面播报，重置冷却确保能播放
+        VoiceService.shared.resetCooldown()
+        loadingAchievementId = achievement.id  // 显示加载中状态
+
         Task {
             _ = await VoiceService.shared.speak(text: text, voice: voiceId, language: language)
+            await MainActor.run { loadingAchievementId = nil }  // 播放开始后清除 loading
         }
         print("🏆 个性化成就语音: \(achievement.title) → \(text.prefix(20))…")
     }
@@ -611,11 +621,12 @@ struct RunSummaryView: View {
                 let (trainingType, targetPace) = loadTodayTask()
                 let goalName = loadGoalName()
 
+                let distanceKm = record.distance / 1000.0
                 let result = try await aiManager.getCoachFeedback(
                     currentPace: record.pace,
                     targetPace: targetPace,
-                    distance: record.distance,
-                    totalDistance: record.distance,
+                    distance: distanceKm,
+                    totalDistance: distanceKm,
                     duration: record.duration,
                     heartRate: nil,
                     kmSplits: record.kmSplits,
@@ -631,7 +642,10 @@ struct RunSummaryView: View {
                 }
             } catch {
                 await MainActor.run {
-                    aiSuggestion = "AI建议生成失败：\(error.localizedDescription)"
+                    let isEN = LanguageManager.shared.currentLocale == "en"
+                    aiSuggestion = isEN
+                        ? "AI analysis failed: \(error.localizedDescription)"
+                        : "AI建议生成失败：\(error.localizedDescription)"
                     isLoadingAI = false
                 }
                 print("❌ AI建议生成失败: \(error)")
@@ -832,6 +846,9 @@ struct PaceBar: View {
 
 struct AchievementBanner: View {
     let achievement: Achievement
+    var isLoading: Bool = false
+
+    private var isEN: Bool { LanguageManager.shared.currentLocale == "en" }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -840,24 +857,30 @@ struct AchievementBanner: View {
                 .foregroundColor(.white)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("🏆 成就解锁！")
+                Text(isEN ? "🏆 Achievement Unlocked!" : "🏆 成就解锁！")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
 
-                Text("\(achievement.title)：\(achievement.description)")
+                Text("\(achievement.localizedTitle)：\(achievement.localizedDescription)")
                     .font(.system(size: 12))
                     .foregroundColor(.white.opacity(0.9))
             }
 
             Spacer()
 
-            // 语音播放图标
+            // 语音播放图标（加载中时显示 spinner）
             VStack(spacing: 4) {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(.white)
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                        .frame(width: 20, height: 20)
+                } else {
+                    Image(systemName: "speaker.wave.2.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.white)
+                }
 
-                Text("点击听语音")
+                Text(isLoading ? (isEN ? "Loading..." : "加载中...") : (isEN ? "Tap to play" : "点击听语音"))
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.white.opacity(0.8))
             }

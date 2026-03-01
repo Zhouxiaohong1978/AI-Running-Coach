@@ -248,4 +248,15 @@ class VoiceAssetMap {
             return false
         }
     }
+
+    /// 获取跑步中所有可能触发的语音（用于 EN 模式预缓存）
+    func getAllRunVoices(goal: TrainingGoal) -> [VoiceAsset] {
+        var voices: [VoiceAsset] = []
+        if let start = getStartVoice() { voices.append(start) }
+        voices.append(contentsOf: goal == .weightLoss ? fatburnMaleVoices : beginnerMaleVoices)
+        voices.append(contentsOf: getCompleteVoices())
+        if let emergency = getEmergencyVoice() { voices.append(emergency) }
+        if let earlyStop = getEarlyStopVoice() { voices.append(earlyStop) }
+        return voices
+    }
 }

@@ -18,17 +18,18 @@ enum AIManagerError: LocalizedError {
     case subscriptionRequired
 
     var errorDescription: String? {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch self {
         case .notAuthenticated:
-            return "用户未登录"
+            return isEN ? "User not logged in" : "用户未登录"
         case .networkError(let message):
-            return "网络错误: \(message)"
+            return isEN ? "Network error: \(message)" : "网络错误: \(message)"
         case .invalidResponse:
-            return "AI响应格式错误"
+            return isEN ? "Invalid AI response" : "AI响应格式错误"
         case .aiGenerationFailed(let message):
-            return "AI生成失败: \(message)"
+            return isEN ? "AI generation failed: \(message)" : "AI生成失败: \(message)"
         case .subscriptionRequired:
-            return "需要升级 Pro 会员"
+            return isEN ? "Pro subscription required" : "需要升级 Pro 会员"
         }
     }
 }

@@ -23,22 +23,46 @@ struct SettingsView: View {
     @State private var selectedCoachStyle: CoachStyle = .encouraging
     @State private var showPrivacyPolicy = false
     @State private var showSupport = false
+    @State private var showAchievements = false
 
     var body: some View {
         NavigationView {
             List {
-                // 语言设置（最顶部）
+                // 语言 + 成就（最顶部并排）
                 Section {
-                    Picker("语言", selection: $languageManager.currentLanguage) {
-                        ForEach(AppLanguage.allCases, id: \.self) { lang in
-                            Text(lang.displayName).tag(lang)
+                    HStack {
+                        // 左：语言
+                        HStack {
+                            Image(systemName: "globe")
+                                .foregroundColor(.blue)
+                            Picker("", selection: $languageManager.currentLanguage) {
+                                ForEach(AppLanguage.allCases, id: \.self) { lang in
+                                    Text(lang.displayName).tag(lang)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                        }
+
+                        Spacer()
+
+                        // 右：成就入口
+                        Button {
+                            showAchievements = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "trophy.fill")
+                                    .foregroundColor(.orange)
+                                Text(languageManager.currentLocale == "en" ? "Achievements" : "成就")
+                                    .fontWeight(.medium)
+                                let total = achievementManager.achievements.count
+                                let unlocked = achievementManager.achievements.filter { $0.isUnlocked }.count
+                                Text("\(unlocked)/\(total)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
-                    .pickerStyle(.menu)
-                } header: {
-                    Text("语言")
-                } footer: {
-                    Text("切换后立即生效")
                 }
 
                 // 账户部分
@@ -267,6 +291,9 @@ struct SettingsView: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
+            .sheet(isPresented: $showAchievements) {
+                AchievementSheetView()
+            }
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView()
             }
@@ -328,13 +355,14 @@ struct SettingsView: View {
     // MARK: - Helper Methods
 
     private var coachStyleDescription: String {
+        let isEN = LanguageManager.shared.currentLocale == "en"
         switch selectedCoachStyle {
         case .encouraging:
-            return "积极鼓励，适合需要动力和正面反馈的跑者"
+            return isEN ? "Motivating and positive, great for runners who need encouragement" : "积极鼓励，适合需要动力和正面反馈的跑者"
         case .strict:
-            return "严格要求，适合追求高标准和自我突破的跑者"
+            return isEN ? "Strict and scientific, ideal for runners chasing higher standards" : "严格要求，适合追求高标准和自我突破的跑者"
         case .calm:
-            return "温和指导，适合享受跑步过程和放松心态的跑者"
+            return isEN ? "Gentle guidance, perfect for runners who enjoy a relaxed pace" : "温和指导，适合享受跑步过程和放松心态的跑者"
         }
     }
 

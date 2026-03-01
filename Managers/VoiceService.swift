@@ -1,6 +1,7 @@
 // VoiceService.swift
 import Foundation
 import AVFoundation
+import UIKit
 
 class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     static let shared = VoiceService()
@@ -63,6 +64,14 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         let hasCached = await MainActor.run { self.audioCache[cacheKey] != nil }
         guard !hasCached else { return }
 
+        let bgTaskId = await MainActor.run {
+            UIApplication.shared.beginBackgroundTask(withName: "TTS-Prefetch") {}
+        }
+        defer {
+            Task { @MainActor in
+                if bgTaskId != .invalid { UIApplication.shared.endBackgroundTask(bgTaskId) }
+            }
+        }
         do {
             var request = URLRequest(url: supabaseURL)
             request.httpMethod = "POST"
@@ -121,7 +130,15 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             }
         }
 
-        // 缓存未命中：走原有网络下载路径
+        // 缓存未命中：走原有网络下载路径（后台任务保护，防止熄屏中断）
+        let bgTaskId = await MainActor.run {
+            UIApplication.shared.beginBackgroundTask(withName: "TTS-Download") {}
+        }
+        defer {
+            Task { @MainActor in
+                if bgTaskId != .invalid { UIApplication.shared.endBackgroundTask(bgTaskId) }
+            }
+        }
         do {
             // 1. 发送请求
             var request = URLRequest(url: supabaseURL)
@@ -234,7 +251,15 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             }
         }
 
-        // 缓存未命中：走网络下载
+        // 缓存未命中：走网络下载（后台任务保护，防止熄屏中断）
+        let bgTaskId = await MainActor.run {
+            UIApplication.shared.beginBackgroundTask(withName: "TTS-Immediate") {}
+        }
+        defer {
+            Task { @MainActor in
+                if bgTaskId != .invalid { UIApplication.shared.endBackgroundTask(bgTaskId) }
+            }
+        }
         do {
             var request = URLRequest(url: supabaseURL)
             request.httpMethod = "POST"
