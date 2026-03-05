@@ -248,9 +248,14 @@ struct ActiveRunView: View {
                                             .foregroundColor(.white.opacity(0.7))
                                     }
                                 }
-                                Text("心率")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white.opacity(0.7))
+                                HStack(spacing: 3) {
+                                    Text("心率")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text("· HealthKit")
+                                        .font(.system(size: 9))
+                                        .foregroundColor(.white.opacity(0.45))
+                                }
                             }
                         }
                     }
@@ -679,11 +684,10 @@ struct ActiveRunView: View {
 
         // 获取当前距离对应的语音
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
-            logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
             // 通过 playVoiceAsset 路由：中文=本地.m4a，英文=TTS API
             if playVoiceAsset(voice) {
+                logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
                 subscriptionManager.incrementFeedbackCount()  // 触发即计数（EN/ZH统一）
-                print("🎙️ 播放距离语音: \(voice.fileName) at \(distanceKm)km")
             }
         }
     }

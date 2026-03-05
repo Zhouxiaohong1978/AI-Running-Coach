@@ -29,12 +29,12 @@ class VoiceTemplateMap {
         map[.time5min] = VoiceTemplate(
             event: .time5min,
             variants: [
-                "5分钟了！身体正在热起来，鼻子吸气嘴巴呼气，找到自己的节奏！",
+                "坚持5分钟！最难熬的阶段已经过去，接下来会越跑越轻松！",
                 "跑了5分钟，热身完成！接下来的每一步都是在为你的健康投资。",
                 "5分钟了，已消耗{calories}大卡，迈出舒服的步伐继续吧！"
             ],
             variantsEn: [
-                "Five minutes in! Your body is heating up — breathe in through your nose, out through your mouth. Find your rhythm!",
+                "Five minutes in! The hardest part is behind you — it only gets easier from here!",
                 "Five-minute mark, warm-up done! Every step from here is an investment in your health.",
                 "Five minutes down, {calories} calories burned — settle into a comfortable stride and keep going!"
             ]

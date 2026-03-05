@@ -262,23 +262,45 @@ class DynamicVoiceEngine: ObservableObject {
         let now = Date()
 
         // 1. 本次跑步是否已触发过（playOncePerRun）
-        if event.playOncePerRun && triggeredThisRun.contains(event) { return false }
+        let log = DebugLogger.shared
+        if event.playOncePerRun && triggeredThisRun.contains(event) {
+            log.log("[\(event.rawValue)] 本次跑步已触发过，跳过", category: "VOICE")
+            return false
+        }
 
         // 2. 全局冷却
-        if now.timeIntervalSince(lastSpeakTime) < globalCooldown { return false }
+        let sinceLastSpeak = now.timeIntervalSince(lastSpeakTime)
+        if sinceLastSpeak < globalCooldown {
+            log.log("[\(event.rawValue)] 全局冷却中（\(String(format: "%.0f", sinceLastSpeak))s/\(globalCooldown)s）", category: "VOICE")
+            return false
+        }
 
         // 3. 任一播放器正在播放时不打断
-        if AudioPlayerManager.shared.isPlaying { return false }
-        if VoiceService.shared.isPlaying { return false }
+        if AudioPlayerManager.shared.isPlaying {
+            log.log("[\(event.rawValue)] AudioPlayerManager播放中，跳过", category: "VOICE")
+            return false
+        }
+        if VoiceService.shared.isPlaying {
+            log.log("[\(event.rawValue)] VoiceService播放中，跳过", category: "VOICE")
+            return false
+        }
 
         // 4. 同事件冷却
         if event.perTriggerCooldown > 0,
-           let lastTime = eventLastTriggeredAt[event],
-           now.timeIntervalSince(lastTime) < event.perTriggerCooldown { return false }
+           let lastTime = eventLastTriggeredAt[event] {
+            let sinceEvent = now.timeIntervalSince(lastTime)
+            if sinceEvent < event.perTriggerCooldown {
+                log.log("[\(event.rawValue)] 事件冷却中（\(String(format: "%.0f", sinceEvent))s/\(event.perTriggerCooldown)s）", category: "VOICE")
+                return false
+            }
+        }
 
         // 5. 5 分钟滑动窗口（最多 3 条）
         recentSpeakTimes = recentSpeakTimes.filter { now.timeIntervalSince($0) < slidingWindowDuration }
-        if recentSpeakTimes.count >= slidingWindowMaxCount { return false }
+        if recentSpeakTimes.count >= slidingWindowMaxCount {
+            log.log("[\(event.rawValue)] 5分钟窗口上限（\(recentSpeakTimes.count)/\(slidingWindowMaxCount)）", category: "WARN")
+            return false
+        }
 
         return true
     }
@@ -307,17 +329,31 @@ class DynamicVoiceEngine: ObservableObject {
         let language = isEN ? "en" : "zh-Hans"
         let voiceId = VoiceService.voiceId(for: AIManager.shared.coachStyle, language: language)
 
+        let log = DebugLogger.shared
+        log.log("触发: \(event.rawValue) | voice=\(voiceId) lang=\(language)", category: "VOICE")
+        log.log("文本: \(text)", category: "VOICE")
+
         Task {
-            // scriptCooldown: 0 — DynamicVoiceEngine 已有 18s 防刷屏，不需要 VoiceService 二次冷却
-            _ = await VoiceService.shared.speak(
+            let success = await VoiceService.shared.speak(
                 text: text,
                 voice: voiceId,
                 language: language,
                 scriptCooldown: 0
             )
+            if success {
+                log.log("播放成功: \(event.rawValue)", category: "SUCCESS")
+            } else {
+                log.log("播放失败: \(event.rawValue)，5s后重试", category: "ERROR")
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                let retrySuccess = await VoiceService.shared.speak(
+                    text: text,
+                    voice: voiceId,
+                    language: language,
+                    scriptCooldown: 0
+                )
+                log.log(retrySuccess ? "重试成功: \(event.rawValue)" : "重试失败: \(event.rawValue)", category: retrySuccess ? "SUCCESS" : "ERROR")
+            }
         }
-
-        print("🎙️ [DynamicVoice] \(event.rawValue): \(text.prefix(25))…")
     }
 
     // MARK: - 变量替换
