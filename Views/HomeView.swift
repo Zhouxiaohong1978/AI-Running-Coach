@@ -147,6 +147,19 @@ struct HomeView: View {
                                         .foregroundColor(.textSecondary2)
                                 }
 
+                                // WeatherKit 必须声明：Apple Weather 版权 + 法律链接
+                                if weatherManager.currentWeather != nil {
+                                    Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
+                                        HStack(spacing: 3) {
+                                            Image(systemName: "applelogo")
+                                                .font(.system(size: 9))
+                                            Text("Weather")
+                                                .font(.system(size: 10))
+                                        }
+                                        .foregroundColor(.textSecondary2.opacity(0.55))
+                                    }
+                                }
+
                                 HStack(spacing: 8) {
                                     Text(getUserName())
                                         .font(.system(size: 40, weight: .bold))
@@ -253,7 +266,7 @@ struct HomeView: View {
                                     .foregroundColor(.white)
                             }
                         }
-                        .padding(.trailing, 24)
+                                        .padding(.trailing, 24)
                         .padding(.bottom, 100)
                     }
                 }

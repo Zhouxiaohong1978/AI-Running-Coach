@@ -22,8 +22,10 @@ struct SettingsView: View {
     @State private var isRestoringPurchase = false
     @State private var selectedCoachStyle: CoachStyle = .encouraging
     @State private var showPrivacyPolicy = false
+    @State private var showTermsOfUse = false
     @State private var showSupport = false
     @State private var showAchievements = false
+    @State private var showDebugLog = false
 
     var body: some View {
         NavigationView {
@@ -247,6 +249,27 @@ struct SettingsView: View {
                     }
                 }
 
+                // HealthKit 说明
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "heart.text.square.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(.red)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(languageManager.currentLocale == "en" ? "Apple Health Integration" : "Apple 健康整合")
+                                .font(.system(size: 15, weight: .medium))
+                            Text(languageManager.currentLocale == "en"
+                                 ? "This app reads your real-time heart rate from Apple Health (HealthKit) during runs to provide heart rate zone coaching and calorie estimates."
+                                 : "本应用在跑步时通过 Apple 健康 (HealthKit) 读取您的实时心率，用于心率区间指导和卡路里估算。")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                } header: {
+                    Text("HealthKit")
+                }
+
                 // 关于部分
                 Section {
                     HStack {
@@ -255,10 +278,24 @@ struct SettingsView: View {
                         Text("1.0.0")
                             .foregroundColor(.secondary)
                     }
+                    .onLongPressGesture(minimumDuration: 1.5) {
+                        showDebugLog = true
+                    }
 
                     Button(action: { showPrivacyPolicy = true }) {
                         HStack {
                             Text("隐私政策")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Button(action: { showTermsOfUse = true }) {
+                        HStack {
+                            Text(languageManager.currentLocale == "en" ? "Terms of Use (EULA)" : "使用条款 (EULA)")
                                 .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "chevron.right")
@@ -297,8 +334,21 @@ struct SettingsView: View {
             .sheet(isPresented: $showPrivacyPolicy) {
                 PrivacyPolicyView()
             }
+            .sheet(isPresented: $showTermsOfUse) {
+                TermsOfUseView()
+            }
             .sheet(isPresented: $showSupport) {
                 SupportView()
+            }
+            .sheet(isPresented: $showDebugLog) {
+                NavigationStack {
+                    DebugLogView()
+                        .toolbar {
+                            ToolbarItem(placement: .navigationBarTrailing) {
+                                Button("关闭") { showDebugLog = false }
+                            }
+                        }
+                }
             }
             .onChange(of: authManager.isAuthenticated) { isAuthenticated in
                 // 登录成功后自动关闭登录页面

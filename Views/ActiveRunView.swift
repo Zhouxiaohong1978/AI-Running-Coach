@@ -248,13 +248,17 @@ struct ActiveRunView: View {
                                             .foregroundColor(.white.opacity(0.7))
                                     }
                                 }
-                                HStack(spacing: 3) {
-                                    Text("心率")
+                                HStack(spacing: 4) {
+                                    Text(LanguageManager.shared.currentLocale == "en" ? "Heart Rate" : "心率")
                                         .font(.system(size: 10))
                                         .foregroundColor(.white.opacity(0.7))
-                                    Text("· HealthKit")
-                                        .font(.system(size: 9))
-                                        .foregroundColor(.white.opacity(0.45))
+                                    HStack(spacing: 2) {
+                                        Image(systemName: "heart.text.square")
+                                            .font(.system(size: 9))
+                                        Text("HealthKit")
+                                            .font(.system(size: 9, weight: .medium))
+                                    }
+                                    .foregroundColor(.white.opacity(0.6))
                                 }
                             }
                         }

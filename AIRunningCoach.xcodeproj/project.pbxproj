@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		TOULAVIEWBUILDFILE0001 /* TermsOfUseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */; };
 		013E8DF120C6E48A11C0550B /* RunRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AAA3D42DA1F0FE41EBD41F /* RunRecord.swift */; };
 		21AA9534577C9498A99CFB43 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B78260DAB77DEDF48D8765 /* ContentView.swift */; };
 		22BD2B8A7BD2B0444558525F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C65651F0929BD30431988091 /* SettingsView.swift */; };
@@ -65,6 +64,7 @@
 		EE22222222222222LANGUAGE2 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11111111111111LANGUAGE1 /* LanguageManager.swift */; };
 		ER11111111111111111111ER /* EnrichedRunContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = ER22222222222222222222ER /* EnrichedRunContext.swift */; };
 		HK11111111111111111111HK /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = HK22222222222222222222HK /* HealthKitManager.swift */; };
+		TOULAVIEWBUILDFILE0001 /* TermsOfUseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */; };
 		VL11111111111111111111VL /* VoiceTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = VL22222222222222222222VL /* VoiceTemplate.swift */; };
 		VT11111111111111111111VT /* VoiceTemplateMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = VT22222222222222222222VT /* VoiceTemplateMap.swift */; };
 /* End PBXBuildFile section */
@@ -125,11 +125,10 @@
 		ER22222222222222222222ER /* EnrichedRunContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnrichedRunContext.swift; sourceTree = "<group>"; };
 		F9F338235E518B473D85BE2D /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		FDBBC3E5FE2F8294D0433767 /* AIRunningCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIRunningCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		GPX6MIN000000000000000001 /* SimulatedRun_6min.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = SimulatedRun_6min.gpx; sourceTree = "<group>"; };
-		TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfUseView.swift; sourceTree = "<group>"; };
 		FF11111111111111111111FF /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
 		FF22222222222222222222FF /* VoiceAssetMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssetMap.swift; sourceTree = "<group>"; };
 		HK22222222222222222222HK /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		TOULAVIEWFILEREF0001 /* TermsOfUseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfUseView.swift; sourceTree = "<group>"; };
 		VL22222222222222222222VL /* VoiceTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTemplate.swift; sourceTree = "<group>"; };
 		VT22222222222222222222VT /* VoiceTemplateMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTemplateMap.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -163,7 +162,6 @@
 				B36821D05F7DD4C28B01B428 /* Assets.xcassets */,
 				DDSPLASHMP4FILEREF /* splash.mp4 */,
 				A2748FE8AA57D3D4216DA4BB /* CLAUDE.md */,
-				GPX6MIN000000000000000001 /* SimulatedRun_6min.gpx */,
 				569AAD41CFF77AC7B4D12F2E /* Managers */,
 				3F5C132E5FDB4128CB8C1BFC /* Models */,
 				FDDCE35C081BE8B69CC0059F /* Utils */,
@@ -535,7 +533,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";
@@ -546,10 +544,7 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-					location,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = "audio location";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -580,7 +575,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";
@@ -591,10 +586,7 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要访问您的位置信息来记录跑步轨迹和计算距离";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-					location,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = "audio location";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

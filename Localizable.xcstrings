@@ -300,6 +300,7 @@
       }
     },
     "🏆 成就解锁" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -329,6 +330,9 @@
         }
       }
     },
+    "🔥" : {
+
+    },
     "🧪 冷却机制测试" : {
       "localizations" : {
         "en" : {
@@ -338,6 +342,9 @@
           }
         }
       }
+    },
+    "1 run logged — keep going!" : {
+
     },
     "1.0.0" : {
       "localizations" : {
@@ -476,6 +483,9 @@
       }
     },
     "1614103587@qq.com" : {
+
+    },
+    "Achievement\nUnlocked" : {
 
     },
     "Achievements" : {
@@ -689,7 +699,13 @@
     "All 6" : {
 
     },
+    "Apple Health Integration" : {
+
+    },
     "Apple Standard EULA" : {
+
+    },
+    "Apple 健康整合" : {
 
     },
     "Apple 标准最终用户许可协议" : {
@@ -698,7 +714,16 @@
     "Basic" : {
 
     },
+    "Beat %lld%% of runners" : {
+
+    },
     "bpm" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Choose how to use your achievement card" : {
 
     },
     "Close" : {
@@ -714,6 +739,9 @@
     "Cloud Sync" : {
 
     },
+    "Complete a run to see your pace trend" : {
+
+    },
     "Contact Us · 联系我们" : {
 
     },
@@ -721,6 +749,9 @@
 
     },
     "Exclusive price for first 1,000 users" : {
+
+    },
+    "Flip Card (View Stats)" : {
 
     },
     "🆓 免费 vs 👑 Pro" : {
@@ -736,6 +767,9 @@
     "Full" : {
 
     },
+    "Generating..." : {
+
+    },
     "GPS ACTIVE" : {
       "localizations" : {
         "en" : {
@@ -745,6 +779,12 @@
           }
         }
       }
+    },
+    "HealthKit" : {
+
+    },
+    "Heart Rate" : {
+
     },
     "Hello, world!" : {
       "localizations" : {
@@ -810,6 +850,9 @@
     "Runs" : {
 
     },
+    "Save to Photos" : {
+
+    },
     "Send Email" : {
 
     },
@@ -822,6 +865,24 @@
           }
         }
       }
+    },
+    "Share / Save" : {
+
+    },
+    "Share Achievement" : {
+
+    },
+    "Share or Save?" : {
+
+    },
+    "Share to Social Platforms" : {
+
+    },
+    "Share to WeChat, Instagram, Weibo or save to Photos" : {
+
+    },
+    "Stats" : {
+
     },
     "Still need help? Email us within 1–2 business days." : {
 
@@ -848,6 +909,9 @@
     "Terms of Use (EULA)" : {
 
     },
+    "This app reads your real-time heart rate from Apple Health (HealthKit) during runs to provide heart rate zone coaching and calorie estimates." : {
+
+    },
     "Training Goals" : {
 
     },
@@ -860,7 +924,13 @@
     "Upgrade to Pro for unlimited coaching" : {
 
     },
+    "View Front" : {
+
+    },
     "Voice Coaching" : {
+
+    },
+    "Weather" : {
 
     },
     "三日连跑" : {
@@ -1010,6 +1080,9 @@
 
     },
     "使用条款 (EULA)" : {
+
+    },
+    "保存到相册" : {
 
     },
     "保证充足的休息和营养" : {
@@ -1296,6 +1369,9 @@
         }
       }
     },
+    "击败了 %lld%% 的跑者" : {
+
+    },
     "分享" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1307,7 +1383,14 @@
         }
       }
     },
+    "分享 / 保存" : {
+
+    },
+    "分享到社交平台" : {
+
+    },
     "分享成就" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1326,6 +1409,9 @@
           }
         }
       }
+    },
+    "分享或保存？" : {
+
     },
     "切换后立即生效" : {
       "extractionState" : "stale",
@@ -1669,6 +1755,9 @@
         }
       }
     },
+    "可直接分享到微信、微博、Instagram 或保存到相册" : {
+
+    },
     "右上角麦克风图标可随时开关语音" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1779,6 +1868,7 @@
       }
     },
     "在分享面板中选择目标应用（如微信、小红书等）" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1996,6 +2086,9 @@
         }
       }
     },
+    "完成跑步后查看配速趋势" : {
+
+    },
     "完整" : {
       "localizations" : {
         "en" : {
@@ -2098,6 +2191,9 @@
           }
         }
       }
+    },
+    "已有1次记录，继续跑步解锁趋势图" : {
+
     },
     "已登录" : {
       "localizations" : {
@@ -2395,6 +2491,9 @@
         }
       }
     },
+    "成就解锁" : {
+
+    },
     "我们将发送6位验证码到您的邮箱" : {
       "localizations" : {
         "en" : {
@@ -2550,6 +2649,9 @@
           }
         }
       }
+    },
+    "数据统计" : {
+
     },
     "斤斤计较" : {
       "extractionState" : "stale",
@@ -2844,6 +2946,9 @@
         }
       }
     },
+    "本应用在跑步时通过 Apple 健康 (HealthKit) 读取您的实时心率，用于心率区间指导和卡路里估算。" : {
+
+    },
     "极限挑战" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2864,6 +2969,9 @@
           }
         }
       }
+    },
+    "查看正面" : {
+
     },
     "查看跑步过程中的详细运行日志，用于调试" : {
       "extractionState" : "stale",
@@ -3380,7 +3488,11 @@
         }
       }
     },
+    "生成中..." : {
+
+    },
     "生成图片后，可分享到微信、朋友圈、微博、小红书等平台" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3401,6 +3513,7 @@
       }
     },
     "生成并分享" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3778,6 +3891,9 @@
           }
         }
       }
+    },
+    "翻转卡片（查看数据）" : {
+
     },
     "联系我们：1614103587@qq.com" : {
       "localizations" : {
@@ -4602,6 +4718,9 @@
           }
         }
       }
+    },
+    "选择成就卡片的使用方式" : {
+
     },
     "选择每周训练天数和训练强度" : {
       "extractionState" : "stale",

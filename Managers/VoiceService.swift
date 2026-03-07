@@ -24,7 +24,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         case ("en", .strict):       return "Aiden"     // 英文磁性男声
         case ("en", _):             return "Katerina"  // 英文温柔女声
         case (_, .strict):          return "Kai"       // 中文磁性男声
-        default:                    return "Qianyue"   // 中文温柔女声
+        default:                    return "Cherry"    // 中文温柔女声（API名，控制台显示为"千悦"）
         }
     }
 
@@ -95,7 +95,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     func speak(text: String, voice: String = "cherry", language: String = "zh-Hans", scriptCooldown: TimeInterval = 0, cacheKey: String? = nil) async -> Bool {
-        print("🔊 开始 TTS 请求: \(text.prefix(20))...")
+        DebugLogger.shared.log("TTS请求: voice=\(voice) lang=\(language) text=\(text.prefix(20))", category: "VOICE")
 
         // 检查冷却
         guard canSpeakNow(minimumInterval: scriptCooldown) else {
@@ -155,7 +155,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 return false
             }
 
-            print("📥 收到响应: \(httpResponse.statusCode), 大小: \(data.count) 字节")
+            DebugLogger.shared.log("响应: \(httpResponse.statusCode) \(data.count)字节", category: httpResponse.statusCode == 200 ? "SUCCESS" : "ERROR")
 
             guard httpResponse.statusCode == 200 else {
                 print("❌ HTTP 错误: \(httpResponse.statusCode)")
