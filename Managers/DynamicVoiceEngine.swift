@@ -47,6 +47,9 @@ class DynamicVoiceEngine: ObservableObject {
     private var personalBestDistanceKm: Double = 0
     private var prAnnounced = false
 
+    // 防变体重复：记录每个事件上次使用的变体索引
+    private var lastVariantIndex: [VoiceTriggerEvent: Int] = [:]
+
     private init() {}
 
     // MARK: - 跑步开始时重置
@@ -61,6 +64,7 @@ class DynamicVoiceEngine: ObservableObject {
         hasEnteredFatBurnZone = false
         self.personalBestDistanceKm = personalBestDistanceKm
         prAnnounced = false
+        lastVariantIndex.removeAll()
         print("🔄 DynamicVoiceEngine 已重置，历史最佳: \(String(format: "%.2f", personalBestDistanceKm))km")
     }
 
@@ -128,10 +132,10 @@ class DynamicVoiceEngine: ObservableObject {
             if let start = highHRStartTime,
                Date().timeIntervalSince(start) >= 10,
                canTrigger(.hrTooHigh) {
-                let text = resolved(
-                    VoiceTemplateMap.shared.template(for: .hrTooHigh).randomVariant(isEN: isEN),
-                    ctx: ctx, isEN: isEN
-                )
+                let result = VoiceTemplateMap.shared.template(for: .hrTooHigh)
+                    .randomVariant(isEN: isEN, excludingIndex: lastVariantIndex[.hrTooHigh])
+                lastVariantIndex[.hrTooHigh] = result.index
+                let text = resolved(result.text, ctx: ctx, isEN: isEN)
                 return (.hrTooHigh, text)
             }
         } else {
@@ -195,18 +199,18 @@ class DynamicVoiceEngine: ObservableObject {
         let delta = olderAvg - recentAvg
 
         if delta > 0.5 && canTrigger(.paceImproved) {   // 提升超过 30 秒/公里
-            let text = resolved(
-                VoiceTemplateMap.shared.template(for: .paceImproved).randomVariant(isEN: isEN),
-                ctx: ctx, isEN: isEN
-            )
+            let result = VoiceTemplateMap.shared.template(for: .paceImproved)
+                .randomVariant(isEN: isEN, excludingIndex: lastVariantIndex[.paceImproved])
+            lastVariantIndex[.paceImproved] = result.index
+            let text = resolved(result.text, ctx: ctx, isEN: isEN)
             return (.paceImproved, text)
         }
 
         if delta < -0.75 && canTrigger(.paceDropped) {  // 下降超过 45 秒/公里
-            let text = resolved(
-                VoiceTemplateMap.shared.template(for: .paceDropped).randomVariant(isEN: isEN),
-                ctx: ctx, isEN: isEN
-            )
+            let result = VoiceTemplateMap.shared.template(for: .paceDropped)
+                .randomVariant(isEN: isEN, excludingIndex: lastVariantIndex[.paceDropped])
+            lastVariantIndex[.paceDropped] = result.index
+            let text = resolved(result.text, ctx: ctx, isEN: isEN)
             return (.paceDropped, text)
         }
 

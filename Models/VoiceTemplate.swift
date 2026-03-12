@@ -108,6 +108,20 @@ struct VoiceTemplate {
         return pool.randomElement() ?? pool[0]
     }
 
+    /// 随机选取一条变体，排除上次使用的索引（避免相邻两次听到相同内容）
+    func randomVariant(isEN: Bool, excludingIndex lastIndex: Int?) -> (text: String, index: Int) {
+        let pool = isEN ? variantsEn : variants
+        guard !pool.isEmpty else { return ("", 0) }
+        // 只有多于 1 条时才排除
+        if pool.count > 1, let last = lastIndex {
+            let candidates = pool.indices.filter { $0 != last }
+            let idx = candidates.randomElement() ?? 0
+            return (pool[idx], idx)
+        }
+        let idx = Int.random(in: 0..<pool.count)
+        return (pool[idx], idx)
+    }
+
     /// 根据训练目标选取最合适的变体
     /// 减肥燃脂目标：优先返回含 {calories}/{food} 占位符的变体，强化燃脂感知
     /// 其他目标：随机返回
