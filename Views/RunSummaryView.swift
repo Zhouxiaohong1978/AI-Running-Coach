@@ -23,6 +23,8 @@ struct RunSummaryView: View {
     @State private var aiScene: String? = nil
     @State private var hasAutoPlayedAchievement = false
     @State private var loadingAchievementId: String? = nil
+    @State private var showAIConsent = false
+    @AppStorage("ai_data_consent_granted") private var aiConsentGranted = false
 
     init(runRecord: RunRecord? = nil) {
         self.runRecord = runRecord
@@ -362,6 +364,16 @@ struct RunSummaryView: View {
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSheetView()
         }
+        .sheet(isPresented: $showAIConsent) {
+            AIDataConsentView(
+                onAgree: {
+                    if let record = runRecord {
+                        executeAISuggestion(record: record)
+                    }
+                },
+                onDecline: {}
+            )
+        }
     }
 
     // MARK: - Formatting
@@ -613,6 +625,16 @@ struct RunSummaryView: View {
             return
         }
 
+        // 首次使用 AI 功能前检查授权
+        if !aiConsentGranted {
+            showAIConsent = true
+            return
+        }
+
+        executeAISuggestion(record: record)
+    }
+
+    private func executeAISuggestion(record: RunRecord) {
         isLoadingAI = true
 
         Task {

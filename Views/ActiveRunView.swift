@@ -51,6 +51,7 @@ struct ActiveRunView: View {
     @State private var achievement300calWarned = false  // 是否已提醒300卡成就
     @State private var showUpgradeHint = false  // 免费用户反馈用完时的升级提示
     @State private var showPaywallFromRun = false // 跑步中点击升级提示弹出付费墙
+    @AppStorage("ai_data_consent_granted") private var aiConsentGranted = false
 
     var body: some View {
         ZStack {
@@ -400,17 +401,17 @@ struct ActiveRunView: View {
         .onChange(of: locationManager.distance) { newDistance in
             checkAndAnnounce(distance: newDistance)
             // 距离更新时也驱动动态引擎（覆盖配速/卡路里/个人记录事件）
-            dynamicEngine.update(context: buildRunContext())
+            if aiConsentGranted { dynamicEngine.update(context: buildRunContext()) }
         }
         .onChange(of: locationManager.duration) { newDuration in
             // 每 10 秒驱动一次动态引擎（覆盖时间里程碑事件）
-            if Int(newDuration) % 10 == 0 {
+            if aiConsentGranted && Int(newDuration) % 10 == 0 {
                 dynamicEngine.update(context: buildRunContext())
             }
         }
         .onChange(of: healthKit.heartRate) { _ in
             // 心率变化时驱动引擎（覆盖心率区间事件）
-            dynamicEngine.update(context: buildRunContext())
+            if aiConsentGranted { dynamicEngine.update(context: buildRunContext()) }
         }
         .onChange(of: dynamicEngine.showBubble) { showing in
             // 动态引擎触发气泡时同步显示
@@ -588,6 +589,10 @@ struct ActiveRunView: View {
             return true
         } else {
             // 中文：播放本地预录制 .m4a 文件
+            // 如果 TTS 正在播放，跳过本地语音避免并行播报
+            if VoiceService.shared.isPlaying {
+                return false
+            }
             if audioPlayerManager.play(voice.fileName, priority: voice.priority) {
                 showFeedbackBubble(voice.description)
                 return true

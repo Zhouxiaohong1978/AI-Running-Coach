@@ -49,6 +49,7 @@
 		CC88888888888888888888CC /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD88888888888888888888DD /* Achievement.swift */; };
 		CC99999999999999999999CC /* AchievementSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD99999999999999999999DD /* AchievementSheetView.swift */; };
 		CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */; };
+		CCAIDATACONSENTVIEWBUILD /* AIDataConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAIDATACONSENTVIEWFILE /* AIDataConsentView.swift */; };
 		CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */; };
 		CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */; };
 		CCPRIVACYPOLICYVIEWBUILD /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */; };
@@ -113,6 +114,7 @@
 		DD88888888888888888888DD /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achievement.swift; sourceTree = "<group>"; };
 		DD99999999999999999999DD /* AchievementSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSheetView.swift; sourceTree = "<group>"; };
 		DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementShareView.swift; sourceTree = "<group>"; };
+		DDAIDATACONSENTVIEWFILE /* AIDataConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIDataConsentView.swift; sourceTree = "<group>"; };
 		DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementTestView.swift; sourceTree = "<group>"; };
 		DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpGuideView.swift; sourceTree = "<group>"; };
 		DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				DDAAAAAAAAAAAAAAAAAAADD /* AchievementShareView.swift */,
 				DDHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift */,
 				DDPRIVACYPOLICYVIEWFILE /* PrivacyPolicyView.swift */,
+				DDAIDATACONSENTVIEWFILE /* AIDataConsentView.swift */,
 				DDSUPPORTVIEWFILEREF /* SupportView.swift */,
 				DDSPLASHVIDEOVIEWFILE /* SplashVideoView.swift */,
 				DDBBBBBBBBBBBBBBBBBBBBDD /* AchievementTestView.swift */,
@@ -388,6 +391,7 @@
 				CCAAAAAAAAAAAAAAAAAAACC /* AchievementShareView.swift in Sources */,
 				CCHELPGUIDEVIEWHELPGUIDE /* HelpGuideView.swift in Sources */,
 				CCPRIVACYPOLICYVIEWBUILD /* PrivacyPolicyView.swift in Sources */,
+				CCAIDATACONSENTVIEWBUILD /* AIDataConsentView.swift in Sources */,
 				CCSUPPORTVIEWBUILDPHASE /* SupportView.swift in Sources */,
 				CCSPLASHVIDEOVIEWBUILD /* SplashVideoView.swift in Sources */,
 				CCBBBBBBBBBBBBBBBBBBBBCC /* AchievementTestView.swift in Sources */,
@@ -533,7 +537,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";
@@ -575,7 +579,7 @@
 				CODE_SIGN_ENTITLEMENTS = AIRunningCoach.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AIRunningCoach-Info.plist";

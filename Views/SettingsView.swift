@@ -26,6 +26,8 @@ struct SettingsView: View {
     @State private var showSupport = false
     @State private var showAchievements = false
     @State private var showDebugLog = false
+    @State private var showRevokeConsentAlert = false
+    @AppStorage("ai_data_consent_granted") private var aiConsentGranted = false
 
     var body: some View {
         NavigationView {
@@ -284,13 +286,47 @@ struct SettingsView: View {
 
                     Button(action: { showPrivacyPolicy = true }) {
                         HStack {
-                            Text("隐私政策")
+                            Text(languageManager.currentLocale == "en" ? "Privacy Policy" : "隐私政策")
                                 .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)
                         }
+                    }
+
+                    // AI 数据授权管理
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(languageManager.currentLocale == "en" ? "AI Data Authorization" : "AI 数据授权")
+                                .foregroundColor(.primary)
+                            Text(aiConsentGranted
+                                 ? (languageManager.currentLocale == "en" ? "Authorized" : "已授权")
+                                 : (languageManager.currentLocale == "en" ? "Not authorized" : "未授权"))
+                                .font(.system(size: 12))
+                                .foregroundColor(aiConsentGranted ? .green : .orange)
+                        }
+                        Spacer()
+                        if aiConsentGranted {
+                            Button(languageManager.currentLocale == "en" ? "Revoke" : "撤回授权") {
+                                showRevokeConsentAlert = true
+                            }
+                            .font(.system(size: 13))
+                            .foregroundColor(.red)
+                        }
+                    }
+                    .alert(
+                        languageManager.currentLocale == "en" ? "Revoke AI Authorization?" : "撤回 AI 数据授权？",
+                        isPresented: $showRevokeConsentAlert
+                    ) {
+                        Button(languageManager.currentLocale == "en" ? "Revoke" : "撤回", role: .destructive) {
+                            aiConsentGranted = false
+                        }
+                        Button(languageManager.currentLocale == "en" ? "Cancel" : "取消", role: .cancel) {}
+                    } message: {
+                        Text(languageManager.currentLocale == "en"
+                             ? "AI features (training plan optimization, voice coaching) will be unavailable until you re-authorize."
+                             : "撤回后，AI 功能（训练计划优化、智能语音教练）将停用，直至重新授权。")
                     }
 
                     Button(action: { showTermsOfUse = true }) {

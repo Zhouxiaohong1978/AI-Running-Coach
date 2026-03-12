@@ -18,6 +18,8 @@ struct GoalSelectionView: View {
     @State private var isGenerating = false
     @State private var errorMessage: String?
     @State private var showPaywall = false
+    @State private var showAIConsent = false
+    @AppStorage("ai_data_consent_granted") private var aiConsentGranted = false
 
     // 用户偏好设置
     @State private var weeklyFrequency: Int = 3
@@ -71,6 +73,14 @@ struct GoalSelectionView: View {
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showAIConsent) {
+                if let goal = selectedGoal {
+                    AIDataConsentView(
+                        onAgree: { executeGeneratePlan(goal: goal) },
+                        onDecline: {}
+                    )
+                }
             }
             .disabled(isGenerating)
             .overlay {
@@ -423,6 +433,16 @@ struct GoalSelectionView: View {
     private func generatePlan() {
         guard let goal = selectedGoal else { return }
 
+        // 首次使用 AI 功能前检查授权
+        if !aiConsentGranted {
+            showAIConsent = true
+            return
+        }
+
+        executeGeneratePlan(goal: goal)
+    }
+
+    private func executeGeneratePlan(goal: TrainingGoal) {
         let preferences = TrainingPreferences(
             weeklyFrequency: weeklyFrequency,
             preferredDays: Array(preferredDays).sorted(),

@@ -54,17 +54,28 @@ struct PrivacyPolicyView: View {
 
                     bilingualCard(
                         sectionNumber: "3",
-                        enTitle: "Information Sharing", zhTitle: "信息共享",
-                        enContent: "We do not sell your data. Third-party sharing only:",
-                        zhContent: "我们不出售您的数据。仅在以下情况下共享：",
+                        enTitle: "AI Service & Data Sharing", zhTitle: "AI 服务与数据共享",
+                        enContent: "We do not sell your data. The following third-party services receive data with your explicit consent:",
+                        zhContent: "我们不出售您的数据。以下第三方服务仅在您明确授权后接收数据：",
                         enBullets: [
-                            ("RevenueCat", "Subscription processing — anonymous ID only."),
-                            ("Alibaba Cloud", "AI plan generation — training goals only, no identity info.")
+                            ("Alibaba Cloud Bailian (DashScope)",
+                             "Provides AI training plan generation and real-time voice coaching. Data sent: pace, distance, duration, heart rate (if available), training goal, historical run count and distance, coaching text for voice synthesis. Data is not stored by the AI provider beyond the request. See: aliyun.com privacy policy."),
+                            ("RevenueCat",
+                             "Subscription management — anonymous user ID only, no run data shared.")
                         ],
                         zhBullets: [
-                            ("RevenueCat", "处理订阅，仅共享匿名用户 ID。"),
-                            ("阿里云百炼", "生成 AI 计划，仅发送训练目标，不含身份信息。")
+                            ("阿里云百炼 (DashScope)",
+                             "提供 AI 训练计划生成和实时语音教练服务。发送的数据包括：配速、距离、时长、心率（如有）、训练目标、历史跑步次数与里程、用于语音合成的教练文本。AI 服务商不超出请求范围存储数据。详见阿里云隐私政策。"),
+                            ("RevenueCat",
+                             "处理订阅，仅共享匿名用户 ID，不含跑步数据。")
                         ]
+                    )
+
+                    bilingualCard(
+                        sectionNumber: nil,
+                        enTitle: nil, zhTitle: nil,
+                        enContent: "Before using AI features, the App will ask for your explicit consent. You can withdraw consent at any time in Settings → Privacy. Withdrawing consent disables AI-powered features but does not affect run tracking.",
+                        zhContent: "首次使用 AI 功能前，App 将请求您的明确授权。您可随时在「设置 → 隐私」中撤回授权，撤回后 AI 功能将停用，但不影响跑步记录功能。"
                     )
 
                     bilingualCard(
