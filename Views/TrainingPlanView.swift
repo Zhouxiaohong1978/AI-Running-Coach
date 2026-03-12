@@ -55,6 +55,12 @@ struct TrainingPlanView: View {
             .navigationTitle("训练计划")
             .onAppear {
                 loadSavedPlan()
+                // 自动跳到当前进行的周，避免用户误改历史周
+                if let startDate = UserDefaults.standard.object(forKey: "training_plan_start_date") as? Date {
+                    let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+                    let currentWeek = max(1, days / 7 + 1)
+                    selectedWeek = currentWeek
+                }
             }
             .sheet(isPresented: $showGoalSelection) {
                 GoalSelectionView(onPlanGenerated: { plan in
@@ -194,14 +200,24 @@ struct TrainingPlanView: View {
         let isRest = task.type == "rest"
 
         if isRest {
-            // 休息日→本周训练日（只改当前周）
-            Button("改为轻松跑") {
+            // 仅本周加课：只改当前周，不影响 preferences 和 AI 重优化逻辑
+            Button("仅本周加课") {
                 var newTask = task
                 newTask.type = "easy_run"
                 newTask.targetDistance = 3.0
                 newTask.targetPace = "7'00\""
                 newTask.description = "轻松跑3.0公里"
                 updateTask(newTask, weekNumber: weekNumber)
+            }
+            // 更新计划：在 preferences 里加入该天，触发 AI 按新频率重优化全计划
+            Button("更新计划（每周+1天）") {
+                var newTask = task
+                newTask.type = "easy_run"
+                newTask.targetDistance = 3.0
+                newTask.targetPace = "7'00\""
+                newTask.description = "轻松跑3.0公里"
+                updateTask(newTask, weekNumber: weekNumber)
+                addDayToWeeklyPlan(dayOfWeek: task.dayOfWeek)
             }
         } else {
             // 训练日：调整距离或改为休息（均只改当前周）
@@ -240,6 +256,25 @@ struct TrainingPlanView: View {
         }
 
         Button("取消", role: .cancel) {}
+    }
+
+    /// 把某天加入 preferences.preferredDays，更新每周频率，触发 AI 重优化
+    private func addDayToWeeklyPlan(dayOfWeek: Int) {
+        guard var plan = currentPlan else { return }
+        let old = plan.preferences ?? TrainingPreferences(weeklyFrequency: 4, preferredDays: [], intensityLevel: "balanced")
+        var newDays = old.preferredDays
+        if !newDays.contains(dayOfWeek) {
+            newDays.append(dayOfWeek)
+            newDays.sort()
+        }
+        plan.preferences = TrainingPreferences(
+            weeklyFrequency: old.weeklyFrequency + 1,
+            preferredDays: newDays,
+            intensityLevel: old.intensityLevel
+        )
+        currentPlan = plan
+        savePlan(plan)
+        regeneratePlan()
     }
 
     /// 根据用户修改重新生成计划（混合模式）

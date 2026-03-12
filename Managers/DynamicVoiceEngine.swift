@@ -262,26 +262,18 @@ class DynamicVoiceEngine: ObservableObject {
         let now = Date()
 
         // 1. 本次跑步是否已触发过（playOncePerRun）
-        let log = DebugLogger.shared
         if event.playOncePerRun && triggeredThisRun.contains(event) {
-            log.log("[\(event.rawValue)] 本次跑步已触发过，跳过", category: "VOICE")
             return false
         }
 
         // 2. 全局冷却
         let sinceLastSpeak = now.timeIntervalSince(lastSpeakTime)
         if sinceLastSpeak < globalCooldown {
-            log.log("[\(event.rawValue)] 全局冷却中（\(String(format: "%.0f", sinceLastSpeak))s/\(globalCooldown)s）", category: "VOICE")
             return false
         }
 
         // 3. 任一播放器正在播放时不打断
-        if AudioPlayerManager.shared.isPlaying {
-            log.log("[\(event.rawValue)] AudioPlayerManager播放中，跳过", category: "VOICE")
-            return false
-        }
-        if VoiceService.shared.isPlaying {
-            log.log("[\(event.rawValue)] VoiceService播放中，跳过", category: "VOICE")
+        if AudioPlayerManager.shared.isPlaying || VoiceService.shared.isPlaying {
             return false
         }
 
@@ -290,7 +282,6 @@ class DynamicVoiceEngine: ObservableObject {
            let lastTime = eventLastTriggeredAt[event] {
             let sinceEvent = now.timeIntervalSince(lastTime)
             if sinceEvent < event.perTriggerCooldown {
-                log.log("[\(event.rawValue)] 事件冷却中（\(String(format: "%.0f", sinceEvent))s/\(event.perTriggerCooldown)s）", category: "VOICE")
                 return false
             }
         }
@@ -298,7 +289,7 @@ class DynamicVoiceEngine: ObservableObject {
         // 5. 5 分钟滑动窗口（最多 3 条）
         recentSpeakTimes = recentSpeakTimes.filter { now.timeIntervalSince($0) < slidingWindowDuration }
         if recentSpeakTimes.count >= slidingWindowMaxCount {
-            log.log("[\(event.rawValue)] 5分钟窗口上限（\(recentSpeakTimes.count)/\(slidingWindowMaxCount)）", category: "WARN")
+            DebugLogger.shared.log("[\(event.rawValue)] 5分钟窗口上限", category: "WARN")
             return false
         }
 

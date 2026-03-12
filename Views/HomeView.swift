@@ -150,13 +150,17 @@ struct HomeView: View {
                                 // WeatherKit 必须声明：Apple Weather 版权 + 法律链接
                                 if weatherManager.currentWeather != nil {
                                     Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-                                        HStack(spacing: 3) {
+                                        HStack(spacing: 4) {
                                             Image(systemName: "applelogo")
-                                                .font(.system(size: 9))
+                                                .font(.system(size: 10, weight: .medium))
                                             Text("Weather")
-                                                .font(.system(size: 10))
+                                                .font(.system(size: 11, weight: .medium))
                                         }
-                                        .foregroundColor(.textSecondary2.opacity(0.55))
+                                        .foregroundColor(.white.opacity(0.75))
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(Color.white.opacity(0.12))
+                                        .cornerRadius(6)
                                     }
                                 }
 
@@ -333,22 +337,17 @@ struct HomeView: View {
 
         // 1. 从Supabase user_metadata获取用户名（云端存储，重装App后仍可恢复）
         if let userName = authManager.currentUserName, !userName.isEmpty {
-            // 同步到本地缓存
             UserDefaults.standard.set(userName, forKey: "user_name")
-            print("🏠 [HomeView] 从云端读取用户名: \(userName)")
             return userName
         }
 
         // 2. 从UserDefaults获取用户名（本地缓存）
         if let userName = UserDefaults.standard.string(forKey: "user_name"), !userName.isEmpty {
-            print("🏠 [HomeView] 从本地缓存读取用户名: \(userName)")
             return userName
         }
 
         // 3. 默认显示兜底名
-        let fallback = LanguageManager.shared.currentLocale == "en" ? "Runner" : "跑友"
-        print("🏠 [HomeView] 使用默认名称: \(fallback)")
-        return fallback
+        return LanguageManager.shared.currentLocale == "en" ? "Runner" : "跑友"
     }
 
     private var todayDateText: String {

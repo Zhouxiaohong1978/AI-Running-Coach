@@ -97,10 +97,8 @@ final class AudioPlayerManager: NSObject, ObservableObject {
             return false
         }
 
-        // 检查是否已播放过
+        // 检查是否已播放过（静默跳过，不打日志避免spam）
         if !allowRepeat && playedAudios.contains(fileName) {
-            print("⏭️ 音频已播放过，跳过: \(fileName)")
-            logger.log("⏭️ 已播放过，跳过: \(fileName)", category: "WARN")
             return false
         }
 

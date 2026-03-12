@@ -485,8 +485,16 @@ final class AIManager: ObservableObject {
                 mergedWeek.dailyTasks = templateWeek.dailyTasks.map { templateTask in
                     var mergedTask = templateTask
                     if let aiTask = aiWeek.dailyTasks.first(where: { $0.dayOfWeek == templateTask.dayOfWeek }) {
-                        // 保留模板的 dayOfWeek 和 targetDistance，使用 AI 的 type/pace/description
+                        // 保留模板的 dayOfWeek，使用 AI 的 type/pace/description
                         mergedTask.type = aiTask.type
+                        // 若 AI 把类型改为训练类型，但模板该天距离为 nil/0
+                        // （场景：模板该天曾被改为休息日），从 AI 取距离避免显示"0.0 公里"
+                        if mergedTask.type != "rest" {
+                            let templateDist = templateTask.targetDistance ?? 0
+                            if templateDist <= 0, let aiDist = aiTask.targetDistance, aiDist > 0 {
+                                mergedTask.targetDistance = aiDist
+                            }
+                        }
                         if let pace = aiTask.targetPace, !pace.isEmpty {
                             mergedTask.targetPace = pace
                         }

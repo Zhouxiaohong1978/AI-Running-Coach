@@ -491,6 +491,9 @@
     "Achievements" : {
 
     },
+    "Agree & Continue" : {
+
+    },
     "AI Coach Feedback" : {
 
     },
@@ -503,6 +506,15 @@
           }
         }
       }
+    },
+    "AI Data Authorization" : {
+
+    },
+    "AI Feature Authorization" : {
+
+    },
+    "AI features (training plan optimization, voice coaching) will be unavailable until you re-authorize." : {
+
     },
     "AI optimizing..." : {
 
@@ -523,6 +535,9 @@
     "AI Training Plans" : {
 
     },
+    "AI 功能数据授权" : {
+
+    },
     "AI 教练反馈" : {
       "localizations" : {
         "en" : {
@@ -532,6 +547,9 @@
           }
         }
       }
+    },
+    "AI 数据授权" : {
+
     },
     "AI 训练计划" : {
       "localizations" : {
@@ -711,6 +729,9 @@
     "Apple 标准最终用户许可协议" : {
 
     },
+    "Authorized" : {
+
+    },
     "Basic" : {
 
     },
@@ -743,6 +764,15 @@
 
     },
     "Contact Us · 联系我们" : {
+
+    },
+    "Data Recipients" : {
+
+    },
+    "Data Sent to AI Service" : {
+
+    },
+    "Decline (AI features unavailable)" : {
 
     },
     "Done" : {
@@ -818,6 +848,9 @@
     "Loading..." : {
 
     },
+    "Not authorized" : {
+
+    },
     "or finish %@" : {
 
     },
@@ -845,6 +878,12 @@
       }
     },
     "Restore Purchases" : {
+
+    },
+    "Revoke" : {
+
+    },
+    "Revoke AI Authorization?" : {
 
     },
     "Runs" : {
@@ -912,6 +951,9 @@
     "This app reads your real-time heart rate from Apple Health (HealthKit) during runs to provide heart rate zone coaching and calorie estimates." : {
 
     },
+    "To provide personalized AI coaching, this app sends your run data to a third-party AI service." : {
+
+    },
     "Training Goals" : {
 
     },
@@ -927,10 +969,19 @@
     "View Front" : {
 
     },
+    "View Full Privacy Policy" : {
+
+    },
+    "View Privacy Policy" : {
+
+    },
     "Voice Coaching" : {
 
     },
     "Weather" : {
+
+    },
+    "Your data is used only to generate personalized coaching content. It is not sold or used for advertising. You can withdraw consent anytime in Settings → Privacy." : {
 
     },
     "三日连跑" : {
@@ -975,6 +1026,9 @@
         }
       }
     },
+    "为提供个性化 AI 训练指导，本 App 需要将您的跑步数据发送至第三方 AI 服务。" : {
+
+    },
     "云端同步" : {
       "localizations" : {
         "en" : {
@@ -994,6 +1048,9 @@
           }
         }
       }
+    },
+    "仅本周加课" : {
+
     },
     "今天是休息日" : {
 
@@ -1721,6 +1778,9 @@
         }
       }
     },
+    "发送至 AI 服务的数据" : {
+
+    },
     "发送邮件" : {
 
     },
@@ -1768,6 +1828,9 @@
           }
         }
       }
+    },
+    "同意并继续" : {
+
     },
     "周" : {
       "localizations" : {
@@ -2182,6 +2245,9 @@
         }
       }
     },
+    "已授权" : {
+
+    },
     "已播放: %lld 条" : {
       "localizations" : {
         "en" : {
@@ -2458,6 +2524,9 @@
         }
       }
     },
+    "您的数据仅用于生成个性化训练指导，不会被出售或用于广告。您可随时在「设置 → 隐私」中撤回授权。" : {
+
+    },
     "成就" : {
 
     },
@@ -2567,6 +2636,9 @@
         }
       }
     },
+    "拒绝（AI 功能将不可用）" : {
+
+    },
     "持之以恒" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2610,6 +2682,18 @@
         }
       }
     },
+    "撤回" : {
+
+    },
+    "撤回 AI 数据授权？" : {
+
+    },
+    "撤回后，AI 功能（训练计划优化、智能语音教练）将停用，直至重新授权。" : {
+
+    },
+    "撤回授权" : {
+
+    },
     "改为休息日" : {
       "localizations" : {
         "en" : {
@@ -2621,6 +2705,7 @@
       }
     },
     "改为轻松跑" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2649,6 +2734,9 @@
           }
         }
       }
+    },
+    "数据接收方" : {
+
     },
     "数据统计" : {
 
@@ -2915,6 +3003,9 @@
         }
       }
     },
+    "更新计划（每周+1天）" : {
+
+    },
     "月订阅" : {
       "localizations" : {
         "en" : {
@@ -2935,6 +3026,9 @@
           }
         }
       }
+    },
+    "未授权" : {
+
     },
     "本地记录" : {
       "localizations" : {
@@ -2960,6 +3054,9 @@
         }
       }
     },
+    "查看完整隐私政策" : {
+
+    },
     "查看成就" : {
       "localizations" : {
         "en" : {
@@ -2983,6 +3080,9 @@
           }
         }
       }
+    },
+    "查看隐私政策" : {
+
     },
     "根据你的修改优化中" : {
       "extractionState" : "stale",
