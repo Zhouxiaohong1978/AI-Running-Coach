@@ -14,6 +14,7 @@ struct AI跑步教练App: App {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var languageManager = LanguageManager.shared
     @State private var showSplash = true
+    @AppStorage("onboarding_completed") private var onboardingCompleted = false
 
     init() {
         SubscriptionManager.shared.configure()
@@ -30,8 +31,13 @@ struct AI跑步教练App: App {
                         }
                     }
                 } else if authManager.isAuthenticated {
-                    HomeView()
-                        .environmentObject(subscriptionManager)
+                    if onboardingCompleted {
+                        HomeView()
+                            .environmentObject(subscriptionManager)
+                    } else {
+                        // 新用户引导流程
+                        OnboardingView()
+                    }
                 } else {
                     LoginView()
                 }
