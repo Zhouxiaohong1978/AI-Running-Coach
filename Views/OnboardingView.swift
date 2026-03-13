@@ -79,6 +79,9 @@ struct OnboardingView: View {
     @State private var healthGranted = false
     @State private var notifGranted = false
 
+    // 订阅 Paywall
+    @State private var showPaywall = false
+
     // AI 预览动画
     @State private var aiTypingText = ""
     @State private var aiTypingDone = false
@@ -120,6 +123,14 @@ struct OnboardingView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            // Paywall 关闭后（无论是否订阅）继续引导流程
+            if step == .aiPreview {
+                withAnimation(.easeInOut(duration: 0.35)) { step = .permissions }
+            }
+        }) {
+            PaywallView()
+        }
     }
 
     // MARK: - 步骤指示器
@@ -411,7 +422,7 @@ struct OnboardingView: View {
                 }
 
                 if selectedGoal != nil {
-                    nextButton(isEN ? "Generate My Plan →" : "生成我的计划 →", enabled: true)
+                    nextButton(isEN ? "Preview My Plan →" : "预览我的计划 →", enabled: true)
                         .padding(.bottom, 40)
                 }
             }
@@ -474,7 +485,8 @@ struct OnboardingView: View {
                 aiPlanPreviewCard
                 aiVoiceCard
 
-                nextButton(isEN ? "Set Up Permissions →" : "设置权限 →", enabled: true)
+                // 订阅转化按钮组：购买意愿最高时机
+                aiPreviewCTA
                     .padding(.bottom, 40)
             }
             .padding(.horizontal, 24)
@@ -679,6 +691,60 @@ struct OnboardingView: View {
         .padding(12)
         .background(Color.blue.opacity(0.12))
         .cornerRadius(12)
+    }
+
+    // MARK: - AI 预览页底部 CTA（购买意愿最高时刻）
+
+    private var aiPreviewCTA: some View {
+        VStack(spacing: 12) {
+            // 主按钮：订阅 Pro
+            Button {
+                showPaywall = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 14))
+                    Text(isEN ? "Start Free Trial →" : "开始免费试用 →")
+                        .font(.system(size: 17, weight: .bold))
+                }
+                .foregroundColor(Color(red: 0.04, green: 0.08, blue: 0.02))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(Color(red: 0.49, green: 0.84, blue: 0.11))
+                .cornerRadius(16)
+            }
+
+            // Pro 权益简述
+            HStack(spacing: 16) {
+                proFeatureTag(isEN ? "AI Voice Coach" : "AI 语音教练")
+                proFeatureTag(isEN ? "Smart Plans" : "智能计划")
+                proFeatureTag(isEN ? "All Goals" : "全部目标")
+            }
+            .frame(maxWidth: .infinity)
+
+            // 次要链接：跳过
+            Button {
+                withAnimation(.easeInOut(duration: 0.35)) { step = .permissions }
+            } label: {
+                Text(isEN ? "Continue without Pro" : "暂不升级，继续")
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.35))
+                    .underline()
+            }
+            .padding(.top, 4)
+        }
+        .padding(.top, 8)
+        .opacity(revealedCards.contains(2) ? 1 : 0)  // 随第三张卡片一起出现
+    }
+
+    private func proFeatureTag(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .medium))
+            .foregroundColor(Color(red: 0.49, green: 0.84, blue: 0.11).opacity(0.8))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color(red: 0.49, green: 0.84, blue: 0.11).opacity(0.1))
+            .cornerRadius(6)
     }
 
     private func startAIAnimation() {
