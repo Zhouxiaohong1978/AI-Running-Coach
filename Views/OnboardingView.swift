@@ -570,7 +570,7 @@ struct OnboardingView: View {
 
     private var aiPlanPreviewCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(isEN ? "Your 8-Week Plan Preview" : "8 周计划预览",
+            Label(isEN ? "Your \(selectedGoal?.recommendedWeeks ?? 8)-Week Plan Preview" : "\(selectedGoal?.recommendedWeeks ?? 8) 周计划预览",
                   systemImage: "calendar.badge.checkmark")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.orange)
@@ -582,7 +582,9 @@ struct OnboardingView: View {
                         Text(isEN ? "W\(week.0)" : "第\(week.0)周")
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundColor(.white.opacity(0.5))
-                            .frame(width: 36, alignment: .leading)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .frame(width: 46, alignment: .leading)
 
                         // 进度条
                         GeometryReader { geo in
