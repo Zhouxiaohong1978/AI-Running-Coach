@@ -369,16 +369,21 @@ struct PaywallView: View {
 
         let isEN = LanguageManager.shared.currentLocale == "en"
         let period = packagePeriodText(package)
+        let intro = package.storeProduct.introductoryDiscount
 
-        if package.storeProduct.introductoryDiscount?.paymentMode == .freeTrial {
+        // 免费试用：显示试用描述
+        if intro?.paymentMode == .freeTrial {
             return isEN
                 ? "Try Free 7 Days, then \(package.localizedPriceString)/\(period)"
                 : "7 天免费试用，然后 \(package.localizedPriceString)/\(period)"
         }
 
+        // 首发价（payAsYouGo / payUpFront）：按钮显示折扣价而非原价
+        let displayPrice = intro?.localizedPriceString ?? package.localizedPriceString
+
         return isEN
-            ? "Subscribe \(package.localizedPriceString)/\(period)"
-            : "订阅 \(package.localizedPriceString)/\(period)"
+            ? "Subscribe \(displayPrice)/\(period)"
+            : "订阅 \(displayPrice)/\(period)"
     }
 
     // MARK: - Footer
