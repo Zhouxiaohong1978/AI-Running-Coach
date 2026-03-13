@@ -128,6 +128,9 @@
         }
       }
     },
+    "%lld 周计划预览" : {
+
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -251,6 +254,12 @@
       }
     },
     "✓" : {
+
+    },
+    "✦ Complete plan generated after setup" : {
+
+    },
+    "✦ 完整计划在设置完成后立即生成" : {
 
     },
     "🎧 等待触发..." : {
@@ -436,6 +445,7 @@
       }
     },
     "7 天免费试用" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -444,9 +454,6 @@
           }
         }
       }
-    },
-    "7-Day Free Trial" : {
-
     },
     "10" : {
 
@@ -489,6 +496,9 @@
 
     },
     "Achievements" : {
+
+    },
+    "Age" : {
 
     },
     "Agree & Continue" : {
@@ -717,6 +727,9 @@
     "All 6" : {
 
     },
+    "Allow" : {
+
+    },
     "Apple Health Integration" : {
 
     },
@@ -766,6 +779,12 @@
     "Contact Us · 联系我们" : {
 
     },
+    "Continue without Pro" : {
+
+    },
+    "Current Running Level" : {
+
+    },
     "Data Recipients" : {
 
     },
@@ -798,6 +817,9 @@
 
     },
     "Generating..." : {
+
+    },
+    "Get Started →" : {
 
     },
     "GPS ACTIVE" : {
@@ -854,6 +876,9 @@
     "or finish %@" : {
 
     },
+    "Personalized plans, real-time coaching,\nand AI feedback tailored just for you." : {
+
+    },
     "Privacy Policy" : {
 
     },
@@ -876,6 +901,9 @@
           }
         }
       }
+    },
+    "Real-time Voice Sample" : {
+
     },
     "Restore Purchases" : {
 
@@ -960,6 +988,9 @@
     "Unlimited" : {
 
     },
+    "Unlock All Pro Features →" : {
+
+    },
     "Upgrade Pro" : {
 
     },
@@ -978,10 +1009,28 @@
     "Voice Coaching" : {
 
     },
+    "W%lld" : {
+
+    },
     "Weather" : {
 
     },
+    "You can change permissions anytime in iPhone Settings." : {
+
+    },
+    "Your %lld-Week Plan Preview" : {
+
+    },
+    "Your AI Running Coach" : {
+
+    },
     "Your data is used only to generate personalized coaching content. It is not sold or used for advertising. You can withdraw consent anytime in Settings → Privacy." : {
+
+    },
+    "Your Profile" : {
+
+    },
+    "yrs" : {
 
     },
     "三日连跑" : {
@@ -1015,6 +1064,9 @@
           }
         }
       }
+    },
+    "个性化训练计划 · 实时语音陪跑\n让每一次跑步都有 AI 教练相伴" : {
+
     },
     "为你量身定制训练计划" : {
       "localizations" : {
@@ -1112,6 +1164,9 @@
         }
       }
     },
+    "你可以随时在 iPhone「设置」中修改权限。" : {
+
+    },
     "你已超前完成%.1f公里！" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1122,6 +1177,12 @@
           }
         }
       }
+    },
+    "你的 AI 跑步教练" : {
+
+    },
+    "你的基本档案" : {
+
     },
     "使用指南" : {
       "localizations" : {
@@ -1175,6 +1236,9 @@
           }
         }
       }
+    },
+    "允许" : {
+
     },
     "允许定位权限，GPS 开始追踪路线" : {
       "extractionState" : "stale",
@@ -2173,6 +2237,9 @@
         }
       }
     },
+    "实时语音教练示例" : {
+
+    },
     "密码" : {
       "localizations" : {
         "en" : {
@@ -2202,6 +2269,9 @@
           }
         }
       }
+    },
+    "岁" : {
+
     },
     "巩固期" : {
       "extractionState" : "stale",
@@ -2311,6 +2381,9 @@
         }
       }
     },
+    "年龄" : {
+
+    },
     "开发者选项" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2352,6 +2425,9 @@
         }
       }
     },
+    "开始设置 →" : {
+
+    },
     "开始跑步" : {
       "localizations" : {
         "en" : {
@@ -2371,6 +2447,9 @@
           }
         }
       }
+    },
+    "当前跑步水平" : {
+
     },
     "当前进度" : {
       "localizations" : {
@@ -2962,6 +3041,9 @@
           }
         }
       }
+    },
+    "暂不升级，继续" : {
+
     },
     "暂无AI建议" : {
       "localizations" : {
@@ -4057,6 +4139,9 @@
           }
         }
       }
+    },
+    "解锁 Pro 全部功能 →" : {
+
     },
     "解锁于 %@" : {
       "localizations" : {
