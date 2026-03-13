@@ -414,9 +414,9 @@ struct OnboardingView: View {
                     subtitle: isEN ? "Pick one — AI will build your plan around it" : "选一个，AI 会围绕它生成你的专属计划"
                 )
 
-                // 目标网格
+                // 目标网格（新用户只显示默认解锁的目标）
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    ForEach(TrainingGoal.allCases) { goal in
+                    ForEach(TrainingGoal.allCases.filter { $0.requiredDistance == 0 }) { goal in
                         goalCard(goal)
                     }
                 }
@@ -704,7 +704,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 14))
-                    Text(isEN ? "Start Free Trial →" : "开始免费试用 →")
+                    Text(isEN ? "Unlock All Pro Features →" : "解锁 Pro 全部功能 →")
                         .font(.system(size: 17, weight: .bold))
                 }
                 .foregroundColor(Color(red: 0.04, green: 0.08, blue: 0.02))
