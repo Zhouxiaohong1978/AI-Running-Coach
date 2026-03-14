@@ -75,8 +75,11 @@ override init() {
             guard let self = self, let start = self.startTime else { return }
             self.duration = Date().timeIntervalSince(start)
 
-            // 计算卡路里 (粗略估算: 1km约100卡路里)
-            self.calories = (self.distance / 1000.0) * 100.0
+            // 卡路里公式：距离(km) × 体重(kg) × 1.036
+            // 参考跑步运动科学标准，70kg跑1km ≈ 72.5kcal
+            let weightKg = UserDefaults.standard.double(forKey: "user_weight_kg")
+            let weight = weightKg > 0 ? weightKg : 65.0
+            self.calories = (self.distance / 1000.0) * weight * 1.036
         }
 
     }
@@ -96,7 +99,9 @@ override init() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, let start = self.startTime else { return }
             self.duration = Date().timeIntervalSince(start)
-            self.calories = (self.distance / 1000.0) * 100.0
+            let weightKg = UserDefaults.standard.double(forKey: "user_weight_kg")
+            let weight = weightKg > 0 ? weightKg : 65.0
+            self.calories = (self.distance / 1000.0) * weight * 1.036
         }
     }
 
