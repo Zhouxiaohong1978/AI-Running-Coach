@@ -47,6 +47,17 @@ struct WeatherInfo {
     let humidity: Double
     let windSpeed: Double
 
+    /// 是否属于雨天（包括小雨/大雨/雷雨/毛毛雨）
+    var isRainy: Bool {
+        switch condition {
+        case .rain, .heavyRain, .drizzle, .freezingDrizzle, .sunShowers,
+             .thunderstorms, .strongStorms, .isolatedThunderstorms, .scatteredThunderstorms:
+            return true
+        default:
+            return false
+        }
+    }
+
     var emoji: String {
         switch condition {
         case .blizzard, .heavySnow:

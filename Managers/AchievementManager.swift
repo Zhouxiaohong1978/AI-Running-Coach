@@ -176,9 +176,12 @@ class AchievementManager: ObservableObject {
                 if hour >= 20 && hour < 23 {
                     achievements[index].currentValue += 1
                 }
+            } else if achievementId.contains("rainy") {
+                // 雨天跑步：读取 RunRecord 中保存的天气状态
+                if runRecord.isRainy {
+                    achievements[index].currentValue += 1
+                }
             }
-            // 雨天跑步需要天气API，暂时跳过
-            // TODO: 集成天气API检测雨天
 
             if !achievements[index].isUnlocked && achievements[index].currentValue >= achievements[index].targetValue {
                 unlockAchievement(at: index)

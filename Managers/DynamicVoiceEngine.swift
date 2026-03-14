@@ -338,8 +338,15 @@ class DynamicVoiceEngine: ObservableObject {
             if success {
                 log.log("播放成功: \(event.rawValue)", category: "SUCCESS")
             } else {
-                log.log("播放失败: \(event.rawValue)，5s后重试", category: "ERROR")
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                // 数据类触发器（卡路里/配速/心率）不重试：
+                // 重试时实际数值可能已变化，导致语音和界面数字不匹配
+                guard event.isTimeEvent else {
+                    log.log("播放失败: \(event.rawValue)，数据类事件不重试", category: "ERROR")
+                    return
+                }
+                // 时间类触发器文案不含实时变化数值，重试安全
+                log.log("播放失败: \(event.rawValue)，10s后重试", category: "ERROR")
+                try? await Task.sleep(nanoseconds: 10_000_000_000)
                 let retrySuccess = await VoiceService.shared.speak(
                     text: text,
                     voice: voiceId,

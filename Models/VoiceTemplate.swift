@@ -46,6 +46,18 @@ enum VoiceTriggerEvent: String, Hashable {
     case dist30km = "dist_30km"
     case dist40km = "dist_40km"
 
+    /// 是否为纯时间触发（文案不含实时变化数值，重试安全）
+    var isTimeEvent: Bool {
+        switch self {
+        case .time5min, .time10min, .time20min, .time30min,
+             .time45min, .time1hour, .time90min, .time2hour,
+             .time3hour, .time4hour, .time5hour:
+            return true
+        default:
+            return false
+        }
+    }
+
     /// 每次跑步只触发一次
     var playOncePerRun: Bool {
         switch self {

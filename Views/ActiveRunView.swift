@@ -458,7 +458,8 @@ struct ActiveRunView: View {
             startTime: Date().addingTimeInterval(-locationManager.duration),
             endTime: Date(),
             routeCoordinates: locationManager.routeCoordinates.map { Coordinate(from: $0) },
-            kmSplits: locationManager.kmSplits.isEmpty ? nil : locationManager.kmSplits
+            kmSplits: locationManager.kmSplits.isEmpty ? nil : locationManager.kmSplits,
+            isRainy: WeatherManager.shared.currentWeather?.isRainy ?? false
         )
 
         savedRecord = record

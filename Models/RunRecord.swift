@@ -32,6 +32,9 @@ struct RunRecord: Identifiable, Codable {
     // 每公里分段数据
     var kmSplits: [Double]? // 每公里用时（秒）
 
+    // 天气信息
+    var isRainy: Bool // 跑步时是否下雨（用于雨天成就）
+
     // 元数据
     var createdAt: Date
     var updatedAt: Date
@@ -50,6 +53,7 @@ struct RunRecord: Identifiable, Codable {
         averageSpeed: Double? = nil,
         maxSpeed: Double? = nil,
         kmSplits: [Double]? = nil,
+        isRainy: Bool = false,
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         syncedToCloud: Bool = false
@@ -66,6 +70,7 @@ struct RunRecord: Identifiable, Codable {
         self.averageSpeed = averageSpeed
         self.maxSpeed = maxSpeed
         self.kmSplits = kmSplits
+        self.isRainy = isRainy
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.syncedToCloud = syncedToCloud
