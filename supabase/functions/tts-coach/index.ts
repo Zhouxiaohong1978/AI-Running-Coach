@@ -14,14 +14,24 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 interface TTSRequest {
   text: string;
   voice: string;
+  lang?: string; // "zh-Hans" | "en"
 }
 
 // Qwen3-TTS-Flash 音色映射（国际版支持的音色）
+// key: 小写名称，value: API 接受的正式名称
 const VOICE_MAP: { [key: string]: string } = {
-  "cherry": "Cherry",        // 女声，清晰
-  "jennifer": "Jennifer",    // 女声，温柔
-  "ethan": "Ethan",          // 男声，沉稳
-  "default": "Cherry",       // 默认音色
+  // 中文音色
+  "cherry":   "Cherry",    // 鼓励型 ZH — 活泼女声（千悦）
+  "kai":      "Kai",       // 严格型 ZH — 磁性男声
+  "serena":   "Serena",    // 温和型 ZH — 温和女声
+  "jennifer": "Jennifer",  // 备用女声
+  "ethan":    "Ethan",     // 备用男声
+  // 英文音色
+  "aiden":    "Aiden",     // 严格型 EN — 磁性男声
+  "katerina": "Katerina",  // 鼓励型 EN — 活泼女声
+  "serena_en":"Serena",    // 温和型 EN（与中文同名）
+  // 默认
+  "default":  "Cherry",
 };
 
 Deno.serve(async (req: Request) => {
@@ -39,7 +49,7 @@ Deno.serve(async (req: Request) => {
   try {
     // 解析请求
     const body: TTSRequest = await req.json();
-    const { text, voice = "cherry" } = body;
+    const { text, voice = "cherry", lang = "zh-Hans" } = body;
 
     if (!text || text.trim().length === 0) {
       return new Response(
@@ -62,8 +72,12 @@ Deno.serve(async (req: Request) => {
       throw new Error("DASHSCOPE_API_KEY not configured");
     }
 
-    // 选择音色
-    const selectedVoice = VOICE_MAP[voice.toLowerCase()] || "Cherry";
+    // 选择音色（大小写不敏感匹配）
+    const selectedVoice = VOICE_MAP[voice.toLowerCase()] || voice || "Cherry";
+    // 根据语言参数选择 language_type
+    const languageType = lang === "en" ? "English" : "Chinese";
+
+    console.log(`🔊 TTS: voice=${selectedVoice}, lang=${languageType}`);
 
     // 调用阿里云国际版 Qwen3-TTS-Flash API
     const response = await fetch(
@@ -79,7 +93,7 @@ Deno.serve(async (req: Request) => {
           input: {
             text: text,
             voice: selectedVoice,
-            language_type: "Chinese",  // 支持中文
+            language_type: languageType,
           },
         }),
       }
