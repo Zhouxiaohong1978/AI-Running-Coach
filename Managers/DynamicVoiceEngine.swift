@@ -276,8 +276,8 @@ class DynamicVoiceEngine: ObservableObject {
             return false
         }
 
-        // 3. 任一播放器正在播放时不打断
-        if AudioPlayerManager.shared.isPlaying || VoiceService.shared.isPlaying {
+        // 3. 任一播放器正在播放或 TTS 正在下载时不打断
+        if AudioPlayerManager.shared.isPlaying || VoiceService.shared.isPlaying || VoiceService.shared.isPending {
             return false
         }
 
@@ -291,8 +291,9 @@ class DynamicVoiceEngine: ObservableObject {
         }
 
         // 5. 5 分钟滑动窗口（最多 3 条）
+        // 时间里程碑（5/10/20/30min 等）是一次性事件，不受窗口限制，确保准时播报
         recentSpeakTimes = recentSpeakTimes.filter { now.timeIntervalSince($0) < slidingWindowDuration }
-        if recentSpeakTimes.count >= slidingWindowMaxCount {
+        if !event.isTimeEvent && recentSpeakTimes.count >= slidingWindowMaxCount {
             DebugLogger.shared.log("[\(event.rawValue)] 5分钟窗口上限", category: "WARN")
             return false
         }

@@ -173,13 +173,13 @@ extension LocationManager: CLLocationManagerDelegate {
 
                 // 过滤条件（必须同时满足）：
                 // 1. 距离 >= 8米（过滤GPS漂移）
-                // 2. 距离 < 100米（过滤GPS跳点）
+                // 2. 距离 < 40米（过滤GPS大跳：单次超过40m几乎不可能是真实跑步移动）
                 // 3. 速度 >= 0.8m/s（确保是真正在移动，不是静止漂移）
-                // 4. 速度 <= 6.5m/s（约2:34/km，超出则为GPS大跳，人类跑步不可能达到）
+                // 4. 速度 <= 5.0m/s（约3:20/km，超出则为GPS跳点，普通跑者不可能达到）
                 let isValidMovement = delta >= minMovementDistance &&
-                                      delta < 100 &&
+                                      delta < 40 &&
                                       speed >= minSpeed &&
-                                      speed <= 6.5
+                                      speed <= 5.0
 
                 if isValidMovement {
                     distance += delta

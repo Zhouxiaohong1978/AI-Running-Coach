@@ -590,8 +590,8 @@ struct ActiveRunView: View {
             return true
         } else {
             // 中文：播放本地预录制 .m4a 文件
-            // 如果 TTS 正在播放，跳过本地语音避免并行播报
-            if VoiceService.shared.isPlaying {
+            // 如果 TTS 正在播放或下载中，跳过本地语音避免并行播报
+            if VoiceService.shared.isPlaying || VoiceService.shared.isPending {
                 return false
             }
             if audioPlayerManager.play(voice.fileName, priority: voice.priority) {

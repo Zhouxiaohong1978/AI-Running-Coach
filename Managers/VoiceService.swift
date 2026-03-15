@@ -8,6 +8,8 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private let supabaseURL = URL(string: "https://aisgbqzksfzdlbjdcwpn.supabase.co/functions/v1/tts-coach")!
     private var audioPlayer: AVAudioPlayer?
     @Published var isPlaying = false
+    /// TTS 请求发出到播放结束全程为 true，防止下载期间被预录音频打断
+    @Published var isPending = false
 
     // 冷却管理
     private var lastSpeechTime: Date = Date.distantPast
@@ -131,11 +133,13 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
 
         // 缓存未命中：走原有网络下载路径（后台任务保护，防止熄屏中断）
+        await MainActor.run { self.isPending = true }
         let bgTaskId = await MainActor.run {
             UIApplication.shared.beginBackgroundTask(withName: "TTS-Download") {}
         }
         defer {
             Task { @MainActor in
+                self.isPending = false
                 if bgTaskId != .invalid { UIApplication.shared.endBackgroundTask(bgTaskId) }
             }
         }
@@ -314,6 +318,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         audioPlayer?.stop()
         audioPlayer = nil
         isPlaying = false
+        isPending = false
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
