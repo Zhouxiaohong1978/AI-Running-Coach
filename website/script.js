@@ -20,6 +20,12 @@ function applyLang() {
       el.textContent = text;
     }
   });
+  // 切换 Hero 截图
+  const heroImg = document.getElementById('screenshotMain');
+  if (heroImg) {
+    const src = heroImg.getAttribute('data-src-' + currentLang);
+    if (src) heroImg.src = src;
+  }
   // 更新页面 title
   document.title = currentLang === 'zh'
     ? 'AI跑步教练 — 你的私人AI跑步教练'
