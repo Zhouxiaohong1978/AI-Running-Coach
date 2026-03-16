@@ -20,6 +20,12 @@ function applyLang() {
       el.textContent = text;
     }
   });
+  // 切换隐私/条款链接语言参数
+  const suffix = currentLang === 'en' ? '?lang=en' : '';
+  const lp = document.getElementById('linkPrivacy');
+  const lt = document.getElementById('linkTerms');
+  if (lp) lp.href = 'privacy.html' + suffix;
+  if (lt) lt.href = 'terms.html' + suffix;
   // 切换 Hero 截图
   const heroImg = document.getElementById('screenshotMain');
   if (heroImg) {

@@ -14,6 +14,7 @@
     .legal-page ul { padding-left: 20px; }
     .legal-page li { margin-bottom: 6px; }
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #7CFC00; text-decoration: none; font-size: 14px; margin-bottom: 40px; }
+    .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -21,52 +22,105 @@
     <div class="nav-container">
       <a href="index.html" class="nav-logo">
         <img src="images/app-icon.png" alt="AI跑步教练" width="32" height="32">
-        <span>AI跑步教练</span>
+        <span id="navTitle">AI跑步教练</span>
       </a>
+      <button class="lang-btn" id="langToggle" onclick="toggleLang()">EN</button>
     </div>
   </nav>
 
   <div class="legal-page">
-    <a href="index.html" class="back-link">← 返回首页</a>
-    <h1>使用条款</h1>
-    <p class="updated">最后更新：2026年3月16日</p>
+    <a href="index.html" class="back-link" id="backLink">← 返回首页</a>
 
-    <h2>1. 接受条款</h2>
-    <p>下载或使用 AI跑步教练 即表示您同意本使用条款。如不同意，请勿使用本应用。</p>
+    <!-- 中文内容 -->
+    <div id="contentZh">
+      <h1>使用条款</h1>
+      <p class="updated">最后更新：2026年3月16日</p>
+      <h2>1. 接受条款</h2>
+      <p>下载或使用 AI跑步教练 即表示您同意本使用条款。如不同意，请勿使用本应用。</p>
+      <h2>2. 服务描述</h2>
+      <p>AI跑步教练是一款 iOS 跑步辅助应用，提供实时数据追踪、AI 语音指导、跑后分析等功能。免费版提供基础功能，Pro 版通过订阅解锁高级功能。</p>
+      <h2>3. 订阅说明</h2>
+      <ul>
+        <li>Pro 订阅通过 Apple App Store 内购完成</li>
+        <li>订阅费用将在确认购买时从您的 Apple ID 账户扣除</li>
+        <li>订阅自动续期，如需取消请在到期前24小时前往 App Store 账户设置中关闭</li>
+        <li>免费试用期（如有）结束后将自动转为付费订阅</li>
+      </ul>
+      <h2>4. 使用规范</h2>
+      <p>您同意：</p>
+      <ul>
+        <li>仅将本应用用于合法的个人健身目的</li>
+        <li>不尝试破解、反编译或修改本应用</li>
+        <li>不使用本应用进行任何商业活动</li>
+      </ul>
+      <h2>5. 健康免责声明</h2>
+      <p>本应用提供的 AI 建议仅供参考，不构成专业医疗建议。跑步前请确认自身健康状况适合运动。如有心脏病、高血压等疾病，请在医生指导下使用本应用。</p>
+      <h2>6. 免责声明</h2>
+      <p>本应用按"现状"提供，不对 GPS 精度、心率数据准确性或 AI 分析结果作任何保证。我们不对因使用本应用导致的任何运动损伤或健康问题承担责任。</p>
+      <h2>7. 知识产权</h2>
+      <p>本应用的所有内容、功能和设计均归开发者所有，受著作权法保护。</p>
+      <h2>8. 条款变更</h2>
+      <p>我们保留随时修改本条款的权利，重大变更将通过应用内通知告知用户。继续使用本应用即表示接受修改后的条款。</p>
+      <h2>9. 联系方式</h2>
+      <p>如有问题，请发送邮件至：<a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    </div>
 
-    <h2>2. 服务描述</h2>
-    <p>AI跑步教练是一款 iOS 跑步辅助应用，提供实时数据追踪、AI 语音指导、跑后分析等功能。免费版提供基础功能，Pro 版通过订阅解锁高级功能。</p>
-
-    <h2>3. 订阅说明</h2>
-    <ul>
-      <li>Pro 订阅通过 Apple App Store 内购完成</li>
-      <li>订阅费用将在确认购买时从您的 Apple ID 账户扣除</li>
-      <li>订阅自动续期，如需取消请在到期前24小时前往 App Store 账户设置中关闭</li>
-      <li>免费试用期（如有）结束后将自动转为付费订阅</li>
-    </ul>
-
-    <h2>4. 使用规范</h2>
-    <p>您同意：</p>
-    <ul>
-      <li>仅将本应用用于合法的个人健身目的</li>
-      <li>不尝试破解、反编译或修改本应用</li>
-      <li>不使用本应用进行任何商业活动</li>
-    </ul>
-
-    <h2>5. 健康免责声明</h2>
-    <p>本应用提供的 AI 建议仅供参考，不构成专业医疗建议。跑步前请确认自身健康状况适合运动。如有心脏病、高血压等疾病，请在医生指导下使用本应用。</p>
-
-    <h2>6. 免责声明</h2>
-    <p>本应用按"现状"提供，不对 GPS 精度、心率数据准确性或 AI 分析结果作任何保证。我们不对因使用本应用导致的任何运动损伤或健康问题承担责任。</p>
-
-    <h2>7. 知识产权</h2>
-    <p>本应用的所有内容、功能和设计均归开发者所有，受著作权法保护。</p>
-
-    <h2>8. 条款变更</h2>
-    <p>我们保留随时修改本条款的权利，重大变更将通过应用内通知告知用户。继续使用本应用即表示接受修改后的条款。</p>
-
-    <h2>9. 联系方式</h2>
-    <p>如有问题，请发送邮件至：<a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    <!-- 英文内容 -->
+    <div id="contentEn" style="display:none">
+      <h1>Terms of Use</h1>
+      <p class="updated">Last updated: March 16, 2026</p>
+      <h2>1. Acceptance of Terms</h2>
+      <p>By downloading or using AI Running Coach, you agree to these Terms of Use. If you do not agree, please do not use the App.</p>
+      <h2>2. Description of Service</h2>
+      <p>AI Running Coach is an iOS running app offering real-time data tracking, AI voice coaching, and post-run analysis. Basic features are free; Pro features are unlocked via subscription.</p>
+      <h2>3. Subscriptions</h2>
+      <ul>
+        <li>Pro subscriptions are purchased through Apple App Store in-app purchase</li>
+        <li>Payment is charged to your Apple ID account upon confirmation</li>
+        <li>Subscriptions auto-renew; cancel at least 24 hours before the renewal date in your App Store account settings</li>
+        <li>Free trials (if offered) automatically convert to paid subscriptions at the end of the trial period</li>
+      </ul>
+      <h2>4. Acceptable Use</h2>
+      <p>You agree to:</p>
+      <ul>
+        <li>Use the App only for lawful personal fitness purposes</li>
+        <li>Not attempt to reverse-engineer, decompile, or modify the App</li>
+        <li>Not use the App for any commercial purpose</li>
+      </ul>
+      <h2>5. Health Disclaimer</h2>
+      <p>AI suggestions provided by the App are for reference only and do not constitute professional medical advice. Please confirm your physical condition is suitable for exercise before running. If you have heart disease, hypertension, or other conditions, consult a doctor before use.</p>
+      <h2>6. Disclaimer of Warranties</h2>
+      <p>The App is provided "as is" without warranties of any kind regarding GPS accuracy, heart rate data precision, or AI analysis results. We are not liable for any injury or health issues arising from use of the App.</p>
+      <h2>7. Intellectual Property</h2>
+      <p>All content, features, and designs of the App are owned by the developer and protected by copyright law.</p>
+      <h2>8. Changes to Terms</h2>
+      <p>We reserve the right to modify these terms at any time. Significant changes will be communicated via in-app notification. Continued use of the App constitutes acceptance of the revised terms.</p>
+      <h2>9. Contact</h2>
+      <p>For questions, email us at: <a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    </div>
   </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    let lang = params.get('lang') === 'en' ? 'en' : 'zh';
+
+    function applyLang() {
+      const isEn = lang === 'en';
+      document.getElementById('contentZh').style.display = isEn ? 'none' : 'block';
+      document.getElementById('contentEn').style.display = isEn ? 'block' : 'none';
+      document.getElementById('langToggle').textContent = isEn ? '中' : 'EN';
+      document.getElementById('backLink').textContent = isEn ? '← Back to Home' : '← 返回首页';
+      document.getElementById('navTitle').textContent = isEn ? 'AI Running Coach' : 'AI跑步教练';
+      document.title = isEn ? 'Terms of Use — AI Running Coach' : '使用条款 — AI跑步教练';
+      document.documentElement.lang = isEn ? 'en' : 'zh-Hans';
+    }
+
+    function toggleLang() {
+      lang = lang === 'zh' ? 'en' : 'zh';
+      applyLang();
+    }
+
+    applyLang();
+  </script>
 </body>
 </html>

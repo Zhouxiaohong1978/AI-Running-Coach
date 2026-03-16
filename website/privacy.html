@@ -14,6 +14,7 @@
     .legal-page ul { padding-left: 20px; }
     .legal-page li { margin-bottom: 6px; }
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #7CFC00; text-decoration: none; font-size: 14px; margin-bottom: 40px; }
+    .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -21,55 +22,115 @@
     <div class="nav-container">
       <a href="index.html" class="nav-logo">
         <img src="images/app-icon.png" alt="AI跑步教练" width="32" height="32">
-        <span>AI跑步教练</span>
+        <span id="navTitle">AI跑步教练</span>
       </a>
+      <button class="lang-btn" id="langToggle" onclick="toggleLang()">EN</button>
     </div>
   </nav>
 
   <div class="legal-page">
-    <a href="index.html" class="back-link">← 返回首页</a>
-    <h1>隐私政策</h1>
-    <p class="updated">最后更新：2026年3月16日</p>
+    <a href="index.html" class="back-link" id="backLink">← 返回首页</a>
 
-    <h2>1. 信息收集</h2>
-    <p>AI跑步教练（以下简称"本应用"）在您使用过程中可能收集以下信息：</p>
-    <ul>
-      <li>位置信息（GPS）：用于记录跑步路线和距离，仅在运动时使用</li>
-      <li>健康数据（心率、卡路里）：通过 Apple HealthKit 获取，用于运动数据展示</li>
-      <li>Apple 账号信息：通过"Sign in with Apple"登录时获取用户标识符</li>
-      <li>运动记录数据：存储于您的设备本地及 Supabase 云端数据库</li>
-    </ul>
+    <!-- 中文内容 -->
+    <div id="contentZh">
+      <h1>隐私政策</h1>
+      <p class="updated">最后更新：2026年3月16日</p>
+      <h2>1. 信息收集</h2>
+      <p>AI跑步教练（以下简称"本应用"）在您使用过程中可能收集以下信息：</p>
+      <ul>
+        <li>位置信息（GPS）：用于记录跑步路线和距离，仅在运动时使用</li>
+        <li>健康数据（心率、卡路里）：通过 Apple HealthKit 获取，用于运动数据展示</li>
+        <li>Apple 账号信息：通过"Sign in with Apple"登录时获取用户标识符</li>
+        <li>运动记录数据：存储于您的设备本地及 Supabase 云端数据库</li>
+      </ul>
+      <h2>2. 信息使用</h2>
+      <p>我们收集的信息仅用于：</p>
+      <ul>
+        <li>提供实时跑步数据展示（配速、距离、时间、心率）</li>
+        <li>生成 AI 语音指导和跑后分析报告</li>
+        <li>记录和展示您的历史运动数据</li>
+        <li>计算成就系统进度</li>
+      </ul>
+      <h2>3. 数据存储</h2>
+      <p>您的运动数据存储在 Supabase 安全云端数据库中，数据与您的账号绑定，不会与其他用户共享。AI 分析功能通过阿里云百炼（Qwen）大模型处理，分析请求中不包含您的个人身份信息。</p>
+      <h2>4. 第三方服务</h2>
+      <p>本应用使用以下第三方服务：</p>
+      <ul>
+        <li>Apple HealthKit — 健康数据访问</li>
+        <li>Apple MapKit — 地图显示</li>
+        <li>Supabase — 数据存储</li>
+        <li>阿里云百炼 — AI 语音和分析</li>
+        <li>RevenueCat — 订阅管理</li>
+      </ul>
+      <h2>5. 数据安全</h2>
+      <p>我们采取合理的技术措施保护您的数据安全，所有网络传输均使用 HTTPS 加密。我们不会出售、出租或以任何商业方式共享您的个人数据。</p>
+      <h2>6. 您的权利</h2>
+      <p>您可以随时在应用内删除您的账号和所有相关数据。如需帮助，请联系我们。</p>
+      <h2>7. 联系方式</h2>
+      <p>如有隐私相关问题，请发送邮件至：<a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    </div>
 
-    <h2>2. 信息使用</h2>
-    <p>我们收集的信息仅用于：</p>
-    <ul>
-      <li>提供实时跑步数据展示（配速、距离、时间、心率）</li>
-      <li>生成 AI 语音指导和跑后分析报告</li>
-      <li>记录和展示您的历史运动数据</li>
-      <li>计算成就系统进度</li>
-    </ul>
-
-    <h2>3. 数据存储</h2>
-    <p>您的运动数据存储在 Supabase 安全云端数据库中，数据与您的账号绑定，不会与其他用户共享。AI 分析功能通过阿里云百炼（Qwen）大模型处理，分析请求中不包含您的个人身份信息。</p>
-
-    <h2>4. 第三方服务</h2>
-    <p>本应用使用以下第三方服务：</p>
-    <ul>
-      <li>Apple HealthKit — 健康数据访问</li>
-      <li>Apple MapKit — 地图显示</li>
-      <li>Supabase — 数据存储</li>
-      <li>阿里云百炼 — AI 语音和分析</li>
-      <li>RevenueCat — 订阅管理</li>
-    </ul>
-
-    <h2>5. 数据安全</h2>
-    <p>我们采取合理的技术措施保护您的数据安全，所有网络传输均使用 HTTPS 加密。我们不会出售、出租或以任何商业方式共享您的个人数据。</p>
-
-    <h2>6. 您的权利</h2>
-    <p>您可以随时在应用内删除您的账号和所有相关数据。如需帮助，请联系我们。</p>
-
-    <h2>7. 联系方式</h2>
-    <p>如有隐私相关问题，请发送邮件至：<a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    <!-- 英文内容 -->
+    <div id="contentEn" style="display:none">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: March 16, 2026</p>
+      <h2>1. Information We Collect</h2>
+      <p>AI Running Coach ("the App") may collect the following information during use:</p>
+      <ul>
+        <li>Location data (GPS): used to track running routes and distance, only during workouts</li>
+        <li>Health data (heart rate, calories): accessed via Apple HealthKit for workout display</li>
+        <li>Apple account identifier: obtained when signing in with Apple</li>
+        <li>Workout records: stored locally on your device and in our Supabase cloud database</li>
+      </ul>
+      <h2>2. How We Use Your Information</h2>
+      <p>Collected information is used solely to:</p>
+      <ul>
+        <li>Display real-time running metrics (pace, distance, time, heart rate)</li>
+        <li>Generate AI voice coaching and post-run analysis reports</li>
+        <li>Store and display your workout history</li>
+        <li>Track achievement progress</li>
+      </ul>
+      <h2>3. Data Storage</h2>
+      <p>Your workout data is stored in Supabase's secure cloud database, linked to your account and never shared with other users. AI analysis is processed by Alibaba Cloud Qwen and does not include personally identifiable information.</p>
+      <h2>4. Third-Party Services</h2>
+      <p>The App uses the following third-party services:</p>
+      <ul>
+        <li>Apple HealthKit — health data access</li>
+        <li>Apple MapKit — map display</li>
+        <li>Supabase — data storage</li>
+        <li>Alibaba Cloud Qwen — AI voice and analysis</li>
+        <li>RevenueCat — subscription management</li>
+      </ul>
+      <h2>5. Data Security</h2>
+      <p>We employ reasonable technical measures to protect your data. All network transmissions use HTTPS encryption. We do not sell, rent, or share your personal data for commercial purposes.</p>
+      <h2>6. Your Rights</h2>
+      <p>You may delete your account and all associated data at any time within the App. Contact us if you need assistance.</p>
+      <h2>7. Contact</h2>
+      <p>For privacy-related questions, email us at: <a href="mailto:1614103587@qq.com" style="color:#7CFC00;">1614103587@qq.com</a></p>
+    </div>
   </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    let lang = params.get('lang') === 'en' ? 'en' : 'zh';
+
+    function applyLang() {
+      const isEn = lang === 'en';
+      document.getElementById('contentZh').style.display = isEn ? 'none' : 'block';
+      document.getElementById('contentEn').style.display = isEn ? 'block' : 'none';
+      document.getElementById('langToggle').textContent = isEn ? '中' : 'EN';
+      document.getElementById('backLink').textContent = isEn ? '← Back to Home' : '← 返回首页';
+      document.getElementById('navTitle').textContent = isEn ? 'AI Running Coach' : 'AI跑步教练';
+      document.title = isEn ? 'Privacy Policy — AI Running Coach' : '隐私政策 — AI跑步教练';
+      document.documentElement.lang = isEn ? 'en' : 'zh-Hans';
+    }
+
+    function toggleLang() {
+      lang = lang === 'zh' ? 'en' : 'zh';
+      applyLang();
+    }
+
+    applyLang();
+  </script>
 </body>
 </html>
