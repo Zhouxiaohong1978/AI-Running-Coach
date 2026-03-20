@@ -229,20 +229,6 @@ struct HomeView: View {
                             }
                             .padding(.top, 16)
 
-                            // 免费用户剩余次数提示
-                            if !subscriptionManager.isPro {
-                                let runsUsed = dataManager.runRecords.count
-                                let runsLeft = max(0, 3 - runsUsed)
-                                if runsLeft > 0 {
-                                    Text("免费体验剩余 \(runsLeft) 次")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.textSecondary)
-                                } else {
-                                    Text("免费次数已用完，升级 Pro 继续跑步")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.orange)
-                                }
-                            }
 
                             Spacer().frame(height: 20)
 

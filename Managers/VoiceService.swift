@@ -27,7 +27,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
         case ("en", .calm):         return "Jennifer" // 英文温和女声
         case ("en", _):             return "Katerina" // 英文活泼女声（鼓励型）
         case (_, .strict):          return "Kai"      // 中文磁性男声
-        case (_, .calm):            return "Jennifer" // 中文温和女声
+        case (_, .calm):            return "Chelsie"  // 中文温和女声
         default:                    return "Cherry"   // 中文活泼女声（鼓励型，API名="千悦"）
         }
     }

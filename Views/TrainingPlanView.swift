@@ -68,6 +68,7 @@ struct TrainingPlanView: View {
                     UserDefaults.standard.removeObject(forKey: "training_plan_start_date")
                     currentPlan = plan
                     savePlan(plan)
+                    subscriptionManager.incrementPlanCount()  // 新建计划计入月度次数
                     showGoalSelection = false
                 })
             }
@@ -279,12 +280,16 @@ struct TrainingPlanView: View {
 
     /// 根据用户修改重新生成计划（混合模式）
     /// 保留用户编辑后的计划结构（天数/距离不变），只让AI后台优化描述/配速
-    private func regeneratePlan() {
+    /// countsTowardLimit: 是否计入月度次数（主动点击重新生成=true，手动微调触发=false）
+    private func regeneratePlan(countsTowardLimit: Bool = false) {
         guard let plan = currentPlan else { return }
 
-        guard subscriptionManager.canGeneratePlan() else {
-            showPaywall = true
-            return
+        if countsTowardLimit {
+            guard subscriptionManager.canGeneratePlan() else {
+                showPaywall = true
+                return
+            }
+            subscriptionManager.incrementPlanCount()
         }
 
         // 记录触发时间，用于判断AI结果是否要应用（若期间用户有新编辑则丢弃）
@@ -393,10 +398,10 @@ struct TrainingPlanView: View {
                 Divider()
 
                 HStack(spacing: 12) {
-                    // 重新生成计划按钮
+                    // 重新生成计划按钮（主动点击，计入月度次数）
                     Button(action: {
                         if subscriptionManager.canGeneratePlan() {
-                            regeneratePlan()
+                            regeneratePlan(countsTowardLimit: true)
                         } else {
                             showPaywall = true
                         }

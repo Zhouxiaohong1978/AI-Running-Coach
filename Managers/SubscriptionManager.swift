@@ -165,7 +165,7 @@ final class SubscriptionManager: NSObject, ObservableObject {
 
     /// 是否可以生成训练计划
     func canGeneratePlan() -> Bool {
-        return isPro || freeMonthlyPlanCount < 1
+        return isPro || freeMonthlyPlanCount < 2
     }
 
     /// 是否可以获取教练反馈
@@ -200,9 +200,9 @@ final class SubscriptionManager: NSObject, ObservableObject {
         set { UserDefaults.standard.set(newValue, forKey: totalRunCountKey) }
     }
 
-    /// 第 3 次跑步后是否应显示 PaywallView
+    /// 第 15 次跑步后是否应显示 PaywallView
     func shouldShowPaywallAfterRun(runCount: Int) -> Bool {
-        return !isPro && runCount >= 3
+        return !isPro && runCount >= 15
     }
 
     /// Pro 功能是否应显示 PaywallView

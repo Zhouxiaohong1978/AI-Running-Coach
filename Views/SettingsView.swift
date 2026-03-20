@@ -295,6 +295,17 @@ struct SettingsView: View {
                         }
                     }
 
+                    Link(destination: URL(string: "https://www.zhouxiaohong.com")!) {
+                        HStack {
+                            Text(languageManager.currentLocale == "en" ? "Official Website" : "官方网站")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
                     // AI 数据授权管理
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {

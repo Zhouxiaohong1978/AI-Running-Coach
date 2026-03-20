@@ -17,6 +17,7 @@ struct RunSummaryView: View {
 
     @State private var region: MKCoordinateRegion
     @State private var showAchievementSheet = false
+    @State private var showPaywall = false
     @State private var aiSuggestion: String = ""
     @State private var isLoadingAI: Bool = false
     @State private var aiParagraphs: FeedbackParagraphs? = nil
@@ -353,6 +354,107 @@ struct RunSummaryView: View {
                     }
                 }
                 .padding(.horizontal, 20)
+
+                // 免费用户 Pro 智能播报提示卡片
+                Group {
+                if !SubscriptionManager.shared.isPro {
+                    let skipped = DynamicVoiceEngine.shared.skippedProCount
+                    let isEN = LanguageManager.shared.currentLocale == "en"
+                    Group {
+                    if skipped > 0 {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "waveform")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.orange)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(isEN ? "You missed \(skipped) smart voice alerts" : "本次跑步跳过了 \(skipped) 条智能播报")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.primary)
+                                    Text(isEN ? "Upgrade Pro to hear heart rate, calories & pace coaching" : "升级 Pro，实时播报心率、卡路里、配速变化")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(16)
+                            .background(Color(UIColor.systemBackground))
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color.orange.opacity(0.4), lineWidth: 1)
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                    }
+
+                    // Pro 功能预览卡片（固定展示，所有免费用户每次跑完都看到）
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.orange, Color.pink],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(isEN ? "What else can Pro Coach do?" : "Pro 教练还能做什么？")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.primary)
+                                Text(isEN
+                                     ? "Heart rate zones, calories & pace — AI coaching every step"
+                                     : "实时播报心率区间、卡路里消耗、配速变化，每一步都有 AI 陪跑")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(16)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.orange.opacity(0.08), Color.pink.opacity(0.06)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.orange.opacity(0.5), Color.pink.opacity(0.3)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    } // Group
+                }
+                } // outer Group
                 .padding(.bottom, 10)
             }
         }
@@ -363,6 +465,9 @@ struct RunSummaryView: View {
         }
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSheetView()
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
         .sheet(isPresented: $showAIConsent) {
             AIDataConsentView(

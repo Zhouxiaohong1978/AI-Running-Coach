@@ -96,7 +96,7 @@ struct PaywallView: View {
                 .font(.system(size: 24, weight: .bold))
                 .multilineTextAlignment(.center)
 
-            Text("无限 AI 训练计划 · 实时教练反馈 · 全部成就")
+            Text(isEN ? "Smart Voice Coaching · Unlimited Plans · All Achievements" : "智能语音播报 · 无限训练计划 · 全部成就")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -137,62 +137,58 @@ struct PaywallView: View {
         return annual?.storeProduct.introductoryDiscount != nil
     }
 
-    // MARK: - Comparison Section
+    // MARK: - Pro Benefits Section
 
     private var comparisonSection: some View {
-        VStack(spacing: 0) {
-            // 表头
-            HStack {
-                Text("功能")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("免费")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .frame(width: 70)
-                Text("Pro")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
-                    .frame(width: 70)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+        VStack(alignment: .leading, spacing: 0) {
+            Text(isEN ? "Pro includes everything you need" : "Pro 会员专享权益")
+                .font(.system(size: 15, weight: .semibold))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
 
-            Divider()
+            Divider().padding(.leading, 16)
 
-            comparisonRow(isEN ? "Runs" : "跑步次数", free: isEN ? "3/month" : "每月3次", pro: isEN ? "Unlimited" : "无限制")
-            comparisonRow(isEN ? "AI Training Plans" : "AI 训练计划", free: isEN ? "1/month" : "每月1次", pro: isEN ? "Unlimited" : "无限制")
-            comparisonRow(isEN ? "AI Coach Feedback" : "AI 教练反馈", free: isEN ? "3/run" : "3条/次", pro: isEN ? "Unlimited" : "无限制")
-            comparisonRow(isEN ? "Voice Coaching" : "语音播报", free: isEN ? "Basic" : "基础", pro: isEN ? "Full" : "完整")
-            comparisonRow(isEN ? "Training Goals" : "训练目标", free: isEN ? "2" : "2个", pro: isEN ? "All 6" : "全部6个")
-            comparisonRow(isEN ? "Cloud Sync" : "云端同步", free: "—", pro: "✓")
-            comparisonRow(isEN ? "Achievements" : "成就系统", free: isEN ? "10" : "10个", pro: isEN ? "All" : "全部")
+            benefitRow(icon: "waveform", color: .blue,
+                title: isEN ? "Smart Voice Coaching" : "智能语音播报",
+                desc: isEN ? "Real-time HR, calories, pace & personal record alerts" : "实时心率、卡路里、配速变化、个人记录突破，全程AI陪跑")
+
+            benefitRow(icon: "brain.head.profile", color: .purple,
+                title: isEN ? "AI Training Plans" : "无限 AI 训练计划",
+                desc: isEN ? "Unlimited personalized plans, updated every month" : "无限次生成专属训练计划，每月不限次数")
+
+            benefitRow(icon: "icloud.fill", color: .cyan,
+                title: isEN ? "Cloud Sync" : "云端数据同步",
+                desc: isEN ? "Your run history safe across all devices" : "跑步记录云端备份，换机不丢数据")
+
+            benefitRow(icon: "trophy.fill", color: .orange,
+                title: isEN ? "All Achievements" : "全部成就解锁",
+                desc: isEN ? "Unlock every badge and milestone" : "解锁全部徽章与里程碑成就")
         }
         .background(Color(UIColor.systemBackground))
         .cornerRadius(16)
     }
 
-    private func comparisonRow(_ feature: LocalizedStringKey, free: LocalizedStringKey, pro: LocalizedStringKey) -> some View {
+    private func benefitRow(icon: String, color: Color, title: String, desc: String) -> some View {
         VStack(spacing: 0) {
-            HStack {
-                Text(feature)
-                    .font(.system(size: 14))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text(free)
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                    .frame(width: 70)
-                Text(pro)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color(red: 0.5, green: 0.8, blue: 0.1))
-                    .frame(width: 70)
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(color)
+                    .frame(width: 28)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                    Text(desc)
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.vertical, 14)
 
-            Divider()
-                .padding(.leading, 16)
+            Divider().padding(.leading, 58)
         }
     }
 

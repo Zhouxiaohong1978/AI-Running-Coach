@@ -367,7 +367,7 @@ struct OnboardingView: View {
     @ViewBuilder
     private func fitnessLevelRow(_ level: FitnessLevel) -> some View {
         let selected = fitnessLevel == level
-        return Button { fitnessLevel = level } label: {
+        Button { fitnessLevel = level } label: {
             HStack(spacing: 14) {
                 Image(systemName: level.icon)
                     .font(.system(size: 18))
@@ -752,13 +752,13 @@ struct OnboardingView: View {
     private func startAIAnimation() {
         // 三张卡片依次出现
         withAnimation(.easeOut(duration: 0.5).delay(0.2)) {
-            revealedCards.insert(0)
+            _ = revealedCards.insert(0)
         }
         withAnimation(.easeOut(duration: 0.5).delay(0.6)) {
-            revealedCards.insert(1)
+            _ = revealedCards.insert(1)
         }
         withAnimation(.easeOut(duration: 0.5).delay(1.0)) {
-            revealedCards.insert(2)
+            _ = revealedCards.insert(2)
         }
     }
 

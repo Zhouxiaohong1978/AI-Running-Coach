@@ -142,25 +142,30 @@ struct ActiveRunView: View {
                     .padding(.top, 10)
                 }
 
-                // 免费用户升级提示（可点击跳转付费墙）
-                if showUpgradeHint {
+                // 免费用户锁定气泡（点击跳转付费墙）
+                if dynamicEngine.showLockedBubble {
                     Button {
                         showPaywallFromRun = true
                     } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "crown.fill")
-                                .foregroundColor(.orange)
-                            Text(LanguageManager.shared.currentLocale == "en" ? "Upgrade to Pro for unlimited coaching" : "升级 Pro 获取无限教练反馈")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.orange)
+                        HStack(spacing: 8) {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 12))
+                                .foregroundColor(.white.opacity(0.8))
+                            Text(dynamicEngine.lockedBubbleText)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.white)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11))
+                                .foregroundColor(.white.opacity(0.7))
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(16)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(20)
                     }
-                    .transition(.opacity)
+                    .transition(.move(edge: .top).combined(with: .opacity))
                     .padding(.top, 4)
                 }
 
@@ -651,6 +656,7 @@ struct ActiveRunView: View {
         if distanceKm >= todayTargetKm && !hasSpokenTodayGoal {
             hasSpokenTodayGoal = true
             hasSpoken3km = true
+            dynamicEngine.markGoalCompleted()  // 停止动态语音，避免干扰完成体验
             logger.log("🎉 到达今日目标 \(todayTargetKm)km，触发完成语音", category: "VOICE")
             if todayTargetKm != 3.0 {
                 // 非3km目标：TTS播报今日目标完成（3km目标已有 新手跑中_08 语音）
@@ -681,23 +687,11 @@ struct ActiveRunView: View {
             return
         }
 
-        // 免费用户检查反馈次数限制
-        if !subscriptionManager.canGetFeedback() {
-            // 语音气泡还在显示时不弹升级提示，避免自相矛盾
-            if !showUpgradeHint && !showCoachFeedback {
-                withAnimation {
-                    showUpgradeHint = true
-                }
-            }
-            return
-        }
-
-        // 获取当前距离对应的语音
+        // 获取当前距离对应的语音（预录音频免费不限次数）
         if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
             // 通过 playVoiceAsset 路由：中文=本地.m4a，英文=TTS API
             if playVoiceAsset(voice) {
                 logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
-                subscriptionManager.incrementFeedbackCount()  // 触发即计数（EN/ZH统一）
             }
         }
     }

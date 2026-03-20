@@ -21,6 +21,13 @@ class DynamicVoiceEngine: ObservableObject {
     @Published var bubbleText: String = ""
     @Published var showBubble: Bool = false
 
+    // 免费用户锁定气泡
+    @Published var lockedBubbleText: String = ""
+    @Published var showLockedBubble: Bool = false
+
+    // 本次跑步跳过的Pro播报次数（供结束页展示）
+    @Published var skippedProCount: Int = 0
+
     // MARK: - 防刷屏参数
 
     private let globalCooldown: TimeInterval = 18
@@ -47,6 +54,9 @@ class DynamicVoiceEngine: ObservableObject {
     private var personalBestDistanceKm: Double = 0
     private var prAnnounced = false
 
+    // 今日目标是否已完成
+    private var goalCompleted = false
+
     // 防变体重复：记录每个事件上次使用的变体索引
     private var lastVariantIndex: [VoiceTriggerEvent: Int] = [:]
 
@@ -64,32 +74,53 @@ class DynamicVoiceEngine: ObservableObject {
         hasEnteredFatBurnZone = false
         self.personalBestDistanceKm = personalBestDistanceKm
         prAnnounced = false
+        goalCompleted = false
+        skippedProCount = 0
         lastVariantIndex.removeAll()
         print("🔄 DynamicVoiceEngine 已重置，历史最佳: \(String(format: "%.2f", personalBestDistanceKm))km")
     }
 
     // MARK: - 主入口
 
+    /// 今日目标达成时由 ActiveRunView 调用，停止后续动态语音触发
+    func markGoalCompleted() {
+        goalCompleted = true
+    }
+
     /// ActiveRunView 在距离/时间变化时调用（每 ~5s 或每次 GPS 更新）
     func update(context: EnrichedRunContext) {
-        guard SubscriptionManager.shared.isPro else { return }  // 动态TTS语音为Pro专属
+        let isPro = SubscriptionManager.shared.isPro
         guard context.distanceKm > 0.1 else { return }  // 100m 后才开始
+        guard !goalCompleted else { return }  // 目标完成后停止触发
 
         // 收集本轮可触发的事件，按优先级取最高的
         var pending: [(event: VoiceTriggerEvent, text: String)] = []
+        var lockedPending: [(event: VoiceTriggerEvent, text: String)] = []
 
-        if let e = checkTimeMilestones(context)        { pending.append(e) }
-        if let e = checkDistanceMilestones(context)   { pending.append(e) }
-        if let e = checkHeartRate(context)            { pending.append(e) }
-        if let e = checkCalories(context)             { pending.append(e) }
-        if let e = checkPaceChange(context)           { pending.append(e) }
-        if let e = checkPersonalRecord(context)       { pending.append(e) }
+        if let e = checkTimeMilestones(context)    { pending.append(e) }
+        if isPro {
+            if let e = checkDistanceMilestones(context) { pending.append(e) }
+            if let e = checkHeartRate(context)          { pending.append(e) }
+            if let e = checkCalories(context)           { pending.append(e) }
+            if let e = checkPaceChange(context)         { pending.append(e) }
+            if let e = checkPersonalRecord(context)     { pending.append(e) }
+        } else {
+            // 免费用户：检测Pro触发器但不播音，改为显示锁定气泡
+            if let e = checkHeartRate(context)      { lockedPending.append(e) }
+            if let e = checkCalories(context)       { lockedPending.append(e) }
+            if let e = checkPaceChange(context)     { lockedPending.append(e) }
+            if let e = checkPersonalRecord(context) { lockedPending.append(e) }
+        }
 
-        guard !pending.isEmpty else { return }
-
-        // 取优先级最高的事件播放
+        // 播放优先级最高的事件
         if let best = pending.max(by: { $0.event.priority < $1.event.priority }) {
             trySpeak(event: best.event, text: best.text)
+        }
+
+        // 免费用户：取第一条显示锁定气泡（有音频播放时跳过，避免干扰）
+        if !isPro, !AudioPlayerManager.shared.isPlaying, !VoiceService.shared.isPlaying,
+           let locked = lockedPending.first {
+            showLockedFeature(event: locked.event, text: locked.text)
         }
     }
 
@@ -356,6 +387,28 @@ class DynamicVoiceEngine: ObservableObject {
                 )
                 log.log(retrySuccess ? "重试成功: \(event.rawValue)" : "重试失败: \(event.rawValue)", category: retrySuccess ? "SUCCESS" : "ERROR")
             }
+        }
+    }
+
+    // MARK: - 免费用户锁定气泡
+
+    private func showLockedFeature(event: VoiceTriggerEvent, text: String) {
+        let now = Date()
+        guard canTrigger(event) else { return }
+
+        // 复用同一套防刷屏状态，避免重复触发
+        if event.playOncePerRun { triggeredThisRun.insert(event) }
+        eventLastTriggeredAt[event] = now
+        lastSpeakTime = now
+        recentSpeakTimes.append(now)
+
+        skippedProCount += 1
+
+        let isEN = LanguageManager.shared.currentLocale == "en"
+        lockedBubbleText = isEN ? "🔒 Pro: \(text)" : "🔒 Pro 功能：\(text)"
+        showLockedBubble = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            self?.showLockedBubble = false
         }
     }
 

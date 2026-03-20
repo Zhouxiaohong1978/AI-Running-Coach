@@ -7,9 +7,6 @@
     "--" : {
 
     },
-    "—" : {
-
-    },
     "：%@" : {
 
     },
@@ -253,9 +250,6 @@
         }
       }
     },
-    "✓" : {
-
-    },
     "✦ Complete plan generated after setup" : {
 
     },
@@ -365,24 +359,6 @@
         }
       }
     },
-    "1/month" : {
-
-    },
-    "2" : {
-
-    },
-    "2个" : {
-
-    },
-    "3/month" : {
-
-    },
-    "3/run" : {
-
-    },
-    "3条/次" : {
-
-    },
     "3次" : {
       "localizations" : {
         "en" : {
@@ -455,10 +431,8 @@
         }
       }
     },
-    "10" : {
-
-    },
     "10个" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -504,9 +478,6 @@
     "Agree & Continue" : {
 
     },
-    "AI Coach Feedback" : {
-
-    },
     "AI COACH INSIGHT" : {
       "localizations" : {
         "en" : {
@@ -542,13 +513,11 @@
         }
       }
     },
-    "AI Training Plans" : {
-
-    },
     "AI 功能数据授权" : {
 
     },
     "AI 教练反馈" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -562,6 +531,7 @@
 
     },
     "AI 训练计划" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -721,12 +691,6 @@
         }
       }
     },
-    "All" : {
-
-    },
-    "All 6" : {
-
-    },
     "Allow" : {
 
     },
@@ -743,9 +707,6 @@
 
     },
     "Authorized" : {
-
-    },
-    "Basic" : {
 
     },
     "Beat %lld%% of runners" : {
@@ -769,9 +730,6 @@
           }
         }
       }
-    },
-    "Cloud Sync" : {
-
     },
     "Complete a run to see your pace trend" : {
 
@@ -813,9 +771,6 @@
         }
       }
     },
-    "Full" : {
-
-    },
     "Generating..." : {
 
     },
@@ -836,6 +791,9 @@
 
     },
     "Heart Rate" : {
+
+    },
+    "Heart rate zones, calories & pace — AI coaching every step" : {
 
     },
     "Hello, world!" : {
@@ -873,6 +831,9 @@
     "Not authorized" : {
 
     },
+    "Official Website" : {
+
+    },
     "or finish %@" : {
 
     },
@@ -892,6 +853,9 @@
         }
       }
     },
+    "Pro includes everything you need" : {
+
+    },
     "Pro 会员" : {
       "localizations" : {
         "en" : {
@@ -901,6 +865,12 @@
           }
         }
       }
+    },
+    "Pro 会员专享权益" : {
+
+    },
+    "Pro 教练还能做什么？" : {
+
     },
     "Real-time Voice Sample" : {
 
@@ -912,9 +882,6 @@
 
     },
     "Revoke AI Authorization?" : {
-
-    },
-    "Runs" : {
 
     },
     "Save to Photos" : {
@@ -946,6 +913,9 @@
 
     },
     "Share to WeChat, Instagram, Weibo or save to Photos" : {
+
+    },
+    "Smart Voice Coaching · Unlimited Plans · All Achievements" : {
 
     },
     "Stats" : {
@@ -982,19 +952,13 @@
     "To provide personalized AI coaching, this app sends your run data to a third-party AI service." : {
 
     },
-    "Training Goals" : {
-
-    },
-    "Unlimited" : {
-
-    },
     "Unlock All Pro Features →" : {
 
     },
     "Upgrade Pro" : {
 
     },
-    "Upgrade to Pro for unlimited coaching" : {
+    "Upgrade Pro to hear heart rate, calories & pace coaching" : {
 
     },
     "View Front" : {
@@ -1006,16 +970,19 @@
     "View Privacy Policy" : {
 
     },
-    "Voice Coaching" : {
-
-    },
     "W%lld" : {
 
     },
     "Weather" : {
 
     },
+    "What else can Pro Coach do?" : {
+
+    },
     "You can change permissions anytime in iPhone Settings." : {
+
+    },
+    "You missed %lld smart voice alerts" : {
 
     },
     "Your %lld-Week Plan Preview" : {
@@ -1252,6 +1219,7 @@
       }
     },
     "免费" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1262,6 +1230,7 @@
       }
     },
     "免费体验剩余 %lld 次" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1272,6 +1241,7 @@
       }
     },
     "免费次数已用完，升级 Pro 继续跑步" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1314,6 +1284,7 @@
       }
     },
     "全部" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1322,9 +1293,6 @@
           }
         }
       }
-    },
-    "全部6个" : {
-
     },
     "全部30+成就" : {
       "extractionState" : "stale",
@@ -1673,6 +1641,7 @@
       }
     },
     "功能" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1706,6 +1675,7 @@
       }
     },
     "升级 Pro 获取无限教练反馈" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1734,6 +1704,9 @@
           }
         }
       }
+    },
+    "升级 Pro，实时播报心率、卡路里、配速变化" : {
+
     },
     "午后跑" : {
       "extractionState" : "stale",
@@ -2028,6 +2001,7 @@
       }
     },
     "基础" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2217,6 +2191,7 @@
 
     },
     "完整" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2236,6 +2211,12 @@
           }
         }
       }
+    },
+    "官方网站" : {
+
+    },
+    "实时播报心率区间、卡路里消耗、配速变化，每一步都有 AI 陪跑" : {
+
     },
     "实时语音教练示例" : {
 
@@ -2610,6 +2591,7 @@
 
     },
     "成就系统" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2873,6 +2855,7 @@
       }
     },
     "无限 AI 训练计划 · 实时教练反馈 · 全部成就" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2894,6 +2877,7 @@
       }
     },
     "无限制" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3042,6 +3026,9 @@
         }
       }
     },
+    "智能语音播报 · 无限训练计划 · 全部成就" : {
+
+    },
     "暂不升级，继续" : {
 
     },
@@ -3123,6 +3110,9 @@
       }
     },
     "本应用在跑步时通过 Apple 健康 (HealthKit) 读取您的实时心率，用于心率区间指导和卡路里估算。" : {
+
+    },
+    "本次跑步跳过了 %lld 条智能播报" : {
 
     },
     "极限挑战" : {
@@ -3344,6 +3334,7 @@
       }
     },
     "每月1次" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3354,6 +3345,7 @@
       }
     },
     "每月3次" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4295,9 +4287,6 @@
         }
       }
     },
-    "训练目标" : {
-
-    },
     "训练计划" : {
       "localizations" : {
         "en" : {
@@ -4340,6 +4329,7 @@
       }
     },
     "语音播报" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4526,6 +4516,7 @@
       }
     },
     "跑步次数" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
