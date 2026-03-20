@@ -394,3 +394,155 @@ img { max-width: 100%; display: block; }
   .hero-title { font-size: 32px; }
   .nav-title { display: none; }
 }
+
+/* ===== 语音气泡 Tier 标签 ===== */
+.bubble-tier {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.tier-free {
+  background: rgba(255,255,255,0.08);
+  color: #888;
+}
+.tier-pro {
+  background: rgba(255,107,53,0.18);
+  color: var(--orange);
+}
+
+/* ===== Free vs Pro 对比区 ===== */
+.compare-section {
+  padding: 80px 24px;
+  background: var(--bg);
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 840px;
+  margin: 48px auto 40px;
+}
+.compare-col {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.compare-col.compare-pro {
+  border-color: rgba(255,107,53,0.45);
+  box-shadow: 0 0 32px rgba(255,107,53,0.1);
+}
+.compare-header {
+  padding: 14px 20px;
+  text-align: center;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.compare-badge-free {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+.compare-badge-pro {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+  background: rgba(255,107,53,0.15);
+  padding: 3px 14px;
+  border-radius: 20px;
+}
+.compare-items {
+  padding: 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg2);
+}
+.compare-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+  padding: 5px 0;
+}
+.compare-item.ci-dim {
+  opacity: 0.28;
+}
+.compare-item.ci-pro-only {
+  background: rgba(255,107,53,0.07);
+  margin: 0 -6px;
+  padding: 7px 6px;
+  border-radius: 8px;
+}
+.ci-icon {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  margin-top: 1px;
+}
+.compare-total {
+  padding: 11px 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+}
+.compare-total-free { color: var(--text-sub); background: var(--bg2); }
+.compare-total-pro  { color: var(--orange); background: rgba(255,107,53,0.07); }
+.compare-cta { text-align: center; margin-top: 36px; }
+
+/* ===== 竞品对比表 ===== */
+.vs-section {
+  padding: 80px 24px;
+  background: var(--bg2);
+}
+.vs-table-wrap {
+  max-width: 800px;
+  margin: 48px auto 0;
+  overflow-x: auto;
+}
+.vs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.vs-table th, .vs-table td {
+  padding: 14px 18px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.vs-table th {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: var(--bg3);
+}
+.vs-table th.col-us {
+  color: var(--orange);
+  background: rgba(255,107,53,0.1);
+}
+.vs-table td:first-child {
+  text-align: left;
+  color: var(--text-sub);
+  font-size: 13px;
+}
+.vs-table td.cell-us {
+  color: var(--orange);
+  font-weight: 700;
+  background: rgba(255,107,53,0.05);
+}
+.vs-table td.cell-no { color: #555; }
+.vs-table td.cell-partial { color: #888; }
+.vs-yes { color: #4CAF50; font-weight: 700; }
+.vs-no  { color: #555; }
+.vs-partial { color: #888; }
+
+@media (max-width: 768px) {
+  .compare-grid { grid-template-columns: 1fr; }
+  .vs-table th, .vs-table td { padding: 10px 12px; font-size: 12px; }
+}
