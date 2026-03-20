@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HelpGuideView: View {
     @Environment(\.dismiss) var dismiss
+    @State private var showFeedback = false
 
     var body: some View {
         NavigationStack {
@@ -130,21 +131,40 @@ struct HelpGuideView: View {
                     .cornerRadius(14)
                     .padding(.horizontal, 16)
 
-                    // 联系支持
-                    VStack(spacing: 6) {
-                        Text("需要帮助？")
+                    // 意见反馈
+                    VStack(spacing: 10) {
+                        Text("意见反馈")
                             .font(.system(size: 14, weight: .semibold))
-                        Link("联系我们：1614103587@qq.com",
-                             destination: URL(string: "mailto:1614103587@qq.com")!)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color(red: 0.49, green: 0.84, blue: 0.11))
+                        Text("你的反馈是我们进步的动力")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                        Button {
+                            showFeedback = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "envelope.fill")
+                                Text("发送反馈意见")
+                            }
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color(red: 0.49, green: 0.84, blue: 0.11))
+                            .cornerRadius(10)
+                        }
                     }
-                    .padding(.vertical, 12)
+                    .padding(16)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(14)
+                    .padding(.horizontal, 16)
                     .padding(.bottom, 20)
                 }
             }
             .navigationTitle("使用指南")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showFeedback) {
+                FeedbackView()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完成") { dismiss() }
@@ -154,8 +174,24 @@ struct HelpGuideView: View {
         }
     }
 
-    private let freeFeatures = ["每月3次跑步", "AI计划1次/月", "基础语音", "10个成就"]
-    private let proFeatures = ["无限跑步记录", "无限AI计划", "完整语音", "全部30+成就", "云端同步"]
+    private let freeFeatures = [
+        "无限次跑步记录",
+        "GPS 跑步追踪",
+        "时间里程碑语音播报",
+        "AI 训练计划（每月2次）",
+        "跑后 AI 教练反馈",
+        "成就系统（部分）"
+    ]
+    private let proFeatures = [
+        "心率区间实时播报",
+        "卡路里消耗实时播报",
+        "配速变化智能提醒",
+        "个人距离记录突破播报",
+        "AI 训练计划（无限制）",
+        "全部成就徽章",
+        "云端同步",
+        "优先客服支持"
+    ]
 }
 
 // MARK: - HelpCard
