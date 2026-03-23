@@ -39,6 +39,14 @@ enum VoiceTriggerEvent: String, Hashable {
     case time4hour = "time_4hour"
     case time5hour = "time_5hour"
 
+    // 早期鼓励（300m）
+    case dist300m = "dist_300m"
+
+    // 目标进度里程碑（按完成百分比触发）
+    case goalHalfway = "goal_halfway"   // 50% — 免费
+    case goal80pct   = "goal_80pct"     // 80% — 免费
+    case goal90pct   = "goal_90pct"     // 90% — Pro
+
     // 距离里程碑（5 / 10 / 21.1 / 30 / 40km）
     case dist5km  = "dist_5km"
     case dist10km = "dist_10km"
@@ -46,12 +54,22 @@ enum VoiceTriggerEvent: String, Hashable {
     case dist30km = "dist_30km"
     case dist40km = "dist_40km"
 
-    /// 是否为纯时间触发（文案不含实时变化数值，重试安全）
+    /// 是否豁免5分钟滑动窗口（一次性重要里程碑 + 时间事件）
     var isTimeEvent: Bool {
         switch self {
+        // 时间里程碑
         case .time5min, .time10min, .time20min, .time30min,
              .time45min, .time1hour, .time90min, .time2hour,
              .time3hour, .time4hour, .time5hour:
+            return true
+        // 目标进度里程碑（playOncePerRun，绝不能被窗口拦截）
+        case .goalHalfway, .goal80pct, .goal90pct:
+            return true
+        // 距离里程碑
+        case .dist300m, .dist5km, .dist10km, .dist21km, .dist30km, .dist40km:
+            return true
+        // 个人记录（高优先级，不应被普通事件挤掉）
+        case .personalDistanceRecord:
             return true
         default:
             return false
@@ -65,7 +83,8 @@ enum VoiceTriggerEvent: String, Hashable {
         case .time45min, .time1hour, .time90min, .time2hour,
              .time3hour, .time4hour, .time5hour:                                    return true
         case .cal150, .cal300, .personalDistanceRecord:                             return true
-        case .dist5km, .dist10km, .dist21km, .dist30km, .dist40km:                 return true
+        case .dist300m, .dist5km, .dist10km, .dist21km, .dist30km, .dist40km:     return true
+        case .goalHalfway, .goal80pct, .goal90pct:                               return true
         case .hrFatBurnZone:                                                        return true
         case .hrTooHigh, .paceImproved, .paceDropped:                              return false
         }
@@ -78,7 +97,8 @@ enum VoiceTriggerEvent: String, Hashable {
         case .time45min, .time1hour, .time90min, .time2hour,
              .time3hour, .time4hour, .time5hour:                                    return 0
         case .cal150, .cal300, .personalDistanceRecord:                             return 0
-        case .dist5km, .dist10km, .dist21km, .dist30km, .dist40km:                 return 0
+        case .dist300m, .dist5km, .dist10km, .dist21km, .dist30km, .dist40km:     return 0
+        case .goalHalfway, .goal80pct, .goal90pct:                               return 0
         case .hrFatBurnZone:                                                        return 0
         case .hrTooHigh:                                                            return 90
         case .paceImproved:                                                         return 120
@@ -95,6 +115,10 @@ enum VoiceTriggerEvent: String, Hashable {
         case .dist30km:                                         return 82  // 马拉松墙
         case .dist10km:                                         return 75
         case .dist5km:                                          return 68
+        case .dist300m:                                         return 62  // 早期鼓励
+        case .goalHalfway:                                      return 70  // 过半
+        case .goal80pct:                                        return 72  // 80%
+        case .goal90pct:                                        return 74  // 90%（Pro）
         case .time5min, .time10min, .time20min, .time30min,
              .time45min, .time1hour, .time90min, .time2hour,
              .time3hour, .time4hour, .time5hour:               return 65
@@ -132,6 +156,18 @@ struct VoiceTemplate {
         }
         let idx = Int.random(in: 0..<pool.count)
         return (pool[idx], idx)
+    }
+
+    /// 根据教练风格选取对应变体
+    /// 索引约定：[0] 鼓励型 / [1] 严格型 / [2] 温和型
+    func variant(forCoachStyle style: CoachStyle, isEN: Bool) -> String {
+        let pool = isEN ? variantsEn : variants
+        guard pool.count >= 3 else { return pool.randomElement() ?? "" }
+        switch style {
+        case .encouraging: return pool[0]
+        case .strict:      return pool[1]
+        case .calm:        return pool[2]
+        }
     }
 
     /// 根据训练目标选取最合适的变体

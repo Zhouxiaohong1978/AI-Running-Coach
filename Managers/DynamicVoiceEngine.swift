@@ -98,6 +98,7 @@ class DynamicVoiceEngine: ObservableObject {
         var lockedPending: [(event: VoiceTriggerEvent, text: String)] = []
 
         if let e = checkTimeMilestones(context)    { pending.append(e) }
+        if let e = checkGoalProgress(context)      { pending.append(e) }  // 50%/80% 免费，90% Pro
         if isPro {
             if let e = checkDistanceMilestones(context) { pending.append(e) }
             if let e = checkHeartRate(context)          { pending.append(e) }
@@ -271,6 +272,8 @@ class DynamicVoiceEngine: ObservableObject {
             let goals: [TrainingGoal]
         }
         let milestones: [DistMilestone] = [
+            // 早期鼓励：所有目标均适用
+            DistMilestone(km: 0.3,  event: .dist300m, goals: TrainingGoal.allCases),
             DistMilestone(km: 5,    event: .dist5km,  goals: [.fiveK, .tenK, .halfMarathon, .fullMarathon]),
             DistMilestone(km: 10,   event: .dist10km, goals: [.tenK, .halfMarathon, .fullMarathon]),
             DistMilestone(km: 21.1, event: .dist21km, goals: [.halfMarathon, .fullMarathon]),
@@ -282,8 +285,45 @@ class DynamicVoiceEngine: ObservableObject {
             guard m.goals.contains(ctx.goal) else { continue }
             guard ctx.distanceKm >= m.km else { continue }   // playOncePerRun 保证只播一次
             guard canTrigger(m.event) else { continue }
+            // dist300m 按教练风格选文案，其余按训练目标
+            let text: String
+            if m.event == .dist300m {
+                text = resolved(
+                    VoiceTemplateMap.shared.template(for: m.event)
+                        .variant(forCoachStyle: effectiveCoachStyle, isEN: isEN),
+                    ctx: ctx, isEN: isEN
+                )
+            } else {
+                text = resolved(
+                    VoiceTemplateMap.shared.template(for: m.event).variant(forGoal: ctx.goal, isEN: isEN),
+                    ctx: ctx, isEN: isEN
+                )
+            }
+            return (m.event, text)
+        }
+        return nil
+    }
+
+    private func checkGoalProgress(_ ctx: EnrichedRunContext) -> (VoiceTriggerEvent, String)? {
+        guard ctx.goalDistanceKm > 0.5 else { return nil }
+        let isPro = SubscriptionManager.shared.isPro
+        let pct = ctx.progressPercent  // 0-100
+        let isEN = LanguageManager.shared.currentLocale == "en"
+
+        // [threshold%, event, proOnly] — 窗口 ±2.5% 内触发一次
+        let milestones: [(threshold: Double, event: VoiceTriggerEvent, proOnly: Bool)] = [
+            (50, .goalHalfway, false),
+            (80, .goal80pct,   false),
+            (90, .goal90pct,   true),
+        ]
+
+        for m in milestones {
+            guard pct >= m.threshold && pct < m.threshold + 5 else { continue }
+            guard !m.proOnly || isPro else { continue }
+            guard canTrigger(m.event) else { continue }
             let text = resolved(
-                VoiceTemplateMap.shared.template(for: m.event).variant(forGoal: ctx.goal, isEN: isEN),
+                VoiceTemplateMap.shared.template(for: m.event)
+                    .variant(forCoachStyle: effectiveCoachStyle, isEN: isEN),
                 ctx: ctx, isEN: isEN
             )
             return (m.event, text)
@@ -332,6 +372,12 @@ class DynamicVoiceEngine: ObservableObject {
         return true
     }
 
+    // MARK: - 教练风格（免费用户锁定鼓励型）
+
+    private var effectiveCoachStyle: CoachStyle {
+        SubscriptionManager.shared.isPro ? AIManager.shared.coachStyle : .encouraging
+    }
+
     // MARK: - 播放
 
     private func trySpeak(event: VoiceTriggerEvent, text: String) {
@@ -344,17 +390,10 @@ class DynamicVoiceEngine: ObservableObject {
         lastSpeakTime = now
         recentSpeakTimes.append(now)
 
-        // 显示气泡（5 秒后自动隐藏）
-        bubbleText = text
-        showBubble = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
-            self?.showBubble = false
-        }
-
-        // TTS 播放
+        // TTS 播放（气泡等语音真正开始播才显示，保持同步）
         let isEN = LanguageManager.shared.currentLocale == "en"
         let language = isEN ? "en" : "zh-Hans"
-        let voiceId = VoiceService.voiceId(for: AIManager.shared.coachStyle, language: language)
+        let voiceId = VoiceService.voiceId(for: effectiveCoachStyle, language: language)
 
         let log = DebugLogger.shared
         log.log("触发: \(event.rawValue) | voice=\(voiceId) lang=\(language)", category: "VOICE")
@@ -369,14 +408,20 @@ class DynamicVoiceEngine: ObservableObject {
             )
             if success {
                 log.log("播放成功: \(event.rawValue)", category: "SUCCESS")
+                // 语音开始播放时才显示气泡
+                await MainActor.run {
+                    self.bubbleText = text
+                    self.showBubble = true
+                }
+                // 固定 8 秒后隐藏气泡（覆盖最长语音时长，18s全局冷却确保下条不会立即跟上）
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
+                await MainActor.run { self.showBubble = false }
             } else {
-                // 数据类触发器（卡路里/配速/心率）不重试：
-                // 重试时实际数值可能已变化，导致语音和界面数字不匹配
+                // 播放失败，不显示气泡
                 guard event.isTimeEvent else {
                     log.log("播放失败: \(event.rawValue)，数据类事件不重试", category: "ERROR")
                     return
                 }
-                // 时间类触发器文案不含实时变化数值，重试安全
                 log.log("播放失败: \(event.rawValue)，10s后重试", category: "ERROR")
                 try? await Task.sleep(nanoseconds: 10_000_000_000)
                 let retrySuccess = await VoiceService.shared.speak(
@@ -385,7 +430,17 @@ class DynamicVoiceEngine: ObservableObject {
                     language: language,
                     scriptCooldown: 0
                 )
-                log.log(retrySuccess ? "重试成功: \(event.rawValue)" : "重试失败: \(event.rawValue)", category: retrySuccess ? "SUCCESS" : "ERROR")
+                if retrySuccess {
+                    log.log("重试成功: \(event.rawValue)", category: "SUCCESS")
+                    await MainActor.run {
+                        self.bubbleText = text
+                        self.showBubble = true
+                    }
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    await MainActor.run { self.showBubble = false }
+                } else {
+                    log.log("重试失败: \(event.rawValue)", category: "ERROR")
+                }
             }
         }
     }

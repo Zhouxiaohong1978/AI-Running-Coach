@@ -179,7 +179,9 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
             // 3. 在主线程配置和播放音频
             return await MainActor.run {
                 do {
-                    // 创建播放器（音频会话已在 init 时激活）
+                    // 重新激活音频会话（防止 AudioPlayerManager 播放预录音频后 session 状态变化）
+                    try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+
                     let player = try AVAudioPlayer(data: data)
                     player.delegate = self
                     player.volume = 1.0
@@ -288,6 +290,7 @@ class VoiceService: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
             return await MainActor.run {
                 do {
+                    try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
                     let player = try AVAudioPlayer(data: data)
                     player.delegate = self
                     player.volume = 1.0

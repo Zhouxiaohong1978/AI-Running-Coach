@@ -658,8 +658,11 @@ struct ActiveRunView: View {
             hasSpoken3km = true
             dynamicEngine.markGoalCompleted()  // 停止动态语音，避免干扰完成体验
             logger.log("🎉 到达今日目标 \(todayTargetKm)km，触发完成语音", category: "VOICE")
-            if todayTargetKm != 3.0 {
-                // 非3km目标：TTS播报今日目标完成（3km目标已有 新手跑中_08 语音）
+            if todayTargetKm == 3.0 {
+                // 3km目标：播放预录制跑後_01（文案含"3公里完成啦"）
+                playCompleteVoices()
+            } else {
+                // 非3km目标：TTS播报，不播跑後_01（文案不符合实际距离）
                 let isEN = LanguageManager.shared.currentLocale == "en"
                 let goalText = isEN ? "Goal completed, well done!" : "今日目标完成，太棒了！"
                 let lang = isEN ? "en" : "zh-Hans"
@@ -673,7 +676,6 @@ struct ActiveRunView: View {
                     }
                 }
             }
-            playCompleteVoices()
         }
 
         // 3. 检查成就进度提醒（90%警告）
@@ -688,7 +690,7 @@ struct ActiveRunView: View {
         }
 
         // 获取当前距离对应的语音（预录音频免费不限次数）
-        if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal) {
+        if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal, targetKm: todayTargetKm) {
             // 通过 playVoiceAsset 路由：中文=本地.m4a，英文=TTS API
             if playVoiceAsset(voice) {
                 logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")

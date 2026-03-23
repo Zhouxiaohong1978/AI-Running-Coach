@@ -199,15 +199,28 @@ struct SettingsView: View {
 
                 // AI教练设置
                 Section {
-                    Picker("教练风格", selection: $selectedCoachStyle) {
-                        Text("鼓励型").tag(CoachStyle.encouraging)
-                        Text("严格型").tag(CoachStyle.strict)
-                        Text("温和型").tag(CoachStyle.calm)
-                    }
-                    .pickerStyle(.menu)
-                    .onChange(of: selectedCoachStyle) { newStyle in
-                        aiManager.coachStyle = newStyle
-                        saveCoachStyle(newStyle)
+                    if subscriptionManager.isPro {
+                        Picker("教练风格", selection: $selectedCoachStyle) {
+                            Text("鼓励型").tag(CoachStyle.encouraging)
+                            Text("严格型").tag(CoachStyle.strict)
+                            Text("温和型").tag(CoachStyle.calm)
+                        }
+                        .pickerStyle(.menu)
+                        .onChange(of: selectedCoachStyle) { newStyle in
+                            aiManager.coachStyle = newStyle
+                            saveCoachStyle(newStyle)
+                        }
+                    } else {
+                        HStack {
+                            Text("教练风格")
+                            Spacer()
+                            Text("鼓励型")
+                                .foregroundColor(.secondary)
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(.orange)
+                                .font(.caption)
+                        }
+                        .onTapGesture { showPaywall = true }
                     }
                 } header: {
                     Text("AI教练")

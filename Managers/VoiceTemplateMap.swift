@@ -272,6 +272,68 @@ class VoiceTemplateMap {
             ]
         )
 
+        // ─── 早期鼓励（300m）────────────────────────────────────
+
+        // 索引约定：[0] 鼓励型 / [1] 严格型 / [2] 温和型
+        map[.dist300m] = VoiceTemplate(
+            event: .dist300m,
+            variants: [
+                "300米了！太棒了，迈出了最重要的第一步，继续加油！",
+                "300米！抬头挺胸，手臂自然摆动，专注姿势从现在开始！",
+                "300米了，慢慢来，跟着自己的节奏就好，做到了就很了不起。"
+            ],
+            variantsEn: [
+                "300 meters — amazing! You took the most important first step. Keep going!",
+                "300 meters! Head up, chest out, arms swinging — nail your form from the start!",
+                "300 meters. Take it easy and follow your own rhythm — just getting out here is great."
+            ]
+        )
+
+        // ─── 目标进度里程碑（百分比）────────────────────────────
+
+        // 索引约定：[0] 鼓励型 / [1] 严格型 / [2] 温和型
+        map[.goalHalfway] = VoiceTemplate(
+            event: .goalHalfway,
+            variants: [
+                "过半了！还剩{remaining}就到终点，你完全可以的，冲！",
+                "过半！还剩{remaining}，不要松懈，保持节奏继续推！",
+                "已经过半啦，还有{remaining}，慢慢来，跟着感觉跑就好。"
+            ],
+            variantsEn: [
+                "Halfway there! Just {remaining} to go — you've absolutely got this, push!",
+                "Halfway! {remaining} left — don't ease up. Hold your pace and keep pushing!",
+                "You're halfway through. {remaining} to go — take it easy and run by feel."
+            ]
+        )
+
+        map[.goal80pct] = VoiceTemplate(
+            event: .goal80pct,
+            variants: [
+                "完成80%！最后{remaining}，给自己一个冲刺！",
+                "80%了！还剩{remaining}，全力以赴，不留余力！",
+                "快到了，还剩{remaining}，稳稳地冲过去就好。"
+            ],
+            variantsEn: [
+                "80% done! Just {remaining} left — give it everything you've got!",
+                "80% complete! {remaining} to go — push hard, leave nothing behind!",
+                "Almost there, {remaining} remaining — stay steady and cruise to the finish."
+            ]
+        )
+
+        map[.goal90pct] = VoiceTemplate(
+            event: .goal90pct,
+            variants: [
+                "最后{remaining}！你已经非常接近了，全力冲刺！",
+                "还有{remaining}！这是最后的考验，绝不能放弃，冲！",
+                "还剩{remaining}，快到了，保持现在的节奏就能完成。"
+            ],
+            variantsEn: [
+                "{remaining} to go! You're so close to the finish — give it your all!",
+                "{remaining} left! This is the final test — don't ease up. Sprint!",
+                "Just {remaining} remaining. Stay at this pace and you'll make it."
+            ]
+        )
+
         // ─── 距离里程碑 ────────────────────────────────────────
 
         map[.dist5km] = VoiceTemplate(

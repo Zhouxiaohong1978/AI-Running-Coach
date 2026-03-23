@@ -68,11 +68,6 @@ class VoiceAssetMap {
                   descriptionEn: "Three kilometers done! Walk for a moment and let your heart rate settle.",
                   priority: .high),
 
-        VoiceAsset(fileName: "跑后_02", triggerType: .onComplete, gender: "female",
-                  description: "点击结束，解锁你的专属跑步成就徽章吧！",
-                  descriptionEn: "Tap finish and unlock your exclusive running achievement badges!",
-                  priority: .high),
-
         // 应急
         VoiceAsset(fileName: "应急_01", triggerType: .onEmergency, gender: "female",
                   description: "状态不太好没关系，能开始就赢了80%的人，累了就走一走。",
@@ -196,12 +191,16 @@ class VoiceAssetMap {
     }
 
     /// 获取跑中距离语音
-    func getDistanceVoice(distance: Double, goal: TrainingGoal) -> VoiceAsset? {
+    func getDistanceVoice(distance: Double, goal: TrainingGoal, targetKm: Double = 3.0) -> VoiceAsset? {
         // 燃脂语音专属减肥目标；其他目标（含进阶/马拉松）复用通用热身语音
         let voices = goal == .weightLoss ? fatburnMaleVoices : beginnerMaleVoices
 
         return voices.first { voice in
             if case .onDistance(let targetDistance) = voice.triggerType {
+                // 以下四条语音内容特指3km路径，非3km目标时跳过
+                // _03 "过半了"、_06 "最后500米83%"、_07 "最后200米"、_08 "3公里达成"
+                let threeKOnly: Set<String> = ["新手跑中_03", "新手跑中_06", "新手跑中_07", "新手跑中_08"]
+                if threeKOnly.contains(voice.fileName) && abs(targetKm - 3.0) > 0.05 { return false }
                 let delta = distance - targetDistance
                 return delta >= 0 && delta < 0.05  // 到达后50米内触发（单向）
             }
