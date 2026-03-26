@@ -87,6 +87,14 @@ class DynamicVoiceEngine: ObservableObject {
         goalCompleted = true
     }
 
+    /// 预录制语音已覆盖某进度里程碑时调用，防止 TTS 再重复触发
+    /// 只更新 triggeredThisRun，不影响全局冷却和滑动窗口
+    func markPreRecordedCovered(_ event: VoiceTriggerEvent) {
+        if event.playOncePerRun {
+            triggeredThisRun.insert(event)
+        }
+    }
+
     /// ActiveRunView 在距离/时间变化时调用（每 ~5s 或每次 GPS 更新）
     func update(context: EnrichedRunContext) {
         let isPro = SubscriptionManager.shared.isPro
@@ -272,8 +280,7 @@ class DynamicVoiceEngine: ObservableObject {
             let goals: [TrainingGoal]
         }
         let milestones: [DistMilestone] = [
-            // 早期鼓励：所有目标均适用
-            DistMilestone(km: 0.3,  event: .dist300m, goals: TrainingGoal.allCases),
+            // 注意：0.3km 已改为预录制 通用跑中_00，此处不再触发 TTS
             DistMilestone(km: 5,    event: .dist5km,  goals: [.fiveK, .tenK, .halfMarathon, .fullMarathon]),
             DistMilestone(km: 10,   event: .dist10km, goals: [.tenK, .halfMarathon, .fullMarathon]),
             DistMilestone(km: 21.1, event: .dist21km, goals: [.halfMarathon, .fullMarathon]),
@@ -285,20 +292,10 @@ class DynamicVoiceEngine: ObservableObject {
             guard m.goals.contains(ctx.goal) else { continue }
             guard ctx.distanceKm >= m.km else { continue }   // playOncePerRun 保证只播一次
             guard canTrigger(m.event) else { continue }
-            // dist300m 按教练风格选文案，其余按训练目标
-            let text: String
-            if m.event == .dist300m {
-                text = resolved(
-                    VoiceTemplateMap.shared.template(for: m.event)
-                        .variant(forCoachStyle: effectiveCoachStyle, isEN: isEN),
-                    ctx: ctx, isEN: isEN
-                )
-            } else {
-                text = resolved(
-                    VoiceTemplateMap.shared.template(for: m.event).variant(forGoal: ctx.goal, isEN: isEN),
-                    ctx: ctx, isEN: isEN
-                )
-            }
+            let text = resolved(
+                VoiceTemplateMap.shared.template(for: m.event).variant(forGoal: ctx.goal, isEN: isEN),
+                ctx: ctx, isEN: isEN
+            )
             return (m.event, text)
         }
         return nil
@@ -365,7 +362,6 @@ class DynamicVoiceEngine: ObservableObject {
         // 时间里程碑（5/10/20/30min 等）是一次性事件，不受窗口限制，确保准时播报
         recentSpeakTimes = recentSpeakTimes.filter { now.timeIntervalSince($0) < slidingWindowDuration }
         if !event.isTimeEvent && recentSpeakTimes.count >= slidingWindowMaxCount {
-            DebugLogger.shared.log("[\(event.rawValue)] 5分钟窗口上限", category: "WARN")
             return false
         }
 

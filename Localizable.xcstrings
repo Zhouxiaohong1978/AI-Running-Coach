@@ -4475,6 +4475,39 @@
         }
       }
     },
+    "跑前热身 5-10 分钟，跑后拉伸 10 分钟" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm up 5–10 min before running, stretch 10 min after"
+          }
+        }
+      }
+    },
+    "注意补水和饮食控制" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stay hydrated and keep an eye on your diet"
+          }
+        }
+      }
+    },
+    "保证充足睡眠" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make sure you get enough sleep"
+          }
+        }
+      }
+    },
     "跑后拉伸很重要，预防受伤" : {
       "extractionState" : "stale",
       "localizations" : {

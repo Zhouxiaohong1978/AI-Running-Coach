@@ -190,22 +190,101 @@ class VoiceAssetMap {
         }
     }
 
-    /// 获取跑中距离语音
-    func getDistanceVoice(distance: Double, goal: TrainingGoal, targetKm: Double = 3.0) -> VoiceAsset? {
-        // 燃脂语音专属减肥目标；其他目标（含进阶/马拉松）复用通用热身语音
-        let voices = goal == .weightLoss ? fatburnMaleVoices : beginnerMaleVoices
+    /// 获取跑中距离语音（支持教练风格 a/b/c 变体）
+    func getDistanceVoice(distance: Double, goal: TrainingGoal, targetKm: Double = 3.0, coachStyle: CoachStyle = .encouraging) -> VoiceAsset? {
 
-        return voices.first { voice in
-            if case .onDistance(let targetDistance) = voice.triggerType {
-                // 以下四条语音内容特指3km路径，非3km目标时跳过
-                // _03 "过半了"、_06 "最后500米83%"、_07 "最后200米"、_08 "3公里达成"
-                let threeKOnly: Set<String> = ["新手跑中_03", "新手跑中_06", "新手跑中_07", "新手跑中_08"]
-                if threeKOnly.contains(voice.fileName) && abs(targetKm - 3.0) > 0.05 { return false }
-                let delta = distance - targetDistance
-                return delta >= 0 && delta < 0.05  // 到达后50米内触发（单向）
-            }
-            return false
+        // 1. 通用跑中_00（0.3km，全目标，优先触发）
+        if distance >= 0.3 && distance < 0.35 {
+            return universalVoice(index: "00", km: 0.3, style: coachStyle)
         }
+
+        // 2. 目标专属语音（减肥 / 新手）带风格变体
+        let voices = goal == .weightLoss ? fatburnMaleVoices : beginnerMaleVoices
+        let threeKOnly: Set<String> = ["新手跑中_03", "新手跑中_06", "新手跑中_07", "新手跑中_08"]
+
+        if let voice = voices.first(where: { v in
+            guard case .onDistance(let d) = v.triggerType else { return false }
+            if threeKOnly.contains(v.fileName) && abs(targetKm - 3.0) > 0.05 { return false }
+            let delta = distance - d
+            return delta >= 0 && delta < 0.05
+        }) {
+            // 新手跑中系列支持风格变体（_a/_c 在 voice/新手跑中/ 目录）
+            if voice.fileName.hasPrefix("新手跑中") {
+                let styledName = newbieStyledName(voice.fileName, style: coachStyle)
+                if styledName != voice.fileName {
+                    return VoiceAsset(fileName: styledName, triggerType: voice.triggerType,
+                                     gender: voice.gender, description: voice.description,
+                                     descriptionEn: voice.descriptionEn, priority: voice.priority)
+                }
+            }
+            return voice
+        }
+
+        // 3. 通用跑中（填补非专属距离的空缺）
+        return checkUniversalVoice(distance: distance, targetKm: targetKm, goal: goal, style: coachStyle)
+    }
+
+    // MARK: - 风格变体辅助
+
+    /// 通用跑中文件名（a/b/c，_10c 未录制时降级到 _10a）
+    private func universalStyledName(_ base: String, style: CoachStyle) -> String {
+        let suffix: String
+        switch style {
+        case .encouraging: suffix = "a"
+        case .strict:      suffix = "b"
+        case .calm:        suffix = (base == "通用跑中_10") ? "a" : "c"  // _10c 未录制
+        }
+        return base + suffix
+    }
+
+    /// 新手跑中变体（严格型用原始文件，鼓励/温和用带后缀文件）
+    private func newbieStyledName(_ base: String, style: CoachStyle) -> String {
+        switch style {
+        case .encouraging: return base + "a"
+        case .strict:      return base        // 原始文件在 voice/male/
+        case .calm:        return base + "c"
+        }
+    }
+
+    /// 构造通用跑中 VoiceAsset
+    private func universalVoice(index: String, km: Double, style: CoachStyle) -> VoiceAsset {
+        let base = "通用跑中_\(index)"
+        let fileName = universalStyledName(base, style: style)
+        return VoiceAsset(fileName: fileName, triggerType: .onDistance(km),
+                         gender: "neutral", description: base, priority: .normal)
+    }
+
+    /// 通用跑中路由（按距离+目标条件匹配）
+    private func checkUniversalVoice(distance: Double, targetKm: Double, goal: TrainingGoal, style: CoachStyle) -> VoiceAsset? {
+        struct Rule {
+            let km: Double; let index: String
+            let match: (Double, TrainingGoal) -> Bool
+        }
+        let rules: [Rule] = [
+            // 1.5km：非3km目标 + 非减肥（减肥有减肥跑中_03）
+            Rule(km: 1.5, index: "12") { t, g in abs(t - 3.0) > 0.05 && g != .weightLoss },
+            // 2.5/2.8/3.0km：非3km目标 + 非减肥
+            Rule(km: 2.5, index: "01") { t, g in t >= 3.2 && g != .weightLoss },
+            Rule(km: 2.8, index: "02") { t, g in t >= 3.2 && g != .weightLoss },
+            Rule(km: 3.0, index: "03") { t, g in abs(t - 3.0) > 0.05 && g != .weightLoss },
+            // 3.5km~6.5km：全目标（减肥超出3km后也需要）
+            Rule(km: 3.5, index: "04") { t, _ in t >= 3.5 },   // 内容已改为通用里程碑，无上限
+            Rule(km: 4.0, index: "05") { t, _ in t >= 4.0 },
+            Rule(km: 4.5, index: "06") { t, _ in t >= 4.5 },   // 内容已改为通用里程碑，无上限
+            // 10km 专属
+            Rule(km: 5.5, index: "11") { t, _ in abs(t - 10.0) < 0.5 },
+            Rule(km: 6.0, index: "07") { t, _ in abs(t - 10.0) < 0.5 },
+            Rule(km: 7.0, index: "08") { t, _ in abs(t - 10.0) < 0.5 },
+            Rule(km: 8.0, index: "09") { t, _ in abs(t - 10.0) < 0.5 },
+            Rule(km: 9.0, index: "10") { t, _ in abs(t - 10.0) < 0.5 },
+        ]
+        for rule in rules {
+            guard rule.match(targetKm, goal) else { continue }
+            let delta = distance - rule.km
+            guard delta >= 0 && delta < 0.05 else { continue }
+            return universalVoice(index: rule.index, km: rule.km, style: style)
+        }
+        return nil
     }
 
     /// 获取完成语音（返回2条：跑后_01 和 跑后_02）

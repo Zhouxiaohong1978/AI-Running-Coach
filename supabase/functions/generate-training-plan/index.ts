@@ -30,6 +30,7 @@ interface GeneratePlanRequest {
   durationWeeks: number;
   currentPlan?: TrainingPlan;        // 用户修改后的计划
   preferences?: TrainingPreferences;  // 用户偏好
+  language?: string;                  // "en" 或 "zh-Hans"
 }
 
 interface DailyTask {
@@ -69,7 +70,8 @@ Deno.serve(async (req: Request) => {
   try {
     // 解析请求
     const body: GeneratePlanRequest = await req.json();
-    const { goal, avgPace, maxDistance, weeklyRuns, durationWeeks, currentPlan, preferences } = body;
+    const { goal, avgPace, maxDistance, weeklyRuns, durationWeeks, currentPlan, preferences, language } = body;
+    const isEN = language === "en";
 
     console.log(`📋 收到训练计划生成请求: ${goal}, ${durationWeeks}周`);
     if (currentPlan) {
@@ -81,7 +83,7 @@ Deno.serve(async (req: Request) => {
 
     // 构建 prompt
     const userDataContext = buildUserContext(avgPace, maxDistance, weeklyRuns);
-    const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan);
+    const prompt = buildPrompt(goal, durationWeeks, userDataContext, preferences, currentPlan, isEN);
 
     // 根据计划周数动态计算 max_tokens（每周约 150 tokens + 基础 300，确保快速生成）
     const maxTokens = Math.min(durationWeeks * 150 + 300, 1500);
@@ -105,7 +107,7 @@ Deno.serve(async (req: Request) => {
     );
 
     // 解析 AI 返回的 JSON
-    const plan = parseAIResponse(aiResponse, goal, durationWeeks);
+    const plan = parseAIResponse(aiResponse, goal, durationWeeks, isEN);
 
     console.log(`✅ 训练计划生成成功: ${plan.weeklyPlans.length}周计划`);
 
@@ -180,7 +182,8 @@ function buildPrompt(
   durationWeeks: number,
   userContext: string,
   preferences?: TrainingPreferences,
-  currentPlan?: TrainingPlan
+  currentPlan?: TrainingPlan,
+  isEN?: boolean
 ): string {
   let prompt = `请为用户生成一个 ${durationWeeks} 周的跑步训练计划。
 
@@ -249,28 +252,13 @@ ${userContext}`;
   }
 
   prompt += `\n\n科学渐进，难度递增合理`;
+  if (isEN) {
+    prompt += `\n\nIMPORTANT: Return all text fields (theme, description, tips) in English.`;
+  }
 
-  return prompt + `
-
-只返回JSON：
-\`\`\`json
-{
-  "goal": "${goal}",
-  "durationWeeks": ${durationWeeks},
-  "difficulty": "beginner/intermediate/advanced",
-  "weeklyPlans": [
-    {
-      "weekNumber": 1,
-      "theme": "适应期",
-      "dailyTasks": [
-        {"dayOfWeek": 1, "type": "easy_run", "targetDistance": 3, "targetPace": "6'30\\"", "description": "轻松跑3km"}
-      ]
-    }
-  ],
-  "tips": ["跑前热身", "跑后拉伸"]
-}
-\`\`\`
-类型: easy_run/tempo_run/interval/long_run/rest`;
+  return prompt + "\n\n只返回JSON，不要加任何说明：\n" +
+    `{"goal":"${goal}","durationWeeks":${durationWeeks},"difficulty":"beginner/intermediate/advanced","weeklyPlans":[{"weekNumber":1,"theme":"适应期","dailyTasks":[{"dayOfWeek":1,"type":"easy_run","targetDistance":3,"targetPace":"6'30\\"","description":"轻松跑3km"}]}],"tips":["跑前热身","跑后拉伸"]}` +
+    "\n类型: easy_run/tempo_run/interval/long_run/rest";
 }
 
 /**
@@ -279,7 +267,8 @@ ${userContext}`;
 function parseAIResponse(
   response: string,
   goal: string,
-  durationWeeks: number
+  durationWeeks: number,
+  isEN: boolean = false
 ): TrainingPlan {
   try {
     // 提取 JSON（AI 可能返回 markdown 格式）
@@ -304,7 +293,12 @@ function parseAIResponse(
 
     // 确保有训练建议
     if (!plan.tips || plan.tips.length === 0) {
-      plan.tips = [
+      plan.tips = isEN ? [
+        "Build up gradually — no need to rush",
+        "Increase weekly mileage by no more than 10%",
+        "Stop immediately if you feel unwell",
+        "Make sure you get enough sleep and nutrition"
+      ] : [
         "循序渐进，不要急于求成",
         "每周增加跑量不超过10%",
         "感觉不适立即停止",
@@ -317,14 +311,14 @@ function parseAIResponse(
     console.error("解析 AI 返回失败，使用后备计划:", error);
 
     // 返回一个简单的后备计划
-    return generateFallbackPlan(goal, durationWeeks);
+    return generateFallbackPlan(goal, durationWeeks, isEN);
   }
 }
 
 /**
  * 生成后备训练计划（当 AI 失败时）
  */
-function generateFallbackPlan(goal: string, weeks: number): TrainingPlan {
+function generateFallbackPlan(goal: string, weeks: number, isEN: boolean = false): TrainingPlan {
   const weeklyPlans: WeekPlan[] = [];
 
   for (let week = 1; week <= weeks; week++) {
@@ -364,7 +358,12 @@ function generateFallbackPlan(goal: string, weeks: number): TrainingPlan {
     durationWeeks: weeks,
     difficulty: "beginner",
     weeklyPlans,
-    tips: [
+    tips: isEN ? [
+      "Build up gradually — no need to rush",
+      "Increase weekly mileage by no more than 10%",
+      "Warm up before running, stretch after",
+      "Make sure you get enough rest and nutrition"
+    ] : [
       "循序渐进，不要急于求成",
       "每周增加跑量不超过10%",
       "跑前热身，跑后拉伸",

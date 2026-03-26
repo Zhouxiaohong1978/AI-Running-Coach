@@ -248,8 +248,8 @@ final class AudioPlayerManager: NSObject, ObservableObject {
             return URL(fileURLWithPath: path)
         }
 
-        // 方案3：从voice目录查找（male/female子目录）
-        for subdir in ["female", "male"] {
+        // 方案3：从voice目录查找（所有子目录）
+        for subdir in ["female", "male", "通用跑中", "新手跑中"] {
             if let path = Bundle.main.path(forResource: fileName, ofType: "m4a", inDirectory: "voice/\(subdir)") {
                 print("✅ 从voice/\(subdir)找到: \(fileName)")
                 return URL(fileURLWithPath: path)

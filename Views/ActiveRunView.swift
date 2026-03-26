@@ -690,10 +690,19 @@ struct ActiveRunView: View {
         }
 
         // 获取当前距离对应的语音（预录音频免费不限次数）
-        if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal, targetKm: todayTargetKm) {
+        let effectiveStyle: CoachStyle = SubscriptionManager.shared.isPro ? AIManager.shared.coachStyle : .encouraging
+        if let voice = voiceMap.getDistanceVoice(distance: distanceKm, goal: userGoal, targetKm: todayTargetKm, coachStyle: effectiveStyle) {
             // 通过 playVoiceAsset 路由：中文=本地.m4a，英文=TTS API
             if playVoiceAsset(voice) {
                 logger.log("🎯 触发距离语音: \(voice.fileName) at \(String(format: "%.3f", distanceKm))km", category: "VOICE")
+                // 预录制语音优先：将该距离对应的目标进度里程碑标记为已覆盖
+                // 防止 DynamicVoiceEngine 在预录制结束后再重复触发同义 TTS
+                if case .onDistance(let km) = voice.triggerType, todayTargetKm > 0 {
+                    let pct = km / todayTargetKm * 100
+                    if abs(pct - 50) <= 5 { dynamicEngine.markPreRecordedCovered(.goalHalfway) }
+                    if abs(pct - 80) <= 5 { dynamicEngine.markPreRecordedCovered(.goal80pct) }
+                    if abs(pct - 90) <= 5 { dynamicEngine.markPreRecordedCovered(.goal90pct) }
+                }
             }
         }
     }

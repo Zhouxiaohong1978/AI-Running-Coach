@@ -848,7 +848,7 @@ struct TrainingPlanView: View {
             HStack {
                 Image(systemName: "lightbulb.fill")
                     .foregroundColor(.yellow)
-                Text("训练建议")
+                Text(LocalizedStringKey("训练建议"))
                     .font(.headline)
             }
 

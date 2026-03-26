@@ -52,6 +52,7 @@ struct GeneratePlanRequest: Codable {
     let durationWeeks: Int
     let currentPlan: TrainingPlanData?     // 用户修改后的当前计划，用于重新生成时参考
     let preferences: TrainingPreferences?  // 用户偏好设置
+    let language: String?                  // "en" 或 "zh-Hans"
 }
 
 /// 训练计划生成响应
@@ -427,7 +428,8 @@ final class AIManager: ObservableObject {
             weeklyRuns: weeklyRuns,
             durationWeeks: durationWeeks,
             currentPlan: currentPlan,
-            preferences: preferences
+            preferences: preferences,
+            language: LanguageManager.shared.currentLocale
         )
 
         do {
