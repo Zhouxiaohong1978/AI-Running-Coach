@@ -264,13 +264,13 @@ class VoiceAssetMap {
 
     // MARK: - 风格变体辅助
 
-    /// 通用跑中文件名（a/b/c，_10c 未录制时降级到 _10a）
+    /// 通用跑中文件名（a/b/c 三风格，_10c 已录制）
     private func universalStyledName(_ base: String, style: CoachStyle) -> String {
         let suffix: String
         switch style {
         case .encouraging: suffix = "a"
         case .strict:      suffix = "b"
-        case .calm:        suffix = (base == "通用跑中_10") ? "a" : "c"  // _10c 未录制
+        case .calm:        suffix = "c"
         }
         return base + suffix
     }
@@ -284,12 +284,12 @@ class VoiceAssetMap {
         }
     }
 
-    /// 减肥跑中/跑前/跑后变体（_01/_03/_04 缺少 b，严格型降级到 a）
+    /// 减肥跑中/跑前/跑后变体（_01/_03/_04 缺少 b，严格型回退到原始录音，无后缀，在 voice/male/）
     private func fatburnStyledName(_ base: String, style: CoachStyle) -> String {
         let missingB: Set<String> = ["减肥跑中_01", "减肥跑中_03", "减肥跑中_04"]
         switch style {
         case .encouraging: return base + "a"
-        case .strict:      return missingB.contains(base) ? base + "a" : base + "b"
+        case .strict:      return missingB.contains(base) ? base : base + "b"
         case .calm:        return base + "c"
         }
     }
