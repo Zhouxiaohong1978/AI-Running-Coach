@@ -613,7 +613,8 @@ struct ActiveRunView: View {
         let voiceId = VoiceService.voiceId(for: aiManager.coachStyle, language: "en")
         Task {
             // 1. 优先预缓存开始语音（单独下载，不等其他）
-            if let startVoice = voiceMap.getStartVoice() {
+            let effectiveStyleEN: CoachStyle = SubscriptionManager.shared.isPro ? aiManager.coachStyle : .encouraging
+            if let startVoice = voiceMap.getStartVoice(goal: userGoal, coachStyle: effectiveStyleEN) {
                 let text = startVoice.descriptionEn.isEmpty ? startVoice.description : startVoice.descriptionEn
                 await VoiceService.shared.prefetch(
                     cacheKey: startVoice.fileName, text: text, voice: voiceId, language: "en"
@@ -622,7 +623,7 @@ struct ActiveRunView: View {
             }
 
             // 2. 并行预缓存其余里程碑语音
-            let voices = voiceMap.getAllRunVoices(goal: userGoal)
+            let voices = voiceMap.getAllRunVoices(goal: userGoal, coachStyle: effectiveStyleEN)
             await withTaskGroup(of: Void.self) { group in
                 for voice in voices {
                     let text = voice.descriptionEn.isEmpty ? voice.description : voice.descriptionEn
@@ -637,9 +638,10 @@ struct ActiveRunView: View {
         }
     }
 
-    /// 播放开始语音（女声：跑前_01）
+    /// 播放开始语音（减肥目标使用专属跑前语音）
     private func playStartVoice() {
-        guard let startVoice = voiceMap.getStartVoice() else { return }
+        let effectiveStyle: CoachStyle = SubscriptionManager.shared.isPro ? aiManager.coachStyle : .encouraging
+        guard let startVoice = voiceMap.getStartVoice(goal: userGoal, coachStyle: effectiveStyle) else { return }
         playVoiceAsset(startVoice)
         print("🎙️ 播放开始语音: \(startVoice.fileName)")
     }
@@ -707,9 +709,10 @@ struct ActiveRunView: View {
         }
     }
 
-    /// 播放完成语音（女声：跑后_01 → 跑后_02，自动按语言路由）
+    /// 播放完成语音（减肥目标使用专属跑后语音，自动按语言路由）
     private func playCompleteVoices() {
-        let completeVoices = voiceMap.getCompleteVoices()
+        let effectiveStyle: CoachStyle = SubscriptionManager.shared.isPro ? aiManager.coachStyle : .encouraging
+        let completeVoices = voiceMap.getCompleteVoices(goal: userGoal, coachStyle: effectiveStyle)
         let isEN = LanguageManager.shared.currentLocale == "en"
 
         if isEN {

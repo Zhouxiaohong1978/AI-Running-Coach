@@ -150,7 +150,7 @@ class VoiceAssetMap {
                   priority: .high),
     ]
 
-    /// 减肥燃脂跑中语音（6条）
+    /// 减肥燃脂跑中语音（9条，支持 a/b/c 风格变体）
     private let fatburnMaleVoices: [VoiceAsset] = [
         VoiceAsset(fileName: "减肥跑中_01", triggerType: .onDistance(0.5), gender: "male",
                   description: "燃脂模式启动，保持轻松交谈的心率，脂肪正在慢慢烧。",
@@ -176,18 +176,53 @@ class VoiceAssetMap {
                   description: "燃脂跑完成！今天的热量缺口，正在帮你悄悄变瘦。",
                   descriptionEn: "Fat-burn run complete! Today's calorie deficit is quietly and steadily making you leaner.",
                   priority: .high),
+
+        VoiceAsset(fileName: "减肥跑中_07", triggerType: .onDistance(5.0), gender: "male",
+                  description: "5公里，脂肪分解正全速进行，坚持就是在改变身体。",
+                  descriptionEn: "Five kilometers — fat is breaking down at full speed. Keep going and your body is changing."),
+
+        VoiceAsset(fileName: "减肥跑中_08", triggerType: .onDistance(5.5), gender: "male",
+                  description: "超过5公里了，你的身体正在用存脂供能，这就是燃脂的感觉。",
+                  descriptionEn: "Past five-five — your body is running on stored fat. This is exactly what fat-burning feels like."),
+
+        VoiceAsset(fileName: "减肥跑中_09", triggerType: .onDistance(6.0), gender: "male",
+                  description: "6公里达成！坚持到这里的人，减脂效果是普通人的2倍。",
+                  descriptionEn: "Six kilometers! People who make it this far burn fat at twice the rate of an average workout.",
+                  priority: .high),
+    ]
+
+    /// 减肥燃脂专属跑前/跑后语音（支持 a/b/c 风格变体）
+    private let fatburnFemaleVoices: [VoiceAsset] = [
+        VoiceAsset(fileName: "减肥跑前_01", triggerType: .onStart, gender: "female",
+                  description: "今天又来跑步了！坚持本身就是最好的减脂药，我们开始吧。",
+                  descriptionEn: "You showed up again! Consistency is the best fat-loss medicine — let's get moving.",
+                  priority: .high),
+
+        VoiceAsset(fileName: "减肥跑后_01", triggerType: .onComplete, gender: "female",
+                  description: "完成！今天消耗的热量，正在悄悄改变你的身材曲线。",
+                  descriptionEn: "Done! The calories you just burned are quietly reshaping your body right now.",
+                  priority: .high),
+
+        VoiceAsset(fileName: "减肥跑后_02", triggerType: .onComplete, gender: "female",
+                  description: "记得补水，拉伸5分钟，让肌肉在恢复中继续燃脂。",
+                  descriptionEn: "Hydrate and stretch for five minutes — your muscles keep burning fat while they recover.",
+                  priority: .high),
     ]
 
     // MARK: - Public Methods
 
-    /// 获取开始语音
-    func getStartVoice() -> VoiceAsset? {
-        return femaleVoices.first { voice in
-            if case .onStart = voice.triggerType {
-                return true
+    /// 获取开始语音（减肥目标使用专属跑前语音 + 风格变体）
+    func getStartVoice(goal: TrainingGoal = .threeK, coachStyle: CoachStyle = .encouraging) -> VoiceAsset? {
+        if goal == .weightLoss {
+            if let base = fatburnFemaleVoices.first(where: { if case .onStart = $0.triggerType { return true }; return false }) {
+                let styledName = fatburnStyledName(base.fileName, style: coachStyle)
+                return styledName == base.fileName ? base :
+                    VoiceAsset(fileName: styledName, triggerType: base.triggerType,
+                               gender: base.gender, description: base.description,
+                               descriptionEn: base.descriptionEn, priority: base.priority)
             }
-            return false
         }
+        return femaleVoices.first { if case .onStart = $0.triggerType { return true }; return false }
     }
 
     /// 获取跑中距离语音（支持教练风格 a/b/c 变体）
@@ -208,16 +243,19 @@ class VoiceAssetMap {
             let delta = distance - d
             return delta >= 0 && delta < 0.05
         }) {
-            // 新手跑中系列支持风格变体（_a/_c 在 voice/新手跑中/ 目录）
+            // 减肥/新手跑中系列均支持风格变体
+            let styledName: String
             if voice.fileName.hasPrefix("新手跑中") {
-                let styledName = newbieStyledName(voice.fileName, style: coachStyle)
-                if styledName != voice.fileName {
-                    return VoiceAsset(fileName: styledName, triggerType: voice.triggerType,
-                                     gender: voice.gender, description: voice.description,
-                                     descriptionEn: voice.descriptionEn, priority: voice.priority)
-                }
+                styledName = newbieStyledName(voice.fileName, style: coachStyle)
+            } else if voice.fileName.hasPrefix("减肥跑中") {
+                styledName = fatburnStyledName(voice.fileName, style: coachStyle)
+            } else {
+                return voice
             }
-            return voice
+            return styledName == voice.fileName ? voice :
+                VoiceAsset(fileName: styledName, triggerType: voice.triggerType,
+                           gender: voice.gender, description: voice.description,
+                           descriptionEn: voice.descriptionEn, priority: voice.priority)
         }
 
         // 3. 通用跑中（填补非专属距离的空缺）
@@ -242,6 +280,16 @@ class VoiceAssetMap {
         switch style {
         case .encouraging: return base + "a"
         case .strict:      return base        // 原始文件在 voice/male/
+        case .calm:        return base + "c"
+        }
+    }
+
+    /// 减肥跑中/跑前/跑后变体（_01/_03/_04 缺少 b，严格型降级到 a）
+    private func fatburnStyledName(_ base: String, style: CoachStyle) -> String {
+        let missingB: Set<String> = ["减肥跑中_01", "减肥跑中_03", "减肥跑中_04"]
+        switch style {
+        case .encouraging: return base + "a"
+        case .strict:      return missingB.contains(base) ? base + "a" : base + "b"
         case .calm:        return base + "c"
         }
     }
@@ -287,14 +335,20 @@ class VoiceAssetMap {
         return nil
     }
 
-    /// 获取完成语音（返回2条：跑后_01 和 跑后_02）
-    func getCompleteVoices() -> [VoiceAsset] {
-        return femaleVoices.filter { voice in
-            if case .onComplete = voice.triggerType {
-                return true
-            }
-            return false
+    /// 获取完成语音（减肥目标使用专属跑后语音 + 风格变体）
+    func getCompleteVoices(goal: TrainingGoal = .threeK, coachStyle: CoachStyle = .encouraging) -> [VoiceAsset] {
+        if goal == .weightLoss {
+            return fatburnFemaleVoices
+                .filter { if case .onComplete = $0.triggerType { return true }; return false }
+                .map { base in
+                    let styledName = fatburnStyledName(base.fileName, style: coachStyle)
+                    return styledName == base.fileName ? base :
+                        VoiceAsset(fileName: styledName, triggerType: base.triggerType,
+                                   gender: base.gender, description: base.description,
+                                   descriptionEn: base.descriptionEn, priority: base.priority)
+                }
         }
+        return femaleVoices.filter { if case .onComplete = $0.triggerType { return true }; return false }
     }
 
     /// 获取成就语音
@@ -328,11 +382,11 @@ class VoiceAssetMap {
     }
 
     /// 获取跑步中所有可能触发的语音（用于 EN 模式预缓存）
-    func getAllRunVoices(goal: TrainingGoal) -> [VoiceAsset] {
+    func getAllRunVoices(goal: TrainingGoal, coachStyle: CoachStyle = .encouraging) -> [VoiceAsset] {
         var voices: [VoiceAsset] = []
-        if let start = getStartVoice() { voices.append(start) }
+        if let start = getStartVoice(goal: goal, coachStyle: coachStyle) { voices.append(start) }
         voices.append(contentsOf: goal == .weightLoss ? fatburnMaleVoices : beginnerMaleVoices)
-        voices.append(contentsOf: getCompleteVoices())
+        voices.append(contentsOf: getCompleteVoices(goal: goal, coachStyle: coachStyle))
         if let emergency = getEmergencyVoice() { voices.append(emergency) }
         if let earlyStop = getEarlyStopVoice() { voices.append(earlyStop) }
         return voices
